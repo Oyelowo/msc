@@ -1,0 +1,183 @@
+reporting all LAS header entries:
+  file signature:             'LASF'
+  file source ID:             0
+  global_encoding:            0
+  project ID GUID data 1-4:   00000000-0000-0000-0000-000000000000
+  version major.minor:        1.2
+  system identifier:          ''
+  generating software:        'TerraScan'
+  file creation day/year:     64/2015
+  header size:                227
+  offset to point data:       229
+  number var. length records: 0
+  point data format:          1
+  point data record length:   28
+  number of point records:    54371310
+  number of points by return: 49648691 4550210 169688 2721 0
+  scale factor x y z:         0.01 0.01 0.01
+  offset x y z:               0 0 0
+  min x y z:                  441024.63 9626145.29 638.95
+  max x y z:                  444780.29 9630145.28 2511.65
+the header is followed by 2 user-defined bytes
+reporting minimum and maximum for all LAS point record entries ...
+  X            44102463   44478029
+  Y           962614529  963014528
+  Z               63895     251165
+  intensity           0        249
+  return_number       1          4
+  number_of_returns   1          4
+  edge_of_flight_line 0          1
+  scan_direction_flag 0          1
+  classification      1          1
+  scan_angle_rank   -24         26
+  user_data           1          1
+  point_source_ID    65        106
+  gps_time 380710.734992 545334.403757
+number of first returns:        49648691
+number of intermediate returns: 172403
+number of last returns:         49648299
+number of single returns:       45098083
+covered area in square units/kilounits: 13583436/13.58
+point density: all returns 4.00 last only 3.66 (per square units)
+      spacing: all returns 0.50 last only 0.52 (in units)
+overview over number of returns of given pulse: 45098083 8761403 500951 10873 0 0 0
+histogram of classification of points:
+        54371310  unclassified (1)
+z coordinate histogram with bin size 5
+  bin [635,640) has 2725
+  bin [640,645) has 112854
+  bin [645,650) has 320243
+  bin [650,655) has 1074215
+  bin [655,660) has 1738699
+  bin [660,665) has 2363667
+  bin [665,670) has 2718298
+  bin [670,675) has 2587039
+  bin [675,680) has 2384200
+  bin [680,685) has 2478743
+  bin [685,690) has 2738950
+  bin [690,695) has 2874708
+  bin [695,700) has 2928568
+  bin [700,705) has 3083566
+  bin [705,710) has 3012981
+  bin [710,715) has 2950940
+  bin [715,720) has 2619378
+  bin [720,725) has 2016977
+  bin [725,730) has 1588262
+  bin [730,735) has 1429367
+  bin [735,740) has 1114906
+  bin [740,745) has 938412
+  bin [745,750) has 891039
+  bin [750,755) has 818881
+  bin [755,760) has 698550
+  bin [760,765) has 632201
+  bin [765,770) has 563881
+  bin [770,775) has 549566
+  bin [775,780) has 528151
+  bin [780,785) has 523365
+  bin [785,790) has 436083
+  bin [790,795) has 378060
+  bin [795,800) has 325343
+  bin [800,805) has 283446
+  bin [805,810) has 258019
+  bin [810,815) has 227020
+  bin [815,820) has 193996
+  bin [820,825) has 184670
+  bin [825,830) has 175087
+  bin [830,835) has 170169
+  bin [835,840) has 177976
+  bin [840,845) has 185225
+  bin [845,850) has 193900
+  bin [850,855) has 195892
+  bin [855,860) has 206153
+  bin [860,865) has 201611
+  bin [865,870) has 174632
+  bin [870,875) has 169733
+  bin [875,880) has 170938
+  bin [880,885) has 178797
+  bin [885,890) has 179696
+  bin [890,895) has 185673
+  bin [895,900) has 157026
+  bin [900,905) has 139293
+  bin [905,910) has 126779
+  bin [910,915) has 116034
+  bin [915,920) has 114593
+  bin [920,925) has 114145
+  bin [925,930) has 98764
+  bin [930,935) has 84985
+  bin [935,940) has 88479
+  bin [940,945) has 81230
+  bin [945,950) has 42584
+  bin [950,955) has 28266
+  bin [955,960) has 17848
+  bin [960,965) has 13844
+  bin [965,970) has 8811
+  bin [970,975) has 2977
+  bin [975,980) has 3
+  bin [1015,1020) has 1
+  bin [1050,1055) has 1
+  bin [1060,1065) has 1
+  bin [1085,1090) has 1
+  bin [1560,1565) has 1
+  bin [1585,1590) has 1
+  bin [1785,1790) has 1
+  bin [1790,1795) has 1
+  bin [1915,1920) has 1
+  bin [2010,2015) has 1
+  bin [2060,2065) has 1
+  bin [2115,2120) has 1
+  bin [2140,2145) has 2
+  bin [2145,2150) has 1
+  bin [2150,2155) has 1
+  bin [2160,2165) has 1
+  bin [2175,2180) has 1
+  bin [2190,2195) has 1
+  bin [2195,2200) has 1
+  bin [2220,2225) has 1
+  bin [2230,2235) has 3
+  bin [2245,2250) has 2
+  bin [2250,2255) has 4
+  bin [2270,2275) has 1
+  bin [2280,2285) has 1
+  bin [2285,2290) has 2
+  bin [2290,2295) has 1
+  bin [2300,2305) has 1
+  bin [2320,2325) has 1
+  bin [2325,2330) has 1
+  bin [2340,2345) has 1
+  bin [2345,2350) has 2
+  bin [2355,2360) has 1
+  bin [2360,2365) has 1
+  bin [2370,2375) has 2
+  bin [2375,2380) has 4
+  bin [2390,2395) has 1
+  bin [2395,2400) has 3
+  bin [2400,2405) has 3
+  bin [2405,2410) has 4
+  bin [2410,2415) has 2
+  bin [2415,2420) has 2
+  bin [2420,2425) has 3
+  bin [2425,2430) has 3
+  bin [2430,2435) has 5
+  bin [2435,2440) has 5
+  bin [2440,2445) has 4
+  bin [2445,2450) has 7
+  bin [2450,2455) has 6
+  bin [2455,2460) has 9
+  bin [2460,2465) has 3
+  bin [2465,2470) has 7
+  bin [2470,2475) has 9
+  bin [2475,2480) has 8
+  bin [2480,2485) has 14
+  bin [2485,2490) has 7
+  bin [2490,2495) has 15
+  bin [2495,2500) has 11
+  bin [2500,2505) has 14
+  bin [2505,2510) has 3
+  bin [2510,2515) has 1
+  average z coordinate 718.687 for 54371310 element(s)
+intensity histogram with bin size 64
+  bin [0,64) has 10697191
+  bin [64,128) has 28911635
+  bin [128,192) has 14632338
+  bin [192,256) has 130146
+  average intensity 100.336 for 54371310 element(s)
