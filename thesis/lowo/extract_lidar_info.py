@@ -37,7 +37,7 @@ def get_density_spacing_info(input_dir=None, output_path_file=None):
     # Insert the values into the dataframe
         lidar_info.loc[i, 'tilesNumber']=int(i)
         lidar_info.loc[i, 'all_returns_density']=all_returns_density
-        lidar_info.loc[i, 'last_returns_density ']=last_returns_density 
+        lidar_info.loc[i, 'last_returns_density']=last_returns_density 
         lidar_info.loc[i, 'all_returns_spacing']=all_returns_spacing
         lidar_info.loc[i, 'last_returns_spacing']=last_returns_spacing
 
