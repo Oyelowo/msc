@@ -7,6 +7,8 @@ import geopandas as gpd
 from fiona.crs import from_epsg
 import pycrs
 import matplotlib.pyplot as plt
+from osgeo import gdal
+import utm
 
 
 
@@ -20,23 +22,50 @@ grid_path = r'E:\LIDAR_FINAL\data\2015\fishnet\fishnet_925_1sqm.shp'
 
 data = rasterio.open(fp)
 fishnet = gpd.read_file(grid_path)
-fishnet.plot()
-plt.show()
+# print(fishnet.bounds)
+# print(fishnet.total_bounds)
+# fishnet.plot()
+# plt.show()
+
+bbox = fishnet.total_bounds
+print(bbox)
+# print(fishnet.crs)
+# print(from_epsg(32737))
+
+# minx, miny = 24.60, 60.00
+# maxx, maxy = 25.22, 60.35
+# bbox = box(minx, miny, maxx, maxy)
+geo = gpd.GeoDataFrame({'geometry': bbox}, crs=fishnet.crs)
+# geo.plot()
+# plt.show()
+minx, miny, maxx, maxy = bbox
+
+# min, max=bbox[0:2], bbox[2:4]
+# print(minx)
+min = utm.to_latlon(minx,miny, 37, northern=False)
+max = utm.to_latlon(maxx,maxy, 37, northern=False)
+
+# unpack the values from the tuple
+bbox_lat_lon = [*min, *max]
+print(bbox_lat_lon)
+# ds = gdal.Open(fp)
+# ds = gdal.Translate('new.tif', ds, projWin = bbox)
+# ds = None
+
+# geo = geo.to_crs(crs=data.crs)
+
+# def getFeatures(gdf):
+#     """Function to parse features from GeoDataFrame in such a manner that rasterio wants them"""
+#     import json
+#     return [json.loads(gdf.to_json())['features'][0]['geometry']]
+
+# coords = getFeatures(geo)
 
 
-minx, miny = 24.60, 60.00
-maxx, maxy = 25.22, 60.35
-bbox = box(minx, miny, maxx, maxy)
-geo = gpd.GeoDataFrame({'geometry': bbox}, index=[0], crs=from_epsg(4326))
 
-geo = geo.to_crs(crs=data.crs.data)
 
-def getFeatures(gdf):
-    """Function to parse features from GeoDataFrame in such a manner that rasterio wants them"""
-    import json
-    return [json.loads(gdf.to_json())['features'][0]['geometry']]
 
-coords = getFeatures(geo)
+
 
 # print(coords)
 
