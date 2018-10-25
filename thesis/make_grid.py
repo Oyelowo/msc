@@ -1,12 +1,20 @@
 import geopandas as gpd
 from shapely.geometry import Polygon
 import numpy as np
+import fiona
+import matplotlib.pyplot as plt
+import geopandas as gpd
+import shapely
 
+
+shapefile=r'E:\LIDAR_FINAL\2015\buildings\buildings_2015.shp'
+
+shp = r'C:\Users\oyeda\Desktop\THESIS\BuildingBoundary\building_mask_2m_edit_Sentinel.shp'
 
 points=gpd.read_file(shp)
 xmin,ymin,xmax,ymax =  points.total_bounds
 gridWidth = 2000
-gridHeight = 1000
+gridHeight = 2000
 rows = int(np.ceil((ymax-ymin) /  gridHeight))
 cols = int(np.ceil((xmax-xmin) / gridWidth))
 XleftOrigin = xmin
@@ -25,6 +33,7 @@ for i in range(cols):
     XrightOrigin = XrightOrigin + gridWidth
 
 grid = gpd.GeoDataFrame({'geometry':polygons})
-grid.to_file("grid.shp")
+#grid.to_file("grid.shp")
 
 grid.plot()
+plt.show()
