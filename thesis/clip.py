@@ -28,6 +28,7 @@ fishnet.crs
 #import gdal
 from gdalconst import GA_ReadOnly
 
+
 data = gdal.Open(clipped_path, GA_ReadOnly)
 geoTransform = data.GetGeoTransform()
 minx = geoTransform[0]
@@ -74,9 +75,11 @@ out_meta = data.meta.copy()
 
 epsg_code = int(data.crs.data['init'][5:])
 
+import io
 
+io.BytesIO(000)
 print(epsg_code)
-
+pycrs.parser.from_epsg_code(epsg_code.BytesIO())
 
 out_meta.update({"driver": "GTiff",
               "height": out_img.shape[1],
@@ -91,7 +94,7 @@ with rasterio.open(out_tif, "w", **out_meta) as dest:
 
 clipped = rasterio.open(out_tif)
 
-show((clipped, 5), cmap='terrain')
+show((clipped, 1), cmap='terrain')
 
 
 

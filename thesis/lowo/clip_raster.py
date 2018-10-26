@@ -1,187 +1,141 @@
-from osgeo import gdal, gdalnumeric, ogr, osr
-from PIL import Image, ImageDraw
-import os, sys
-from functools import reduce
-import operator
-gdal.UseExceptions()
+import rasterio
+from rasterio.plot import show
+from rasterio.plot import show_hist
+from rasterio.mask import mask
+from shapely.geometry import box
+import geopandas as gpd
+from fiona.crs import from_epsg
+import pycrs
+import matplotlib.pyplot as plt
+from osgeo import gdal
+import utm
+from gdalconst import GA_ReadOnly
+from osgeo import gdal
+import os
+
+fp= r'E:\LIDAR_FINAL\data\precipitation\mean_annual\CHELSA_bio_12.tif'
+out_tif=r'E:\LIDAR_FINAL\data\precipitation\mean_annual\test_lowo.tif'
+clipped_path= r'E:\LIDAR_FINAL\data\precipitation\mean_annual\mean_annual_rainfall_clipped.tif'
+
+# show((data, 1), cmap='terrain')
+# plt.show()
+grid_path = r'E:\LIDAR_FINAL\data\2015\fishnet\fishnet_925_1sqm.shp'
 
 
-# This function will convert the rasterized clipper shapefile
-# to a mask for use within GDAL.
-def imageToArray(i):
-    """
-    Converts a Python Imaging Library array to a
-    gdalnumeric image.
-    """
-    a=gdalnumeric.fromstring(i.tostring(),'b')
-    a.shape=i.im.size[1], i.im.size[0]
-    return a
+data = rasterio.open(fp)
+fishnet = gpd.read_file(grid_path)
 
-def arrayToImage(a):
-    """
-    Converts a gdalnumeric array to a
-    Python Imaging Library Image.
-    """
-    i=Image.fromstring('L',(a.shape[1],a.shape[0]),
-            (a.astype('b')).tostring())
-    return i
+fishnet.crs
 
-def world2Pixel(geoMatrix, x, y):
-  """
-  Uses a gdal geomatrix (gdal.GetGeoTransform()) to calculate
-  the pixel location of a geospatial coordinate
-  """
-  ulX = geoMatrix[0]
-  ulY = geoMatrix[3]
-  xDist = geoMatrix[1]
-  yDist = geoMatrix[5]
-  rtnX = geoMatrix[2]
-  rtnY = geoMatrix[4]
-  pixel = int((x - ulX) / xDist)
-  line = int((ulY - y) / xDist)
-  return (pixel, line)
-
-#
-#  EDIT: this is basically an overloaded
-#  version of the gdal_array.OpenArray passing in xoff, yoff explicitly
-#  so we can pass these params off to CopyDatasetInfo
-#
-def OpenArray( array, prototype_ds = None, xoff=0, yoff=0 ):
-    ds = gdal.Open( gdalnumeric.GetArrayFilename(array) )
-
-    if ds is not None and prototype_ds is not None:
-        if type(prototype_ds).__name__ == 'str':
-            prototype_ds = gdal.Open( prototype_ds )
-        if prototype_ds is not None:
-            gdalnumeric.CopyDatasetInfo( prototype_ds, ds, xoff=xoff, yoff=yoff )
-    return ds
-
-def histogram(a, bins=range(0,256)):
-  """
-  Histogram function for multi-dimensional array.
-  a = array
-  bins = range of numbers to match
-  """
-  fa = a.flat
-  n = gdalnumeric.searchsorted(gdalnumeric.sort(fa), bins)
-  n = gdalnumeric.concatenate([n, [len(fa)]])
-  hist = n[1:]-n[:-1]
-  return hist
-
-def stretch(a):
-  """
-  Performs a histogram stretch on a gdalnumeric array image.
-  """
-  hist = histogram(a)
-  im = arrayToImage(a)
-  lut = []
-  for b in range(0, len(hist), 256):
-    # step size
-    step = reduce(operator.add, hist[b:b+256]) / 255
-    # create equalization lookup table
-    n = 0
-    for i in range(256):
-      lut.append(n / step)
-      n = n + hist[i+b]
-  im = im.point(lut)
-  return imageToArray(im)
-
-def main( shapefile_path, raster_path ):
-    # Load the source data as a gdalnumeric array
-    srcArray = gdalnumeric.LoadFile(raster_path)
-
-    # Also load as a gdal image to get geotransform
-    # (world file) info
-    srcImage = gdal.Open(raster_path)
-    geoTrans = srcImage.GetGeoTransform()
-
-    # Create an OGR layer from a boundary shapefile
-    shapef = ogr.Open(shapefile_path)
-    lyr = shapef.GetLayer( os.path.split( os.path.splitext( shapefile_path )[0] )[1] )
-    poly = lyr.GetNextFeature()
-
-    # Convert the layer extent to image pixel coordinates
-    minX, maxX, minY, maxY = lyr.GetExtent()
-    ulX, ulY = world2Pixel(geoTrans, minX, maxY)
-    lrX, lrY = world2Pixel(geoTrans, maxX, minY)
-
-    # Calculate the pixel size of the new image
-    pxWidth = int(lrX - ulX)
-    pxHeight = int(lrY - ulY)
-
-    clip = srcArray[:, ulY:lrY, ulX:lrX]
-
-    #
-    # EDIT: create pixel offset to pass to new image Projection info
-    #
-    xoffset =  ulX
-    yoffset =  ulY
-    print ("Xoffset, Yoffset = ( %f, %f )" % ( xoffset, yoffset ))
-
-    # Create a new geomatrix for the image
-    geoTrans = list(geoTrans)
-    geoTrans[0] = minX
-    geoTrans[3] = maxY
-
-    # Map points to pixels for drawing the
-    # boundary on a blank 8-bit,
-    # black and white, mask image.
-    points = []
-    pixels = []
-    geom = poly.GetGeometryRef()
-    pts = geom.GetGeometryRef(0)
-    for p in range(pts.GetPointCount()):
-      points.append((pts.GetX(p), pts.GetY(p)))
-    for p in points:
-      pixels.append(world2Pixel(geoTrans, p[0], p[1]))
-    rasterPoly = Image.new("L", (pxWidth, pxHeight), 1)
-    rasterize = ImageDraw.Draw(rasterPoly)
-    rasterize.polygon(pixels, 0)
-    mask = imageToArray(rasterPoly)
-
-    # Clip the image using the mask
-    clip = gdalnumeric.choose(mask, \
-        (clip, 0)).astype(gdalnumeric.uint8)
-
-    # This image has 3 bands so we stretch each one to make them
-    # visually brighter
-    for i in range(3):
-      clip[i,:,:] = stretch(clip[i,:,:])
-
-    # Save new tiff
-    #
-    #  EDIT: instead of SaveArray, let's break all the
-    #  SaveArray steps out more explicity so
-    #  we can overwrite the offset of the destination
-    #  raster
-    #
-    ### the old way using SaveArray
-    #
-    # gdalnumeric.SaveArray(clip, "OUTPUT.tif", format="GTiff", prototype=raster_path)
-    #
-    ###
-    #
-    gtiffDriver = gdal.GetDriverByName( 'GTiff' )
-    if gtiffDriver is None:
-        raise ValueError("Can't find GeoTiff Driver")
-    gtiffDriver.CreateCopy( "OUTPUT.tif",
-        OpenArray( clip, prototype_ds=raster_path, xoff=xoffset, yoff=yoffset )
-    )
-
-    # Save as an 8-bit jpeg for an easy, quick preview
-    clip = clip.astype(gdalnumeric.uint8)
-    gdalnumeric.SaveArray(clip, "OUTPUT.jpg", format="JPEG")
-
-    gdal.ErrorReset()
+#import gdal
 
 
-if __name__ == '__main__':
+def get_raster_extent(raster_path):
+    data = gdal.Open(clipped_path, GA_ReadOnly)
+    geoTransform = data.GetGeoTransform()
+    minx = geoTransform[0]
+    maxy = geoTransform[3]
+    maxx = minx + geoTransform[1] * data.RasterXSize
+    miny = maxy + geoTransform[5] * data.RasterYSize
+    print('[minx, maxy , maxx, miny] is',  [minx, maxy , maxx, miny] )
+    data = None
+    return [minx, maxy , maxx, miny]
 
-    #
-    # example run : $ python clip.py /<full-path>/<shapefile-name>.shp /<full-path>/<raster-name>.tif
-    #
-    if len( sys.argv ) < 2:
-        print("[ ERROR ] you must two args. 1) the full shapefile path and 2) the full raster path")
-        sys.exit( 1 )
 
-    main( sys.argv[1], sys.argv[2] )
+
+
+def clip_and_export_raster(raster_path, output_tif, extent):
+    '''
+    extent: An array of the extent of the window in this order: [minx, maxy , maxx, miny]
+    '''
+    data = gdal.Open(raster_path)
+    data = gdal.Translate(r'E:\LIDAR_FINAL\data\precipitation\mean_annual\newnew.tif', ds, projWin=extent)
+    data = None
+#    data = rasterio.open(r'E:\LIDAR_FINAL\data\precipitation\mean_annual\newnew.tif')
+#    show((data, 1), cmap='terrain')
+    
+   
+
+def getFeatures(gdf):
+    """Function to parse features from GeoDataFrame in such a manner that rasterio wants them"""
+    import json
+    return [json.loads(gdf.to_json())['features'][0]['geometry']]
+
+
+
+
+def clip_and_export_raster(raster_data, clipped_tif_path,extent, bbox_epsg_code=4326, export=True):
+    '''
+    extent: An array of the extent of the window in this order: [minx, maxy , maxx, miny]
+    '''
+    bbox = box(*extent)
+
+    geo = gpd.GeoDataFrame({'geometry': bbox}, index=[0], crs=from_epsg(bbox_epsg_code))
+    
+    try:
+        geo = geo.to_crs(crs=raster_data.crs.data)
+    except: raise projectionError('The raster crs is not defined')
+    coords = getFeatures(geo)
+    
+    clipped_img, clipped_img_transform = mask(raster=raster_data, shapes=coords, crop=True)
+    clipped_img_meta = raster_data.meta.copy()
+    clipped_img_meta.update({"driver": "GTiff",
+              "height": clipped_img.shape[1],
+                "width": clipped_img.shape[2],
+                 "transform": clipped_img_transform,
+                "crs": data.crs.data})
+    if export:
+        with rasterio.open(out_tif, "w", **clipped_img_meta) as output:
+            output.write(clipped_img)
+            
+    clipped = rasterio.open(clipped_img_tif)
+    show((clipped, 1), cmap='terrain')
+    return [clipped_img_tif, clipped_img_meta]
+
+
+
+
+
+
+
+
+
+
+
+ds = gdal.Translate('new.tif', ds, projWin = [minx, maxy , maxx, miny])
+
+
+from osgeo import gdal
+
+ds = gdal.Open(fp)
+ds = gdal.Translate('new.tif', ds, projWin = [minx, maxy , maxx, miny])
+ds = gdal.Translate('new.tif', ds, projWin = [minx, maxy , maxx, miny])
+data = rasterio.open('new.tif')
+show((data, 1), cmap='terrain')
+ds = None
+
+
+from osgeo import gdal,osr
+ds=gdal.Open(fp)
+prj=ds.GetProjection()
+print(prj)
+
+srs=osr.SpatialReference(wkt=prj)
+if srs.IsProjected:
+    print (srs.GetAttrValue('projcs'))
+print(srs.GetAttrValue('geogcs'))
+
+
+
+import os
+inDS = fp # input raster
+outDS = ... # output raster
+lon =   # lon of your flux tower
+lat = ... # lat of your flux tower
+ulx = lon - 24.5
+uly = lat + 24.5
+lrx = lon + 24.5
+lry = lat - 24.5
+translate = 'gdal_translate -projwin %s %s %s %s %s %s' %(ulx, uly, lrx, lry, inDS, outDS)
+os.system(translate)
+
