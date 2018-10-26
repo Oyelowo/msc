@@ -52,9 +52,13 @@ show((data, 1), cmap='terrain')
 ds = None
 
 
-
-
+arr = [minx, miny, maxx, maxy]
+arr
+box(*arr)
 bbox = box(minx, miny, maxx, maxy)
+
+fishnet.total_bounds
+
 
 geo = gpd.GeoDataFrame({'geometry': bbox}, index=[0], crs=from_epsg(4326))
 
@@ -75,12 +79,7 @@ out_meta = data.meta.copy()
 
 epsg_code = int(data.crs.data['init'][5:])
 
-import io
-
-io.BytesIO(000)
-print(epsg_code)
-pycrs.parser.from_epsg_code(epsg_code.BytesIO())
-
+pycrs.parser.from_epsg_code(epsg_code)
 out_meta.update({"driver": "GTiff",
               "height": out_img.shape[1],
                 "width": out_img.shape[2],

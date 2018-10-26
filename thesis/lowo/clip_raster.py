@@ -42,6 +42,14 @@ def get_raster_extent(raster_path):
     return [minx, maxy , maxx, miny]
 
 
+def get_vector_extent(shapefile, geometry_field='geometry', utm_zone=37, northern=False):
+    '''
+    extent: An array of the extent of the window in this order: [minx, maxy , maxx, miny]
+    '''
+    minx,miny, maxx,maxy = shapefile[geometry_field].total_bounds
+    minx,miny = utm.to_latlon(minx,miny, utm_zone, northern)
+    maxx,maxy = utm.to_latlon(maxx,maxy, utm_zone, northern)
+    return [minx, maxy , maxx, miny]
 
 
 def clip_and_export_raster(raster_path, output_tif, extent):
