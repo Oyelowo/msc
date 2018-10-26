@@ -40,7 +40,12 @@ data = None
 
 
 
+   kk = list(fishnet.total_bounds)
+    minx,miny, maxy, maxy = kk[0], kk[1], kk[2], kk[3]
+    minx,miny = utm.to_latlon(minx,miny, 37, northern=True)
+    maxx,maxy = utm.to_latlon(maxx,maxy, 37, northern=True)
 
+#411326.9602166185,447444.86021661846,9611034.927098723,9641596.227098722
 
 from osgeo import gdal
 
@@ -58,6 +63,8 @@ box(*arr)
 bbox = box(minx, miny, maxx, maxy)
 
 fishnet.total_bounds
+
+
 
 
 geo = gpd.GeoDataFrame({'geometry': bbox}, index=[0], crs=from_epsg(4326))
