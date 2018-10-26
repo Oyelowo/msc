@@ -91,3 +91,6 @@ def get_clipped_raster(raster_data, output_path, extent, bbox_epsg_code=4326, ex
 
 
 
+def plot_map():
+    
+
