@@ -11,9 +11,9 @@ from osgeo import gdal
 import utm
 
 
-
-fp= r'E:\LIDAR_FINAL\data\precipitation\mean_annual\mean_annual_rainfall_clipped.tif'
+fp= r'E:\LIDAR_FINAL\data\precipitation\mean_annual\CHELSA_bio_12.tif'
 out_tif=r'E:\LIDAR_FINAL\data\precipitation\mean_annual\test_lowo.tif'
+clipped_path= r'E:\LIDAR_FINAL\data\precipitation\mean_annual\mean_annual_rainfall_clipped.tif'
 
 # show((data, 1), cmap='terrain')
 # plt.show()
@@ -22,71 +22,121 @@ grid_path = r'E:\LIDAR_FINAL\data\2015\fishnet\fishnet_925_1sqm.shp'
 
 data = rasterio.open(fp)
 fishnet = gpd.read_file(grid_path)
-# print(fishnet.bounds)
-# print(fishnet.total_bounds)
-# fishnet.plot()
-# plt.show()
 
-bbox = fishnet.total_bounds
-print(bbox)
-# print(fishnet.crs)
-# print(from_epsg(32737))
+fishnet.crs
 
-# minx, miny = 24.60, 60.00
-# maxx, maxy = 25.22, 60.35
-# bbox = box(minx, miny, maxx, maxy)
-geo = gpd.GeoDataFrame({'geometry': bbox}, crs=fishnet.crs)
-# geo.plot()
-# plt.show()
-minx, miny, maxx, maxy = bbox
+#import gdal
+from gdalconst import GA_ReadOnly
 
-# min, max=bbox[0:2], bbox[2:4]
-# print(minx)
-min = utm.to_latlon(minx,miny, 37, northern=False)
-max = utm.to_latlon(maxx,maxy, 37, northern=False)
-
-# unpack the values from the tuple
-bbox_lat_lon = [*min, *max]
-print(bbox_lat_lon)
-# ds = gdal.Open(fp)
-# ds = gdal.Translate('new.tif', ds, projWin = bbox)
-# ds = None
-
-# geo = geo.to_crs(crs=data.crs)
-
-# def getFeatures(gdf):
-#     """Function to parse features from GeoDataFrame in such a manner that rasterio wants them"""
-#     import json
-#     return [json.loads(gdf.to_json())['features'][0]['geometry']]
-
-# coords = getFeatures(geo)
+data = gdal.Open(clipped_path, GA_ReadOnly)
+geoTransform = data.GetGeoTransform()
+minx = geoTransform[0]
+maxy = geoTransform[3]
+maxx = minx + geoTransform[1] * data.RasterXSize
+miny = maxy + geoTransform[5] * data.RasterYSize
+print([minx, miny, maxx, maxy])
+data = None
 
 
 
 
 
+from osgeo import gdal
+
+ds = gdal.Open(fp)
+ds = gdal.Translate(r'E:\LIDAR_FINAL\data\precipitation\mean_annual\newnew.tif', ds, projWin = [minx, maxy , maxx, miny])
+ds = gdal.Translate(r'E:\LIDAR_FINAL\data\precipitation\mean_annual\new.tif', ds, projWin = [minx, maxy , maxx, miny])
+data = rasterio.open(r'E:\LIDAR_FINAL\data\precipitation\mean_annual\newnew.tif')
+show((data, 1), cmap='terrain')
+ds = None
 
 
-# print(coords)
 
-# out_img, out_transform = mask(raster=data, shapes=coords, crop=True)
 
-# out_meta = data.meta.copy()
+bbox = box(minx, miny, maxx, maxy)
 
-# print(out_meta)
+geo = gpd.GeoDataFrame({'geometry': bbox}, index=[0], crs=from_epsg(4326))
 
-# epsg_code = int(data.crs.data['init'][5:])
+geo = geo.to_crs(crs=data.crs.data)
+data.crs
+fishnet.crs
 
-# print(epsg_code)
+def getFeatures(gdf):
+    """Function to parse features from GeoDataFrame in such a manner that rasterio wants them"""
+    import json
+    return [json.loads(gdf.to_json())['features'][0]['geometry']]
 
-# out_meta.update({"driver": "GTiff",
-#                      "height": out_img.shape[1],
-#                      "width": out_img.shape[2],
-#                      "transform": out_transform,
-#                      "crs": pycrs.parser.from_epsg_code(epsg_code).to_proj4()})
+coords = getFeatures(geo)
+print(coords)
 
-# with rasterio.open(out_tif, "w", **out_meta) as dest:dest.write(out_img)
+out_img, out_transform = mask(raster=data, shapes=coords, crop=True)
+out_meta = data.meta.copy()
 
-# clipped = rasterio.open(out_tif)
+epsg_code = int(data.crs.data['init'][5:])
 
-# show((clipped, 5), cmap='terrain')
+
+print(epsg_code)
+
+
+out_meta.update({"driver": "GTiff",
+              "height": out_img.shape[1],
+                "width": out_img.shape[2],
+                 "transform": out_transform,
+                "crs": pycrs.parser.from_epsg_code(epsg_code).to_proj4()})
+    
+    
+out_tif=r'E:\LIDAR_FINAL\data\precipitation\mean_annual\testtest.tif'
+with rasterio.open(out_tif, "w", **out_meta) as dest:
+       dest.write(out_img)
+
+clipped = rasterio.open(out_tif)
+
+show((clipped, 5), cmap='terrain')
+
+
+
+
+
+
+
+
+
+
+
+ds = gdal.Translate('new.tif', ds, projWin = [minx, maxy , maxx, miny])
+
+
+from osgeo import gdal
+
+ds = gdal.Open(fp)
+ds = gdal.Translate('new.tif', ds, projWin = [minx, maxy , maxx, miny])
+ds = gdal.Translate('new.tif', ds, projWin = [minx, maxy , maxx, miny])
+data = rasterio.open('new.tif')
+show((data, 1), cmap='terrain')
+ds = None
+
+
+from osgeo import gdal,osr
+ds=gdal.Open(fp)
+prj=ds.GetProjection()
+print(prj)
+
+srs=osr.SpatialReference(wkt=prj)
+if srs.IsProjected:
+    print (srs.GetAttrValue('projcs'))
+print(srs.GetAttrValue('geogcs'))
+
+
+
+import os
+inDS = fp # input raster
+outDS = ... # output raster
+lon =   # lon of your flux tower
+lat = ... # lat of your flux tower
+ulx = lon - 24.5
+uly = lat + 24.5
+lrx = lon + 24.5
+lry = lat - 24.5
+translate = 'gdal_translate -projwin %s %s %s %s %s %s' %(ulx, uly, lrx, lry, inDS, outDS)
+os.system(translate)
+

@@ -11,10 +11,11 @@ shapefile=r'E:\LIDAR_FINAL\2015\buildings\buildings_2015.shp'
 
 shp = r'C:\Users\oyeda\Desktop\THESIS\BuildingBoundary\building_mask_2m_edit_Sentinel.shp'
 
+shp= r'E:\LIDAR_FINAL\data\2015\fishnet\fishnet_925_1sqm.shp'
 points=gpd.read_file(shp)
 xmin,ymin,xmax,ymax =  points.total_bounds
-gridWidth = 2000
-gridHeight = 2000
+gridWidth = 926.1
+gridHeight = 926.1
 rows = int(np.ceil((ymax-ymin) /  gridHeight))
 cols = int(np.ceil((xmax-xmin) / gridWidth))
 XleftOrigin = xmin
@@ -33,7 +34,7 @@ for i in range(cols):
     XrightOrigin = XrightOrigin + gridWidth
 
 grid = gpd.GeoDataFrame({'geometry':polygons})
-#grid.to_file("grid.shp")
+grid.to_file(r"E:\LIDAR_FINAL\data\grid.shp")
 
 grid.plot()
 plt.show()

@@ -10,8 +10,9 @@ data = pd.read_csv('./lidar_info_extracted.csv')
 data=data.iloc[:, 2:] 
 # ex()
 
-
-
+import sys
+sys.path
+from rasterToPolygon import polygonize
 
 data.describe().to_csv('output_data/2015_lidar_info_stat.csv')
 fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12,8))

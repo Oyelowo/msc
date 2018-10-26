@@ -1,0 +1,274 @@
+import rasterio
+from rasterio.plot import show
+from rasterio.plot import show_hist
+from rasterio.mask import mask
+from shapely.geometry import box
+import geopandas as gpd
+from fiona.crs import from_epsg
+import pycrs
+import matplotlib.pyplot as plt
+from osgeo import gdal
+import utm
+
+
+
+fp= r'E:\LIDAR_FINAL\data\precipitation\mean_annual\mean_annual_rainfall_clipped.tif'
+out_tif=r'E:\LIDAR_FINAL\data\precipitation\mean_annual\test_lowo.tif'
+
+# show((data, 1), cmap='terrain')
+# plt.show()
+grid_path = r'E:\LIDAR_FINAL\data\2015\fishnet\fishnet_925_1sqm.shp'
+
+
+data = rasterio.open(fp)
+fishnet = gpd.read_file(grid_path)
+# print(fishnet.bounds)
+# print(fishnet.total_bounds)
+# fishnet.plot()
+# plt.show()
+
+bbox = fishnet.total_bounds
+# print(bbox)
+# print(fishnet.crs)
+# print(from_epsg(32737))
+
+minx, miny, maxx, maxy = bbox
+
+# # min, max=bbox[0:2], bbox[2:4]
+# # print(minx)
+# min = utm.to_latlon(minx,miny, 37, northern=False)
+# max = utm.to_latlon(maxx,maxy, 37, northern=False)
+
+# # unpack the values from the tuple
+# bbox_lat_lon = [*min, *max]
+# print(bbox_lat_lon) 
+# ds = gdal.Open(fp)
+# ds = gdal.Translate('newl.tif', ds, projWin = bbox_lat_lon)
+# ds = None
+
+
+
+minx, miny = 3.30175, 38.13193 
+maxx, maxy = 3.14038, 38.28565
+
+# minx, miny = 24.60, 60.00
+# maxx, maxy = 25.22, 60.35
+# bbox = box(*bbox_lat_lon)
+bbox = box(minx, miny, maxx, maxy)
+print(bbox)
+geo = gpd.GeoDataFrame({'geometry': bbox}, index=[0], crs=from_epsg(4326))
+geo = geo.to_crs(crs=data.crs.data)
+
+def getFeatures(gdf):
+    """Function to parse features from GeoDataFrame in such a manner that rasterio wants them"""
+    import json
+    return [json.loads(gdf.to_json())['features'][0]['geometry']]
+
+coords = getFeatures(geo)
+print(coords)
+out_img, out_transform = mask(raster=data, shapes=coords, crop=True)
+
+# out_image, out_transform = mask(data, fishnet, crop=True, invert=False)
+# geo = gpd.GeoDataFrame({'geometry': bbox_lat_lon}, index=[0],crs=from_epsg(4326))
+# geo.plot()
+# plt.show()
+
+
+
+
+
+
+# geo = geo.to_crs(crs=data.crs)
+
+# def getFeatures(gdf):
+#     """Function to parse features from GeoDataFrame in such a manner that rasterio wants them"""
+#     import json
+#     return [json.loads(gdf.to_json())['features'][0]['geometry']]
+
+# coords = getFeatures(geo)
+
+
+
+
+
+
+
+# print(coords)
+
+# out_img, out_transform = mask(raster=data, shapes=coords, crop=True)
+
+# out_meta = data.meta.copy()
+
+# print(out_meta)
+
+# epsg_code = int(data.crs.data['init'][5:])
+
+# print(epsg_code)
+
+# out_meta.update({"driver": "GTiff",
+#                      "height": out_img.shape[1],
+#                      "width": out_img.shape[2],
+#                      "transform": out_transform,
+#                      "crs": pycrs.parser.from_epsg_code(epsg_code).to_proj4()})
+
+# with rasterio.open(out_tif, "w", **out_meta) as dest:dest.write(out_img)
+
+# clipped = rasterio.open(out_tif)
+
+# show((clipped, 5), cmap='terrain')
+
+# RasterClipper.py - clip a geospatial image using a shapefile
+
+
+
+
+
+
+
+
+
+
+
+
+
+# RasterClipper.py - clip a geospatial image using a shapefile
+
+import operator
+from osgeo import gdal, gdalnumeric, ogr, osr
+import Image, ImageDraw
+
+# Raster image to clip
+raster = "SatImage.tif"
+
+# Polygon shapefile used to clip
+shp = "county"
+
+# Name of clip raster file(s)
+output = "clip"
+
+# This function will convert the rasterized clipper shapefile 
+# to a mask for use within GDAL.    
+def imageToArray(i):
+    """
+    Converts a Python Imaging Library array to a 
+    gdalnumeric image.
+    """
+    a=gdalnumeric.fromstring(i.tostring(),'b')
+    a.shape=i.im.size[1], i.im.size[0]
+    return a
+
+def arrayToImage(a):
+    """
+    Converts a gdalnumeric array to a 
+    Python Imaging Library Image.
+    """
+    i=Image.fromstring('L',(a.shape[1],a.shape[0]),
+            (a.astype('b')).tostring())
+    return i
+     
+def world2Pixel(geoMatrix, x, y):
+  """
+  Uses a gdal geomatrix (gdal.GetGeoTransform()) to calculate
+  the pixel location of a geospatial coordinate 
+  """
+  ulX = geoMatrix[0]
+  ulY = geoMatrix[3]
+  xDist = geoMatrix[1]
+  yDist = geoMatrix[5]
+  rtnX = geoMatrix[2]
+  rtnY = geoMatrix[4]
+  pixel = int((x - ulX) / xDist)
+  line = int((ulY - y) / yDist)
+  return (pixel, line) 
+
+def histogram(a, bins=range(0,256)):
+  """
+  Histogram function for multi-dimensional array.
+  a = array
+  bins = range of numbers to match 
+  """
+  fa = a.flat
+  n = gdalnumeric.searchsorted(gdalnumeric.sort(fa), bins)
+  n = gdalnumeric.concatenate([n, [len(fa)]])
+  hist = n[1:]-n[:-1] 
+  return hist
+
+def stretch(a):
+  """
+  Performs a histogram stretch on a gdalnumeric array image.
+  """
+  hist = histogram(a)
+  im = arrayToImage(a)   
+  lut = []
+  for b in range(0, len(hist), 256):
+    # step size
+    step = reduce(operator.add, hist[b:b+256]) / 255
+    # create equalization lookup table
+    n = 0
+    for i in range(256):
+      lut.append(n / step)
+      n = n + hist[i+b]
+  im = im.point(lut)
+  return imageToArray(im)
+
+# Load the source data as a gdalnumeric array
+srcArray = gdalnumeric.LoadFile(raster)
+
+# Also load as a gdal image to get geotransform 
+# (world file) info
+srcImage = gdal.Open(raster)
+geoTrans = srcImage.GetGeoTransform()
+
+# Create an OGR layer from a boundary shapefile
+shapef = ogr.Open("%s.shp" % shp)
+lyr = shapef.GetLayer(shp)
+poly = lyr.GetNextFeature()
+
+# Convert the layer extent to image pixel coordinates
+minX, maxX, minY, maxY = lyr.GetExtent()
+ulX, ulY = world2Pixel(geoTrans, minX, maxY)
+lrX, lrY = world2Pixel(geoTrans, maxX, minY)
+
+# Calculate the pixel size of the new image
+pxWidth = int(lrX - ulX)
+pxHeight = int(lrY - ulY)
+
+clip = srcArray[:, ulY:lrY, ulX:lrX]
+
+# Create a new geomatrix for the image
+geoTrans = list(geoTrans)
+geoTrans[0] = minX
+geoTrans[3] = maxY
+
+# Map points to pixels for drawing the 
+# boundary on a blank 8-bit, 
+# black and white, mask image.
+points = []
+pixels = []
+geom = poly.GetGeometryRef()
+pts = geom.GetGeometryRef(0)
+for p in range(pts.GetPointCount()):
+  points.append((pts.GetX(p), pts.GetY(p)))
+for p in points:
+  pixels.append(world2Pixel(geoTrans, p[0], p[1]))
+rasterPoly = Image.new("L", (pxWidth, pxHeight), 1)
+rasterize = ImageDraw.Draw(rasterPoly)
+rasterize.polygon(pixels, 0)
+mask = imageToArray(rasterPoly)   
+
+# Clip the image using the mask
+clip = gdalnumeric.choose(mask, \
+    (clip, 0)).astype(gdalnumeric.uint8)
+
+# This image has 3 bands so we stretch each one to make them
+# visually brighter
+for i in range(3):
+  clip[i,:,:] = stretch(clip[i,:,:])
+
+# Save ndvi as tiff
+gdalnumeric.SaveArray(clip, "%s.tif" % output, \
+    format="GTiff", prototype=raster)
+
+# Save ndvi as an 8-bit jpeg for an easy, quick preview
+clip = clip.astype(gdalnumeric.uint8)
+gdalnumeric.SaveArray(clip, "%s.jpg" % output, format="JPEG")
