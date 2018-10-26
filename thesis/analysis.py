@@ -37,6 +37,7 @@ bbox_aoi = ras.get_raster_extent(r'E:\LIDAR_FINAL\data\AOI\clipped_mean_annual_r
 #[38.19986023835, -3.2418059025499986, 38.52486023705, -3.516805901449999]
 
 
+#LOAD THE FILEPATH
 mean_annual_filepath = r'E:\LIDAR_FINAL\data\precipitation\mean_annual\CHELSA_bio_12.tif'
 mean_annual_clipped_path = r'E:\LIDAR_FINAL\data\precipitation\mean_annual\mean_annual_rain_clipped.tif'
 mean_annual_rain_raster = rasterio.open(mean_annual_filepath)
@@ -44,10 +45,15 @@ mean_annual_rain_raster = rasterio.open(mean_annual_filepath)
 mean_annual_rain_clipped = ras.get_clipped_raster(mean_annual_rain_raster, mean_annual_clipped_path,
                                                   bbox_aoi, 4326)
 
+#READ THE VALUES OF THE JUST CLIPPED RASTER
+mean_annual_rain = rasterio.open(mean_annual_clipped_path).read().astype(float)
 
-mean_annual_rain = rasterio.open(mean_annual_clipped_path)
+
+#SPECIFY PLOT SIZE IN THE CONSOLE
+plt.rcParams['figure.figsize'] = (4, 12) 
 
 
+#PLOT
 sns.set_style("white")
 # Plot newly classified and masked raster
 fig, ax = plt.subplots(figsize = (3,2))
@@ -55,7 +61,7 @@ show((mean_annual_rain_clipped, 1),cmap='Blues', title="Mean Annual Rainfall")
 #show((clipped, 1), cmap='Blues', title="Mean Annual Rainfall", contour=True)
 
 
-
+# CLIP ALL THE MONTHLY DATA AND ALSO SUM THEM
 sum_rain = 0
 monthly_rain_raster = glob.glob(r'E:\LIDAR_FINAL\data\precipitation\mean_monthly\CHELSA*.tif')
 for month_index, month_file in enumerate(monthly_rain_raster, 1):
@@ -71,7 +77,7 @@ for month_index, month_file in enumerate(monthly_rain_raster, 1):
 
 
     
-plt.rcParams['figure.figsize'] = (4, 12)    
+   
 
 cc = sum_rain/12
 show(sum_rain.mean())
