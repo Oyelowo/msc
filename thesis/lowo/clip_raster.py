@@ -45,7 +45,7 @@ def clip_and_export_raster(raster_path, output_tif, extent):
     extent: An array of the extent of the window in this order: [minx, maxy , maxx, miny]
     '''
     raster_data = gdal.Open(raster_path)
-    raster_data = gdal.Translate(r'E:\LIDAR_FINAL\data\precipitation\mean_annual\newnew.tif', raster_data, projWin=extent)
+    raster_data = gdal.Translate(output_tif, raster_data, projWin=extent)
     raster_data = None
 #    data = rasterio.open(r'E:\LIDAR_FINAL\data\precipitation\mean_annual\newnew.tif')
 #    show((data, 1), cmap='terrain')
@@ -88,4 +88,4 @@ def get_clipped_raster(raster_data, output_path, extent, bbox_epsg_code=4326):
             
     clipped = rasterio.open(output_path)
     show((clipped, 1), cmap='terrain')
-    return clipped_img
+    return clipped

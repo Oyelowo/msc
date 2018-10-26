@@ -40,19 +40,34 @@ data = None
 
 
 
-   kk = list(fishnet.total_bounds)
-    minx,miny, maxy, maxy = kk[0], kk[1], kk[2], kk[3]
-    minx,miny = utm.to_latlon(minx,miny, 37, northern=True)
-    maxx,maxy = utm.to_latlon(maxx,maxy, 37, northern=True)
+
+    data = gdal.Open(raster_file_path, GA_ReadOnly)
+    geoTransform = data.GetGeoTransform()
+    minx = geoTransform[0]
+    maxy = geoTransform[3]
+    maxx = minx + geoTransform[1] * data.RasterXSize
+    miny = maxy + geoTransform[5] * data.RasterYSize
+    print('[minx, maxy , maxx, miny] is',  [minx, maxy , maxx, miny] )
+    data = None
+    
+    
+
+minx,miny, maxx,maxy = fishnet['geometry'].total_bounds
+     [minx, maxy , maxx, miny]
+      [minx, maxx , miny, maxy]
+    minx,miny = utm.to_latlon(minx,miny, 37, northern=False)
+    maxx,maxy = utm.to_latlon(maxx,maxy, 37, northern=False)
 
 #411326.9602166185,447444.86021661846,9611034.927098723,9641596.227098722
-
+    
+ll = (-3.518701590504289, 38.5269533416643, -3.2424456042838354, 38.2016484226522)
+ll[2]
 from osgeo import gdal
 
 ds = gdal.Open(fp)
-ds = gdal.Translate(r'E:\LIDAR_FINAL\data\precipitation\mean_annual\newnew.tif', ds, projWin = [minx, maxy , maxx, miny])
-ds = gdal.Translate(r'E:\LIDAR_FINAL\data\precipitation\mean_annual\new.tif', ds, projWin = [minx, maxy , maxx, miny])
-data = rasterio.open(r'E:\LIDAR_FINAL\data\precipitation\mean_annual\newnew.tif')
+ds = gdal.Translate(r'E:\LIDAR_FINAL\data\precipitation\mean_annual\newneww.tif', ds, projWin = [minx, maxy , maxx, miny])
+#ds = gdal.Translate(r'E:\LIDAR_FINAL\data\precipitation\mean_annual\new.tif', ds, projWin = [minx, maxy , maxx, miny])
+data = rasterio.open(r'E:\LIDAR_FINAL\data\precipitation\mean_annual\newneww.tif')
 show((data, 1), cmap='terrain')
 ds = None
 
