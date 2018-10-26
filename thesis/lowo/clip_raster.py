@@ -47,6 +47,9 @@ def clip_and_export_raster(raster_path, output_tif, extent):
     raster_data = gdal.Open(raster_path)
     raster_data = gdal.Translate(output_tif, raster_data, projWin=extent)
     raster_data = None
+    clipped = rasterio.open(output_tif)
+#    show((clipped, 1), cmap='Blues')
+    return clipped
 #    data = rasterio.open(r'E:\LIDAR_FINAL\data\precipitation\mean_annual\newnew.tif')
 #    show((data, 1), cmap='terrain')
     
