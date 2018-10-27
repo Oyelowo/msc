@@ -107,7 +107,7 @@ def get_clipped_raster(raster_data, output_path, extent, bbox_epsg_code=4326):
 
 
 
-def create_grid(gridHeight, gridWidth,bbox=None, is_utm=True, zone_number=None,shapefile=None, geometry_field='geometry'):
+def create_grid(gridHeight, gridWidth,bbox=None, is_utm=False, zone_number=None,shapefile=None, geometry_field='geometry'):
     '''
     NOTE: you have to specify if your grid is in UTM or WGS84 longitude latitude
     bbox: should be provided
@@ -116,7 +116,7 @@ def create_grid(gridHeight, gridWidth,bbox=None, is_utm=True, zone_number=None,s
         raise ValueError('Provide either the bounding box or the shapefile you want to use for the extent of the grid')
 
     if bbox:
-        if is_utm:
+        if not is_utm:
             bbox=bbox_to_utm(bbox, zone_number)
         minx, maxy , maxx, miny = bbox
     else:

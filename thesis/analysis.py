@@ -84,26 +84,29 @@ show(sum_rain,cmap='Blues', title="Mean Annual Rainfall")
 
 
 
-
+# CREATE A FISHNET/GRID OF 926.1m PIXEL
 #For bounding box in longitude and latitude
 grid = ras.create_grid(926.1, 926.1, bbox_aoi, is_utm=True)
 
+
+
+def bbox_to_utm(bbox, zone_number):
+    lonlow, lathigh, lonhigh, latlow = bbox
+    minx, maxy,*others = utm.from_latlon(lathigh, lonlow, zone_number)
+    maxx, miny, *others = utm.from_latlon(latlow, lonhigh, zone_number)
+    return [minx, maxy , maxx, miny]
+
+#minx, maxy , maxx, miny
+
+aoi_shapefile.total_bounds
 #For bounding box in UTM Zone
+grid = ras.create_grid(926.1, 926.1, bbox_aoi, is_utm=False)
 grid = ras.create_grid(926.1, 926.1, bbox_aoi2, is_utm=False)
 
-grid = ras.create_grid(gridHeight=926.1, gridWidth=926.1,shapefile=aoi_shapefile)
+#grid = ras.create_grid(gridHeight=926.1, gridWidth=926.1,shapefile=aoi_shapefile)
 grid.plot()
 
-
-# CREATE A FISHNET/GRID OF 926.1m PIXEL
 grid_path = r'E:\LIDAR_FINAL\data\grid\grid.shp'
-points=gpd.read_file(grid_path)
-minx,miny,maxx,maxy =  aoi_shapefile.total_bounds
-bbox_aoi2=[minx,miny,maxx,maxy]
-
-#grid_output_fp= r'E:\LIDAR_FINAL\data\grid\grid.shp'
+grid.to_file(grid_path)
 
 
-# TO CREATE THE GRID, YOU CAN EITHER USE A SHAPEFILE OR INPUT THE BBOX MANUALLY
-grid = ras.create_grid(gridHeight=926.1, gridWidth=926.1, bbox=bbox_aoi, is_utm=False, zone_number=37)
-grid.plot()
