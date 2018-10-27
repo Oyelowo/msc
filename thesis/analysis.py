@@ -92,7 +92,7 @@ for month_index, month_file in enumerate(monthly_rain_clipped, 1):
     print(month)
 #    month_raster = rasterio.open(month_file)
     polygonized_raster = ras.polygonize(month_file, 4326, 32737)
-    polygonized_raster=polygonized_raster.rename(columns={'grid_value': month + '_temp'})
+    polygonized_raster=polygonized_raster.rename(columns={'grid_value': month[:3] + '_rain'})
     polygonized_raster.to_file(output_shp)
  
 
@@ -178,29 +178,49 @@ buildings_aggr = gpd.GeoDataFrame()
 #buildings_aggr['geometry']=None
 for key, group  in buildings_grouped:
     group_geometry = group.iloc[0]['geometry']
-    buildings_aggr['grid_ID'] = key
+    buildings_aggr.loc[key, 'grid_ID'] = key
     buildings_aggr.loc[key,'geometry'] = group_geometry
-    buildings_aggr.loc[key,'areaSum'] = group['area'].sum()
-    print('Aggregating', key, group)
+    buildings_aggr.loc[key,'area_sum'] = group['area'].sum()
+    print('Aggregating', key, group['area'].sum())
 
 
-
+buildings_aggr.plot('area_sum', linewidth=0.03, cmap="Blues", scheme="quantiles", k=19, alpha=0.9)
 
 
 
 # =============================================================================
-# 
+# AGGREGATE RAINFALL DATA
 # =============================================================================
+
+
+
+kkr = gpd.read_file(months_shp_filepaths[0])
+
+#test['geometry'] = test.centroid
+kk = buildings_aggr.copy()
+kkr.crs = {'init' :'epsg:32737'}
+kk = gpd.sjoin(kk, kkr, how='left', op='intersects')
+
+
+
+kk.plot()
+kk.plot(column='area_sum', cmap="Blues", scheme="equal_interval", k=9, alpha=0.9)
+
+
+
 
 
 buildings_rain  = buildings_grid.copy()
+del buildings_rain['index_right']
 for i, month_filepath in enumerate(months_shp_filepaths, 1):
     print(i)
     month_data = gpd.read_file(month_filepath)
     month_name = calendar.month_name[month_index] 
     month_data.crs = {'init' :'epsg:32737'}
-    buildings_rain_grid = gpd.sjoin(buildings_rain, month_data, how="left", op='intersects', lsuffix=month, rsuffix='_' + month_name)
-    print(buildings_rain_grid.columns)
+    buildings_rain = gpd.sjoin(buildings_rain, month_data, how="left", op='intersects')
+    del buildings_rain['index_right']
+    print(buildings_rain.columns)
+    
     
 buildings_grid.plot(column='area', cmap="Blues", scheme="equal_interval", k=9, alpha=0.9)
 
