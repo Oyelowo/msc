@@ -13,6 +13,8 @@ from osgeo import gdal
 import os
 from shapely.geometry import Polygon
 import numpy as np
+from rasterio.features import shapes
+from shapely.geometry import shape
 
 
 '''
@@ -144,3 +146,26 @@ def create_grid(gridHeight, gridWidth,bbox=None, is_utm=False, zone_number=None,
 
     grid = gpd.GeoDataFrame({'geometry':polygons})
     return grid
+
+
+
+
+
+def polygonize(raster_filepath, old_epsg_code=4326, new_epsg_code=32737):
+    mask = None
+    with rasterio.drivers():
+        with rasterio.open(raster_filepath) as original_raster:
+            image = original_raster.read(1) # first band
+            results = (
+            {'properties': {'grid_value': value}, 'geometry': geometry}
+            for index, (geometry, value) in enumerate(shapes(image, mask=mask, transform=original_raster.affine)))
+
+    geoms = list(results)
+#    print(shape(geoms[0]['geometry']))
+
+    gpd_polygonized_raster  = gpd.GeoDataFrame.from_features(geoms)
+    gpd_polygonized_raster.crs = {'init': from_epsg(old_epsg_code).get('init')}
+    gpd_polygonized_raster = gpd_polygonized_raster.to_crs(epsg=new_epsg_code)
+    return gpd_polygonized_raster
+
+    #gpd_polygonized_raster.to_file('lowo.shp')

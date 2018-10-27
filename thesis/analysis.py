@@ -82,9 +82,25 @@ cc = sum_rain/12
 
 show(sum_rain,cmap='Blues', title="Mean Annual Rainfall")
 
+# =============================================================================
+# CONVERT THE RASTER FILES INTO VECTOR
+# =============================================================================
+monthly_rain_clipped=glob.glob(r'E:\LIDAR_FINAL\data\precipitation\mean_monthly\clipped\*.tif')
+for month_index, month_file in enumerate(monthly_rain_clipped, 1):
+    month = calendar.month_name[month_index] 
+    output_shp = os.path.join('E:/LIDAR_FINAL/data/precipitation/mean_monthly/clipped/to_vector', month + '.shp')
+    print(month)
+#    month_raster = rasterio.open(month_file)
+    polygonized_raster = ras.polygonize(month_file, 4326, 32737)
+    polygonized_raster.to_file(output_shp)
+ 
 
 
-# CREATE A FISHNET/GRID OF 926.1m PIXEL
+
+# =============================================================================
+# 
+# # CREATE A FISHNET/GRID OF 926.1m PIXEL
+# =============================================================================
 #generating grid by directly providing the bounding box
 grid = ras.create_grid(926.1, 926.1, bbox_aoi, is_utm=False)
 
@@ -127,9 +143,14 @@ del buildings_centroid['centroid']
 
 centroid_fp = r'E:\LIDAR_FINAL\data\2015\buildings_centroid\buildings_centroid.shp'
 buildings_centroid.to_file(centroid_fp)
+#buildings_centroid.plot()
 
 
-# buildings_centroid.plot()
+
+# =============================================================================
+# OVERLAY ANALYSIS
+# =============================================================================
+
 
 
 
