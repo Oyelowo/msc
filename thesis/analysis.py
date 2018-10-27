@@ -99,6 +99,33 @@ grid.to_file(grid_path)
 
 
 
+# =============================================================================
+# WORKING WITH THE BUILDING SHAPEFILE
+# =============================================================================
+building_fp = r'E:\LIDAR_FINAL\data\2015\buildings\buildings_2015_simplified.shp'
+buildings_shp = gpd.read_file(building_fp)
+
+# calculate area and centroid of the buildings
+buildings_shp['area'] = buildings_shp['geometry'].area
+
+# filter roof areas lower than 10sqm or higher than 2000sqm
+
+buildings_shp = buildings_shp.loc[(buildings_shp['area']>10) & (buildings_shp['area']<2000)]
+
+# get the centroid of every building
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
