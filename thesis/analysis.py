@@ -120,7 +120,9 @@ grid.plot()
 
 grid_path = r'E:\LIDAR_FINAL\data\grid\grid.shp'
 grid.to_file(grid_path)
-
+# =============================================================================
+# 
+# =============================================================================
 
 
 # =============================================================================
@@ -153,12 +155,14 @@ centroid_fp = r'E:\LIDAR_FINAL\data\2015\buildings_centroid\buildings_centroid.s
 buildings_centroid.to_file(centroid_fp)
 #buildings_centroid.plot()
 
+# =============================================================================
+# 
+# =============================================================================
 
 
 # =============================================================================
-# OVERLAY ANALYSIS
+# SPATIAL JOIN
 # =============================================================================
-
 
 overlay = buildings_centroid.copy()
 bb = gpd.read_file(r'E:\LIDAR_FINAL\data\precipitation\mean_monthly\clipped\to_vector\january.shp')
@@ -206,13 +210,12 @@ kk2 = gpd.read_file(months_shp_filepaths[1])
 #test['geometry'] = test.centroid
 def aggregate_grid_rain(grid_data, rain_data, crs_code, month_field_name):
     grid_data.crs = rain_data.crs= {'init' :'epsg:' + str(crs_code)}
-    joined = gpd.sjoin(grid_data, rain_data, how='left', op='intersects')
-    grouped_data = joined.groupby('grid_ID')
-    buildings_rain_aggr = gpd.GeoDataFrame()
+    grid_data = gpd.sjoin(grid_data, rain_data, how='left', op='intersects')
+    grouped_data = grid_data.groupby('grid_ID')
     #buildings_aggr['geometry']=None
     for key, group  in grouped_data:
         group_geometry = group.iloc[0]['geometry']
-#        buildings_rain_aggr.loc[key, 'grid_ID'] = key
+        buildings_rain_aggr.loc[key, 'grid_ID'] = key
         buildings_rain_aggr.loc[key,'geometry'] = group_geometry
         buildings_rain_aggr.loc[key, month_field_name] = group[month_field_name].mean()
         print('Aggregating', key, group[month_field_name].mean())
@@ -234,14 +237,16 @@ months_shp_filepaths = glob.glob(r'E:\LIDAR_FINAL\data\precipitation\mean_monthl
 
 buildings_rain  = buildings_grid.copy()
 del buildings_rain['index_right']
-for month_index, month_filepath in enumerate(months_shp_filepaths, 1):
+for i, month_filepath in enumerate(months_shp_filepaths, 1):
     month_data = gpd.read_file(month_filepath)
-    month_name = calendar.month_name[month_index]
-    month_field_name = month_name[:3] + '_rain'
+    
+#    Get field name from file name and exclude the file format
+    month_field_name = os.path.basename(month_filepath)[:-4]
+    print(month_field_name)
     month_data.crs = {'init' :'epsg:32737'}
     buildings_rain = aggregate_grid_rain(buildings_rain, month_data, 32737,month_field_name)
     
-    
+
 month_data.columns
     
     buildings_rain = gpd.sjoin(buildings_rain, month_data, how="left", op='intersects')
@@ -249,7 +254,7 @@ month_data.columns
     print(buildings_rain.columns)
     
     
-buildings_grid.plot(column='area', cmap="Blues", scheme="equal_interval", k=9, alpha=0.9)
+buildings_rain.plot(column='Sep_rain', cmap="Blues", scheme="equal_interval", k=9, alpha=0.9)
 
 month.plot()
 
