@@ -21,7 +21,6 @@ import rasterio
 from rasterio.plot import show
 from rasterio.plot import show_hist
 from rasterio.mask import mask
-from make_grid import create_grid
 import geopandas as gpd
 from shapely.geometry import box
 import seaborn as sns
@@ -95,49 +94,7 @@ grid = ras.create_grid(926.1, 926.1, bbox_aoi2, grid_filepath=grid_path)
 grid.plot()
 
 
-
+grid_output_fp= r'E:\LIDAR_FINAL\data\grid\grid.shp'
 # TO CREATE THE GRID, YOU CAN EITHER USE A SHAPEFILE OR INPUT THE BBOX MANUALLY
-ras.bbox_to_utm(bbox_aoi, 37)
-
-
-lonlow, lathigh, lonhigh, latlow = bbox_aoi
-
-minx, maxy,*others = utm.from_latlon(lathigh, lonlow, 37)
-maxx, miny, *others = utm.from_latlon(latlow, lonhigh, 37)
-utm.from_latlon()
-shapefile=r'E:\LIDAR_FINAL\2015\buildings\buildings_2015.shp'
-
-shp = r'C:\Users\oyeda\Desktop\THESIS\BuildingBoundary\building_mask_2m_edit_Sentinel.shp'
-
-kk = 9
-
-if kk>3 : l =2
-
-
-shp= r'E:\LIDAR_FINAL\data\2015\fishnet\fishnet_925_1sqm.shp'
-points=gpd.read_file(shp)
-xmin,ymin,xmax,ymax =  points.total_bounds
-gridWidth = 926.1
-gridHeight = 926.1
-rows = int(np.ceil((ymax-ymin) /  gridHeight))
-cols = int(np.ceil((xmax-xmin) / gridWidth))
-XleftOrigin = xmin
-XrightOrigin = xmin + gridWidth
-YtopOrigin = ymax
-YbottomOrigin = ymax- gridHeight
-polygons = []
-for i in range(cols):
-    Ytop = YtopOrigin
-    Ybottom =YbottomOrigin
-    for j in range(rows):
-        polygons.append(Polygon([(XleftOrigin, Ytop), (XrightOrigin, Ytop), (XrightOrigin, Ybottom), (XleftOrigin, Ybottom)])) 
-        Ytop = Ytop - gridHeight
-        Ybottom = Ybottom - gridHeight
-    XleftOrigin = XleftOrigin + gridWidth
-    XrightOrigin = XrightOrigin + gridWidth
-
-grid = gpd.GeoDataFrame({'geometry':polygons})
-grid.to_file(r"E:\LIDAR_FINAL\data\grid\grid.shp")
-
+grid = ras.create_grid(926.1, 926.1, grid_output_fp, bbox_aoi, is_utm=False, zone_number=37)
 grid.plot()
-plt.show()

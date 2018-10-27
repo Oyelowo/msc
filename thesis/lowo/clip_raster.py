@@ -112,16 +112,14 @@ def create_grid(gridHeight, gridWidth, grid_filepath, bbox=None, is_utm=False, z
     bbox: should be provided
     '''
     if bbox:
-        if is_utm:
-            minx, maxy , maxx, miny = bbox
-        else:
-            minx, maxy , maxx, miny = bbox_to_utm(bbox, zone_number)
+        if not is_utm:
+            bbox=bbox_to_utm(bbox, zone_number)
+        minx, maxy , maxx, miny = bbox
             
     elif shapefile:
         minx,miny,maxx,maxy =  shapefile[geometry_field].total_bounds
     else:
         raise ValueError('Provide either the bounding box or the shapefile you want to use for the extent of the grid')
-    print(minx,miny,maxx,maxy)
     rows = int(np.ceil((maxy-miny) /  gridHeight))
     cols = int(np.ceil((maxx-minx) / gridWidth))
     XleftOrigin = minx
@@ -142,6 +140,5 @@ def create_grid(gridHeight, gridWidth, grid_filepath, bbox=None, is_utm=False, z
 
     grid = gpd.GeoDataFrame({'geometry':polygons})
     if export and grid_filepath:
-        print(grid)
         grid.to_file(grid_filepath) 
     return grid
