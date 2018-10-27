@@ -113,11 +113,19 @@ buildings_shp['area'] = buildings_shp['geometry'].area
 buildings_shp = buildings_shp.loc[(buildings_shp['area']>10) & (buildings_shp['area']<2000)]
 
 # get the centroid of every building
+buildings_shp['centroid']= buildings_shp['geometry'].centroid
 
 
+buildings_centroid = buildings_shp.copy()
+buildings_centroid['geometry'] = buildings_shp['centroid']
+del buildings_centroid['centroid']
 
 
+centroid_fp = r'E:\LIDAR_FINAL\data\2015\buildings_centroid\buildings_centroid.shp'
+buildings_centroid.to_file(centroid_fp)
 
+
+# buildings_centroid.plot()
 
 
 
