@@ -102,8 +102,8 @@ grid.to_file(grid_path)
 # =============================================================================
 # WORKING WITH THE BUILDING SHAPEFILE
 # =============================================================================
-building_fp = r'E:\LIDAR_FINAL\data\2015\buildings\buildings_2015_simplified.shp'
-buildings_shp = gpd.read_file(building_fp)
+buildings_fp = r'E:\LIDAR_FINAL\data\2015\buildings\buildings_2015_simplified.shp'
+buildings_shp = gpd.read_file(buildings_fp)
 
 # calculate area and centroid of the buildings
 buildings_shp['area'] = buildings_shp['geometry'].area
@@ -118,6 +118,10 @@ buildings_shp['centroid']= buildings_shp['geometry'].centroid
 
 buildings_centroid = buildings_shp.copy()
 buildings_centroid['geometry'] = buildings_shp['centroid']
+buildings_centroid = buildings_centroid.reset_index(drop=True)
+
+#set ID for the filtered buildings. Start from one
+buildings_centroid['ID'] =  buildings_centroid.index + 1
 del buildings_centroid['centroid']
 
 
