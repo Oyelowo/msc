@@ -105,7 +105,7 @@ for month_index, month_file in enumerate(monthly_rain_clipped, 1):
 grid = ras.create_grid(926.1, 926.1, bbox_aoi, is_utm=False)
 
 #generating grid based on shapefile extent
-grid2 = ras.create_grid(926.1, 926.1, shapefile=aoi_shapefile)
+#grid2 = ras.create_grid(926.1, 926.1, shapefile=aoi_shapefile)
 
 #grid = ras.create_grid(gridHeight=926.1, gridWidth=926.1,shapefile=aoi_shapefile)
 grid.plot()
@@ -150,6 +150,38 @@ buildings_centroid.to_file(centroid_fp)
 # =============================================================================
 # OVERLAY ANALYSIS
 # =============================================================================
+
+
+aa = buildings_centroid.copy()
+bb = gpd.read_file(r'E:\LIDAR_FINAL\data\precipitation\mean_monthly\clipped\to_vector\january.shp')
+
+
+
+grid.crs = {'init' :'epsg:32737'}
+
+
+{'init': from_epsg(old_epsg_code).get('init')}
+
+cc = aa.sjoin( bb, how="inner", op='intersects')
+bb.plot()
+aa.crs
+cc = gpd.sjoin(grid, aa, how="inner", op='intersects')
+cc.plot()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

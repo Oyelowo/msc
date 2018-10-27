@@ -164,7 +164,7 @@ def polygonize(raster_filepath, old_epsg_code=4326, new_epsg_code=32737):
 #    print(shape(geoms[0]['geometry']))
 
     gpd_polygonized_raster  = gpd.GeoDataFrame.from_features(geoms)
-    gpd_polygonized_raster.crs = {'init': from_epsg(old_epsg_code).get('init')}
+    gpd_polygonized_raster.crs = {'init' :'epsg:'+ str(old_epsg_code)}
     gpd_polygonized_raster = gpd_polygonized_raster.to_crs(epsg=new_epsg_code)
     return gpd_polygonized_raster
 
