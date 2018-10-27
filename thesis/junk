@@ -124,7 +124,19 @@ out_img, out_transform = mask(raster=data, shapes=coords, crop=True)
 
 
 
-
+#test['geometry'] = test.centroid
+def aggregate_grid_rain(grid_data, rain_data, crs_code, ):
+    grid_data.crs = kkr.crs= {'init' :'epsg:' + str(crs_code)}
+    kk = gpd.sjoin(kk, kkr, how='left', op='intersects')
+    kk_grouped = kk.groupby('grid_ID')
+    buildings_rain_aggr = gpd.GeoDataFrame()
+    #buildings_aggr['geometry']=None
+    for key, group  in kk_grouped:
+        group_geometry = group.iloc[0]['geometry']
+        buildings_rain_aggr.loc[key, 'grid_ID'] = key
+        buildings_rain_aggr.loc[key,'geometry'] = group_geometry
+        buildings_rain_aggr.loc[key,'Apr_rain'] = group['Apr_rain'].mean()
+        print('Aggregating', key, group['Apr_rain'].mean())
 
 
 
