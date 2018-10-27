@@ -5,19 +5,31 @@ from rasterio.mask import mask
 from shapely.geometry import box
 import geopandas as gpd
 from fiona.crs import from_epsg
-import pycrs
 import matplotlib.pyplot as plt
 from osgeo import gdal
 import utm
 from gdalconst import GA_ReadOnly
 from osgeo import gdal
 import os
+from shapely.geometry import Polygon
+import numpy as np
+
 
 '''
 Author: Oyelowo Oyedayo
 Purpose: For my thesis 
 Contact: www.github.com(Oyelowo)
 '''
+
+
+def bbox_to_utm(bbox, zone_number):
+    lonlow, lathigh, lonhigh, latlow = bbox
+    minx, maxy,*others = utm.from_latlon(lathigh, lonlow, zone_number)
+    maxx, miny, *others = utm.from_latlon(latlow, lonhigh, zone_number)
+    return [minx, maxy , maxx, miny]
+    
+    
+    
 def get_raster_extent(raster_file_path):
     data = gdal.Open(raster_file_path, GA_ReadOnly)
     geoTransform = data.GetGeoTransform()
@@ -92,3 +104,44 @@ def get_clipped_raster(raster_data, output_path, extent, bbox_epsg_code=4326):
     clipped = rasterio.open(output_path)
     show((clipped, 1), cmap='terrain')
     return clipped
+
+
+
+def create_grid(gridHeight, gridWidth, grid_filepath, bbox=None, is_utm=False, zone_number=None,shapefile=None, geometry_field='geometry', export=True):
+    '''
+    bbox: should be provided
+    '''
+    if bbox:
+        if is_utm:
+            minx, maxy , maxx, miny = bbox
+        else:
+            minx, maxy , maxx, miny = bbox_to_utm(bbox, zone_number)
+            
+    elif shapefile:
+        minx,miny,maxx,maxy =  shapefile[geometry_field].total_bounds
+    else:
+        raise ValueError('Provide either the bounding box or the shapefile you want to use for the extent of the grid')
+    print(minx,miny,maxx,maxy)
+    rows = int(np.ceil((maxy-miny) /  gridHeight))
+    cols = int(np.ceil((maxx-minx) / gridWidth))
+    XleftOrigin = minx
+    XrightOrigin = minx + gridWidth
+    YtopOrigin = maxy
+    YbottomOrigin = maxy- gridHeight
+
+    polygons = []
+    for i in range(cols):
+        Ytop = YtopOrigin
+        Ybottom =YbottomOrigin
+        for j in range(rows):
+            polygons.append(Polygon([(XleftOrigin, Ytop), (XrightOrigin, Ytop), (XrightOrigin, Ybottom), (XleftOrigin, Ybottom)])) 
+            Ytop = Ytop - gridHeight
+            Ybottom = Ybottom - gridHeight
+        XleftOrigin = XleftOrigin + gridWidth
+        XrightOrigin = XrightOrigin + gridWidth
+
+    grid = gpd.GeoDataFrame({'geometry':polygons})
+    if export and grid_filepath:
+        print(grid)
+        grid.to_file(grid_filepath) 
+    return grid

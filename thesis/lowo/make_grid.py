@@ -3,7 +3,7 @@ from shapely.geometry import Polygon
 import numpy as np
 
 
-def create_grid(gridHeight, gridWidth, bbox, shapefile, grid_filepath, geometry_field='geometry', export=True):
+def create_grid(gridHeight, gridWidth, bbox, grid_filepath, geometry_field='geometry', export=True):
     '''
     bbox:
     '''
