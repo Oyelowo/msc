@@ -79,22 +79,31 @@ for month_index, month_file in enumerate(monthly_rain_raster, 1):
    
 
 cc = sum_rain/12
-show(sum_rain.mean())
 
 show(sum_rain,cmap='Blues', title="Mean Annual Rainfall")
 
 
 
-# CREATE A FISHNET/GRID OF 926.1m PIXEL
-grid_path = r'E:\LIDAR_FINAL\data\grid\grid.shp'
-points=gpd.read_file(grid_path)
-xmin,ymin,xmax,ymax =  aoi_shapefile.total_bounds
-bbox_aoi2=[xmin,ymin,xmax,ymax]
-grid = ras.create_grid(926.1, 926.1, bbox_aoi2, grid_filepath=grid_path)
+
+#For bounding box in longitude and latitude
+grid = ras.create_grid(926.1, 926.1, bbox_aoi, is_utm=True)
+
+#For bounding box in UTM Zone
+grid = ras.create_grid(926.1, 926.1, bbox_aoi2, is_utm=False)
+
+grid = ras.create_grid(gridHeight=926.1, gridWidth=926.1,shapefile=aoi_shapefile)
 grid.plot()
 
 
-grid_output_fp= r'E:\LIDAR_FINAL\data\grid\grid.shp'
+# CREATE A FISHNET/GRID OF 926.1m PIXEL
+grid_path = r'E:\LIDAR_FINAL\data\grid\grid.shp'
+points=gpd.read_file(grid_path)
+minx,miny,maxx,maxy =  aoi_shapefile.total_bounds
+bbox_aoi2=[minx,miny,maxx,maxy]
+
+#grid_output_fp= r'E:\LIDAR_FINAL\data\grid\grid.shp'
+
+
 # TO CREATE THE GRID, YOU CAN EITHER USE A SHAPEFILE OR INPUT THE BBOX MANUALLY
-grid = ras.create_grid(926.1, 926.1, grid_output_fp, bbox_aoi, is_utm=False, zone_number=37)
+grid = ras.create_grid(gridHeight=926.1, gridWidth=926.1, bbox=bbox_aoi, is_utm=False, zone_number=37)
 grid.plot()

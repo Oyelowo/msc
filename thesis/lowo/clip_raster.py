@@ -107,19 +107,23 @@ def get_clipped_raster(raster_data, output_path, extent, bbox_epsg_code=4326):
 
 
 
-def create_grid(gridHeight, gridWidth, grid_filepath, bbox=None, is_utm=False, zone_number=None,shapefile=None, geometry_field='geometry', export=True):
+def create_grid(gridHeight, gridWidth,bbox=None, is_utm=True, zone_number=None,shapefile=None, geometry_field='geometry'):
     '''
+    NOTE: you have to specify if your grid is in UTM or WGS84 longitude latitude
     bbox: should be provided
     '''
+    if bbox is None and shapefile is None:
+        raise ValueError('Provide either the bounding box or the shapefile you want to use for the extent of the grid')
+
     if bbox:
-        if not is_utm:
+        if is_utm:
             bbox=bbox_to_utm(bbox, zone_number)
         minx, maxy , maxx, miny = bbox
-            
-    elif shapefile:
-        minx,miny,maxx,maxy =  shapefile[geometry_field].total_bounds
     else:
-        raise ValueError('Provide either the bounding box or the shapefile you want to use for the extent of the grid')
+        minx,miny,maxx,maxy =  shapefile[geometry_field].total_bounds
+        print(shapefile[geometry_field].total_bounds)
+
+          
     rows = int(np.ceil((maxy-miny) /  gridHeight))
     cols = int(np.ceil((maxx-minx) / gridWidth))
     XleftOrigin = minx
@@ -139,6 +143,4 @@ def create_grid(gridHeight, gridWidth, grid_filepath, bbox=None, is_utm=False, z
         XrightOrigin = XrightOrigin + gridWidth
 
     grid = gpd.GeoDataFrame({'geometry':polygons})
-    if export and grid_filepath:
-        grid.to_file(grid_filepath) 
     return grid
