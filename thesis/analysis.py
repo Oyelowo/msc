@@ -27,7 +27,8 @@ import seaborn as sns
 import glob
 import os
 import calendar
-import re 
+import re
+import pysal as ps
 
 from rasterToPolygon import polygonize
 import clip_raster as ras
@@ -285,9 +286,11 @@ for column in buildings_rain_aggr.columns:
     if column in ['geometry', 'grid_ID', 'area_sum']:
         continue
     roof_coefficient = 0.7
-    roof_area = buildings_rain_aggr['area_sum'] 
+    roof_area = buildings_rain_aggr['area_sum']
     rainfall = buildings_rain_aggr[column]
-    roof_harvesting_potential = roof_area * rainfall * roof_coefficient
+    
+#    1 m2) * 1 mm = 1litre. roof area is m2 and rain is in mm.
+    roof_harvesting_potential = (roof_area * rainfall * roof_coefficient)
     buildings_rain_aggr[column + 'POT'] =round(roof_harvesting_potential, 2)
     print(buildings_rain_aggr.columns)
 
@@ -297,13 +300,10 @@ for column in buildings_rain_aggr.columns:
 # =============================================================================
 for column in buildings_rain_aggr.columns:
     if column.endswith('rainPOT'):
-        buildings_rain_aggr.plot(column=column, cmap="Blues", scheme="quantiles", k=10, alpha=0.9)
+        buildings_rain_aggr.plot(column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9, edgecolor='1')
         print(column)
+#edgecolor='0.8
 buildings_rain_aggr.describe()
-
-
-
-
 
 
 # =============================================================================
@@ -316,8 +316,4 @@ buildings_rain_aggr.describe()
 #
 #
 # =============================================================================
-
-
-
-
 
