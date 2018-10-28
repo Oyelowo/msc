@@ -228,9 +228,6 @@ def aggregate_grid_rain(new_dataframe, old_dataframe, month_field_name):
     return new_dataframe
 
 
-kktest.plot(column='Apr_rain', cmap="Blues", scheme="equal_interval", k=9, alpha=0.9)
-
-
 # =============================================================================
 # 
 # =============================================================================
@@ -245,8 +242,7 @@ for i, month_filepath in enumerate(months_shp_filepaths, 1):
     print(i)
     month_rain_data = gpd.read_file(month_filepath)
     
-    buildings_rain.crs = aoi_crs_epsg
-    month_rain_data.crs= aoi_crs_epsg
+    buildings_rain.crs = month_rain_data.crs=  aoi_crs_epsg
     
     joined_data = gpd.sjoin(buildings_rain, month_rain_data, how='left', op='intersects')
     
@@ -257,10 +253,41 @@ for i, month_filepath in enumerate(months_shp_filepaths, 1):
     buildings_rain_aggr = aggregate_grid_rain(buildings_rain_aggr, joined_data, month_field_name)
     
 
+# =============================================================================
+# PLOT THE ROOF AREA AND RAINFALL DATA
+# =============================================================================
+
+for column in buildings_rain_aggr.columns[2:]:
+    buildings_rain_aggr.plot(column=column, cmap="Blues", scheme="equal_interval", k=9, alpha=0.9)
+    print(column)
     
+
+
+# =============================================================================
+#     CALCULATE MONTHLY RAINWATER HARVESTING POTENTIALS
+# =============================================================================
+for column in buildings_rain_aggr.columns:
+    if column in ['geometry', 'grid_ID', 'area_sum']:
+        continue
+    roof_coefficient = 0.7
+    roof_area = buildings_rain_aggr['area_sum'] 
+    rainfall = buildings_rain_aggr[column]
+    roof_harvesting_potential = roof_area * rainfall * roof_coefficient
+    buildings_rain_aggr[column + 'POT'] =roof_harvesting_potential 
+    print(buildings_rain_aggr.columns)
+
+
+# =============================================================================
+# 
+# =============================================================================
+for column in buildings_rain_aggr.columns:
+    if column.endswith('rainPOT'):
+        buildings_rain_aggr.plot(column=column, cmap="Blues", scheme="quantiles", k=10, alpha=0.9)
+        print(column)
+
 month_rain_data = gpd.read_file(months_shp_filepaths[0])    
 month_rain_data.plot(column='Apr_rain', cmap="Blues", scheme="equal_interval", k=9, alpha=0.9)
-
+ ['geometry', 'grid_ID', 'area_sum'].
 month.plot()
 
 bg.crs = aoi_crs_epsg
@@ -269,6 +296,7 @@ cc.plot()
 
 cc.plot(column='grid_value', linewidth=0.03, cmap="Blues", scheme="equal_interval", k=9, alpha=0.9)
 buildings_grid.plot(column='area', linewidth=0.03, cmap="Blues", scheme="quantiles", k=9, alpha=0.9)
+
 
 
 
