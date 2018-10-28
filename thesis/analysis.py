@@ -43,7 +43,8 @@ rain_raster_data_epsg_code = 4326
 #readthe shapefile for the area of interest
 aoi_shapefile = gpd.read_file(r'E:\LIDAR_FINAL\data\AOI\fishnet_926_1sqm.shp')
 
-bbox_aoi2 = ras.get_vector_extent(aoi_shapefile)
+#bbox_aoi2 = ras.get_vector_extent(aoi_shapefile)'
+#bbox_aoi = ras.get_vector_extent(aoi_shapefile)
 #bbox_aoi = ras.get_raster_extent(r'E:\LIDAR_FINAL\data\AOI\clipped_mean_annual_rain.tif')
 bbox_aoi = [38.19986023835, -3.2418059025499986, 38.52486023705, -3.516805901449999]
 
@@ -136,13 +137,16 @@ grid = grid.reset_index(drop=True)
 #grid2 = ras.create_grid(926.1, 926.1, shapefile=aoi_shapefile)
 
 #grid = ras.create_grid(gridHeight=926.1, gridWidth=926.1,shapefile=aoi_shapefile)
-grid.plot()
+#grid.plot()
 
 grid_path = r'E:\LIDAR_FINAL\data\grid\grid.shp'
 grid.to_file(grid_path)
 # =============================================================================
 # 
 # =============================================================================
+
+
+
 
 
 # =============================================================================
@@ -184,7 +188,7 @@ buildings_centroid.to_file(centroid_fp)
 # SPATIAL JOIN
 # =============================================================================
 grid.crs = buildings_centroid.crs = aoi_crs_epsg
-buildings_grid = gpd.sjoin(grid,buildings_centroid, how="left", op='intersects')
+buildings_grid = gpd.sjoin(grid,buildings_centroid, how="inner", op='intersects')
 del buildings_grid['index_right']
 months_shp_filepaths = glob.glob(r'E:\LIDAR_FINAL\data\precipitation\mean_monthly\clipped\to_vector\*.shp')
 
@@ -221,7 +225,7 @@ buildings_aggr.plot('area_sum', linewidth=0.03, cmap="Blues", scheme="quantiles"
 # AGGREGATE RAINFALL DATA
 # =============================================================================
 
-
+#3CREATE FUNCTION TO HELP WITH AGGREGATING THE DATA
 #test['geometry'] = test.centroid
 def aggregate_grid_rain(new_dataframe, old_dataframe, month_field_name):
     grouped_data = old_dataframe.groupby('grid_ID')
@@ -239,7 +243,7 @@ def aggregate_grid_rain(new_dataframe, old_dataframe, month_field_name):
 
 
 # =============================================================================
-# 
+# SPATIAL JOIN OF RAINFALL AND ROOF AREAS TO GRID DATA
 # =============================================================================
 
 months_shp_filepaths = glob.glob(r'E:\LIDAR_FINAL\data\precipitation\mean_monthly\clipped\to_vector\*.shp')
@@ -276,7 +280,7 @@ for column in buildings_rain_aggr.columns[2:]:
 # =============================================================================
 #     CALCULATE MONTHLY RAINWATER HARVESTING POTENTIALS
 # =============================================================================
-buildings_rain_aggr = buildings_rain_aggr.fillna(0)
+#buildings_rain_aggr = buildings_rain_aggr.fillna(0)
 for column in buildings_rain_aggr.columns:
     if column in ['geometry', 'grid_ID', 'area_sum']:
         continue
@@ -284,7 +288,7 @@ for column in buildings_rain_aggr.columns:
     roof_area = buildings_rain_aggr['area_sum'] 
     rainfall = buildings_rain_aggr[column]
     roof_harvesting_potential = roof_area * rainfall * roof_coefficient
-    buildings_rain_aggr[column + 'POT'] =roof_harvesting_potential 
+    buildings_rain_aggr[column + 'POT'] =round(roof_harvesting_potential, 2)
     print(buildings_rain_aggr.columns)
 
 
@@ -293,7 +297,7 @@ for column in buildings_rain_aggr.columns:
 # =============================================================================
 for column in buildings_rain_aggr.columns:
     if column.endswith('rainPOT'):
-        buildings_rain_aggr.plot(column=column, cmap="Blues", scheme="equal_interval", k=9, alpha=0.9)
+        buildings_rain_aggr.plot(column=column, cmap="Blues", scheme="quantiles", k=10, alpha=0.9)
         print(column)
 buildings_rain_aggr.describe()
 
@@ -302,27 +306,16 @@ buildings_rain_aggr.describe()
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# =============================================================================
+# TODO:
+# HISTOGRAM FOR MONTHLY AND ANNUAL RAINFALL
+# HISTOGRAM FOR ROOF SIZE DISTRIBUTION
+# HISTOGRAM FOR ROOF POTENTIAL FOR ALL MONTHS
+# HISTOGRAM FOR ANNUAL ROOF POTENTIAL
+#
+#
+#
+# =============================================================================
 
 
 
