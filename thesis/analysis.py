@@ -27,10 +27,15 @@ import seaborn as sns
 import glob
 import os
 import calendar
-import re
+import re 
 
 from rasterToPolygon import polygonize
 import clip_raster as ras
+
+
+aoi_crs_epsg = {'init' :'epsg:32737'}
+aoi_crs_epsg_code = 32737
+rain_raster_data_epsg_code = 4326
 
 #readthe shapefile for the area of interest
 aoi_shapefile = gpd.read_file(r'E:\LIDAR_FINAL\data\AOI\fishnet_926_1sqm.shp')
@@ -97,7 +102,7 @@ for i, month_file in enumerate(monthly_rain_clipped, 1):
     output_shp = os.path.join('E:/LIDAR_FINAL/data/precipitation/mean_monthly/clipped/to_vector', month_field_name + '.shp')
     print(month_field_name)
 #    month_raster = rasterio.open(month_file)
-    polygonized_raster = ras.polygonize(month_file, 4326, 32737)
+    polygonized_raster = ras.polygonize(month_file, rain_raster_data_epsg_code, aoi_crs_epsg_code)
     polygonized_raster=polygonized_raster.rename(columns={'grid_value': month_field_name})
     polygonized_raster.to_file(output_shp)
     
@@ -168,8 +173,9 @@ buildings_centroid.to_file(centroid_fp)
 # =============================================================================
 # SPATIAL JOIN
 # =============================================================================
-
+grid.crs = buildings_centroid.crs = aoi_crs_epsg
 buildings_grid = gpd.sjoin(grid,buildings_centroid, how="left", op='intersects')
+del buildings_grid['index_right']
 months_shp_filepaths = glob.glob(r'E:\LIDAR_FINAL\data\precipitation\mean_monthly\clipped\to_vector\*.shp')
 
 #The op options determines the type of join operation to apply. op can be set to “intersects”, “within” or 
@@ -188,7 +194,8 @@ buildings_grid.columns
 buildings_grouped = buildings_grid.groupby('grid_ID')
 buildings_aggr = gpd.GeoDataFrame()
 #buildings_aggr['geometry']=None
-for key, group  in buildings_grouped:
+for key, (i, group ) in enumerate(buildings_grouped,1):
+    print(i)
     group_geometry = group.iloc[0]['geometry']
     buildings_aggr.loc[key, 'grid_ID'] = key
     buildings_aggr.loc[key,'geometry'] = group_geometry
@@ -205,26 +212,31 @@ buildings_aggr.plot('area_sum', linewidth=0.03, cmap="Blues", scheme="quantiles"
 # =============================================================================
 
 
-
-kkr = gpd.read_file(months_shp_filepaths[0])
-kk2 = gpd.read_file(months_shp_filepaths[1])
-
 #test['geometry'] = test.centroid
 def aggregate_grid_rain(new_dataframe, old_dataframe, month_field_name):
     grouped_data = old_dataframe.groupby('grid_ID')
     #buildings_aggr['geometry']=None
-    for key, group  in grouped_data:
+    for key, (i, group ) in enumerate(grouped_data,1):
         group_geometry = group.iloc[0]['geometry']
-        new_dataframe.loc[key, 'grid_ID'] = key
         new_dataframe.loc[key,'geometry'] = group_geometry
+        new_dataframe.loc[key, 'grid_ID'] = key
         new_dataframe.loc[key, month_field_name] = group[month_field_name].mean()
         print('Aggregating', key, month_field_name, group[month_field_name].mean())
+#        
+#        if i == 1:
+#            buildings_aggr.loc[key,'area_sum'] = group['area'].sum()
     return new_dataframe
 
 print(grid.crs, )
-kktest = aggregate_grid_rain(buildings_aggr, kkr, 32737, 'Apr_rain')
+kktest = aggregate_grid_rain(buildings_aggr, kkr, aoi_crs_epsg_code, 'Apr_rain')
 
-
+kk= joined_data.groupby('grid_ID')
+for key, (i, group ) in enumerate(kk,1):
+    print(key,i)
+    print(group['Apr_rain'].mean())
+    
+for key, group in kk:
+    print(key, i)
 
 kktest.plot(column='Apr_rain', cmap="Blues", scheme="equal_interval", k=9, alpha=0.9)
 
@@ -237,14 +249,14 @@ months_shp_filepaths = glob.glob(r'E:\LIDAR_FINAL\data\precipitation\mean_monthl
 
 
 buildings_rain_aggr = gpd.GeoDataFrame()
-buildings_rain  = buildings_grid.copy()
-del buildings_rain['index_right']
+buildings_rain  = buildings_aggr.copy()
+#del buildings_rain['area']
 for i, month_filepath in enumerate(months_shp_filepaths, 1):  
     print(i)
     month_rain_data = gpd.read_file(month_filepath)
     
-    buildings_rain.crs = {'init' :'epsg:32737'}
-    month_rain_data.crs= {'init' :'epsg:32737'}
+    buildings_rain.crs = aoi_crs_epsg
+    month_rain_data.crs= aoi_crs_epsg
     
     joined_data = gpd.sjoin(buildings_rain, month_rain_data, how='left', op='intersects')
     
@@ -267,7 +279,7 @@ month_rain_data.plot(column='Apr_rain', cmap="Blues", scheme="equal_interval", k
 month.plot()
 
 bg = gpd.read_file(monthly_rain_files[0])
-bg.crs = {'init' :'epsg:32737'}
+bg.crs = aoi_crs_epsg
 
 cc.plot()
 
