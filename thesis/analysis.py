@@ -33,6 +33,9 @@ from rasterToPolygon import polygonize
 import clip_raster as ras
 
 
+# =============================================================================
+# 
+# =============================================================================
 aoi_crs_epsg = {'init' :'epsg:32737'}
 aoi_crs_epsg_code = 32737
 rain_raster_data_epsg_code = 4326
@@ -41,20 +44,22 @@ rain_raster_data_epsg_code = 4326
 aoi_shapefile = gpd.read_file(r'E:\LIDAR_FINAL\data\AOI\fishnet_926_1sqm.shp')
 
 bbox_aoi2 = ras.get_vector_extent(aoi_shapefile)
-bbox_aoi = ras.get_raster_extent(r'E:\LIDAR_FINAL\data\AOI\clipped_mean_annual_rain.tif')
-#[38.19986023835, -3.2418059025499986, 38.52486023705, -3.516805901449999]
+#bbox_aoi = ras.get_raster_extent(r'E:\LIDAR_FINAL\data\AOI\clipped_mean_annual_rain.tif')
+bbox_aoi = [38.19986023835, -3.2418059025499986, 38.52486023705, -3.516805901449999]
 
 
-#LOAD THE FILEPATH
-mean_annual_filepath = r'E:\LIDAR_FINAL\data\precipitation\mean_annual\CHELSA_bio_12.tif'
-mean_annual_clipped_path = r'E:\LIDAR_FINAL\data\precipitation\mean_annual\mean_annual_rain_clipped.tif'
-mean_annual_rain_raster = rasterio.open(mean_annual_filepath)
+# =============================================================================
+# #LOAD THE FILEPATH
+# =============================================================================
+#mean_annual_filepath = r'E1:\LIDAR_FINAL\data\precipitation\mean_annual\CHELSA_bio_12.tif'
+#mean_annual_clipped_path = r'E:\LIDAR_FINAL\data\precipitation\mean_annual\mean_annual_rain_clipped.tif'
+#mean_annual_rain_raster = rasterio.open(mean_annual_filepath)
 #clip the mean annual rainfall raster data
-mean_annual_rain_clipped = ras.get_clipped_raster(mean_annual_rain_raster, mean_annual_clipped_path,
-                                                  bbox_aoi, 4326)
+#mean_annual_rain_clipped = ras.get_clipped_raster(mean_annual_rain_raster, mean_annual_clipped_path,
+#                                                  bbox_aoi, 4326)
 
 #READ THE VALUES OF THE JUST CLIPPED RASTER
-mean_annual_rain = rasterio.open(mean_annual_clipped_path).read().astype(float)
+#mean_annual_rain = rasterio.open(mean_annual_clipped_path).read().astype(float)
 
 
 #SPECIFY PLOT SIZE IN THE CONSOLE
@@ -65,21 +70,26 @@ plt.rcParams['figure.figsize'] = (4, 12)
 sns.set_style("white")
 # Plot newly classified and masked raster
 fig, ax = plt.subplots(figsize = (3,2))
-show((mean_annual_rain_clipped, 1),cmap='Blues', title="Mean Annual Rainfall")
+#show((mean_annual_rain_clipped, 1),cmap='Blues', title="Mean Annual Rainfall")
 #show((clipped, 1), cmap='Blues', title="Mean Annual Rainfall", contour=True)
 
 
-# CLIP ALL THE MONTHLY DATA AND ALSO SUM THEM
+# =============================================================================
+# # CLIP ALL THE MONTHLY DATA AND ALSO SUM THEM
+# =============================================================================
 sum_rain = 0
-monthly_rain_raster = glob.glob(r'E:\LIDAR_FINAL\data\precipitation\mean_monthly\CHELSA*.tif')
+monthly_rain_raster = glob.glob(r'E:\LIDAR_FINAL\data\precipitation\mean_monthly\*.tif')
 for i, month_file_path in enumerate(monthly_rain_raster, 1):
     print(i)
     filename = os.path.basename(month_file_path)
 #    Match the first number in the file name which is the month
-    month_number = re.search(r'\d+', filename).group()
-    
-    month_name = calendar.month_name[int(month_number)]
-    output_tif = os.path.join('E:/LIDAR_FINAL/data/precipitation/mean_monthly/clipped', month_name[:3]+'_rain' + '.tif')
+    if filename[:-4] == 'annual_rainfall':
+        month_name = 'ann'
+    else:
+        month_number = re.search(r'\d+', filename).group()
+        month_name = calendar.month_name[int(month_number)]
+    month_abbreviation = month_name[:3]+'_rain'
+    output_tif = os.path.join('E:/LIDAR_FINAL/data/precipitation/mean_monthly/clipped', month_abbreviation + '.tif')
     print(output_tif)
     ras.clip_and_export_raster(month_file_path, output_tif, bbox_aoi)
     
@@ -220,7 +230,7 @@ def aggregate_grid_rain(new_dataframe, old_dataframe, month_field_name):
         group_geometry = group.iloc[0]['geometry']
         new_dataframe.loc[key,'geometry'] = group_geometry
         new_dataframe.loc[key, 'grid_ID'] = key
-        new_dataframe.loc[key, month_field_name] = group[month_field_name].mean()
+        new_dataframe.loc[key, month_field_name] =round(group[month_field_name].mean(), 2)
         print('Aggregating', key, month_field_name, group[month_field_name].mean())
 #        
         if i == len(new_dataframe):
@@ -266,6 +276,7 @@ for column in buildings_rain_aggr.columns[2:]:
 # =============================================================================
 #     CALCULATE MONTHLY RAINWATER HARVESTING POTENTIALS
 # =============================================================================
+buildings_rain_aggr = buildings_rain_aggr.fillna(0)
 for column in buildings_rain_aggr.columns:
     if column in ['geometry', 'grid_ID', 'area_sum']:
         continue
@@ -278,32 +289,13 @@ for column in buildings_rain_aggr.columns:
 
 
 # =============================================================================
-# 
+# PLOT ROOF HARVESTING POTENTIAL FOR ALL MONTHS
 # =============================================================================
 for column in buildings_rain_aggr.columns:
     if column.endswith('rainPOT'):
-        buildings_rain_aggr.plot(column=column, cmap="Blues", scheme="quantiles", k=10, alpha=0.9)
+        buildings_rain_aggr.plot(column=column, cmap="Blues", scheme="equal_interval", k=9, alpha=0.9)
         print(column)
-
-month_rain_data = gpd.read_file(months_shp_filepaths[0])    
-month_rain_data.plot(column='Apr_rain', cmap="Blues", scheme="equal_interval", k=9, alpha=0.9)
- ['geometry', 'grid_ID', 'area_sum'].
-month.plot()
-
-bg.crs = aoi_crs_epsg
-
-cc.plot()
-
-cc.plot(column='grid_value', linewidth=0.03, cmap="Blues", scheme="equal_interval", k=9, alpha=0.9)
-buildings_grid.plot(column='area', linewidth=0.03, cmap="Blues", scheme="quantiles", k=9, alpha=0.9)
-
-
-
-
-
-
-
-
+buildings_rain_aggr.describe()
 
 
 
