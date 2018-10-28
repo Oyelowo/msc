@@ -223,20 +223,10 @@ def aggregate_grid_rain(new_dataframe, old_dataframe, month_field_name):
         new_dataframe.loc[key, month_field_name] = group[month_field_name].mean()
         print('Aggregating', key, month_field_name, group[month_field_name].mean())
 #        
-#        if i == 1:
-#            buildings_aggr.loc[key,'area_sum'] = group['area'].sum()
+        if i == len(new_dataframe):
+            new_dataframe.loc[key,'area_sum'] = group['area_sum'].sum()
     return new_dataframe
 
-print(grid.crs, )
-kktest = aggregate_grid_rain(buildings_aggr, kkr, aoi_crs_epsg_code, 'Apr_rain')
-
-kk= joined_data.groupby('grid_ID')
-for key, (i, group ) in enumerate(kk,1):
-    print(key,i)
-    print(group['Apr_rain'].mean())
-    
-for key, group in kk:
-    print(key, i)
 
 kktest.plot(column='Apr_rain', cmap="Blues", scheme="equal_interval", k=9, alpha=0.9)
 
@@ -267,18 +257,12 @@ for i, month_filepath in enumerate(months_shp_filepaths, 1):
     buildings_rain_aggr = aggregate_grid_rain(buildings_rain_aggr, joined_data, month_field_name)
     
 
-month_data.columns
-    
-    buildings_rain = gpd.sjoin(buildings_rain, month_data, how="left", op='intersects')
-    del buildings_rain['index_right']
-    print(buildings_rain.columns)
     
 month_rain_data = gpd.read_file(months_shp_filepaths[0])    
 month_rain_data.plot(column='Apr_rain', cmap="Blues", scheme="equal_interval", k=9, alpha=0.9)
 
 month.plot()
 
-bg = gpd.read_file(monthly_rain_files[0])
 bg.crs = aoi_crs_epsg
 
 cc.plot()
