@@ -317,3 +317,55 @@ buildings_rain_aggr.describe()
 #
 # =============================================================================
 
+
+
+
+
+
+
+import pandas as pd
+import numpy as np
+import shapely
+import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+
+
+gdf = buildings_rain_aggr
+## the plotting
+#buildings_rain_aggr.plot(column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9, edgecolor='1')
+       
+vmin, vmax = buildings_rain_aggr['ann_rainPOT'].min(), buildings_rain_aggr['ann_rainPOT'].max()
+
+ax = gdf.plot(column='ann_rainPOT', colormap='RdBu',  scheme="quantiles", k=10, alpha=0.9, edgecolor='1')
+#ax = gdf.plot(column='ann_rainPOT', colormap='RdBu', vmin=vmin, vmax=vmax)
+# add colorbar
+fig = ax.get_figure()
+sm = plt.cm.ScalarMappable(cmap='RdBu', norm=plt.Normalize(vmin=vmin, vmax=vmax))
+divider = make_axes_locatable(ax)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+# fake up the array of the scalar mappable. Urgh...
+sm._A = []
+fig.colorbar(sm, cax=cax)
+
+
+
+
+
+
+
+
+# =============================================================================
+# 
+# # create an axes on the right side of ax. The width of cax will be 5%
+# # of ax and the padding between cax and ax will be fixed at 0.05 inch.
+# divider = make_axes_locatable(ax)
+# cax = divider.append_axes("right", size="5%", pad=0.05)
+# 
+# plt.colorbar(gdf, cax=cax)
+# 
+# 
+# 
+# plt.colorbar(gdf,fraction=0.046, pad=0.04)
+# 
+# =============================================================================
