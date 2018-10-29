@@ -346,8 +346,8 @@ divider = make_axes_locatable(ax)
 cax = divider.append_axes("right", size="5%", pad=0.05)
 # fake up the array of the scalar mappable. Urgh...
 sm._A = []
-fig.colorbar(sm, cax=cax)
-
+cbar=fig.colorbar(sm, cax=cax)
+cbar.set_label('Litres')
 
 
 
