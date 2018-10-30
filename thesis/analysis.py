@@ -413,7 +413,8 @@ def main(r,c, axes):
     plt.setp(axis.xaxis.get_majorticklabels(), rotation=20)  
     
     minx,miny,maxx,maxy =  buildings_rain_aggr.total_bounds
-    map_plot.text(x=minx+1000,y=maxy-5000, s='^ \nN ', ha='center', fontsize=20, family='Courier new', rotation = 0)
+    map_plot.text(x=minx+1000,y=maxy-5000, s='^ \nN ', ha='center', fontsize=20, weight='bold', family='Courier new', rotation = 0)
+    #ax11.text(datetime(2013, 2, 15), -25, 'Winter')
     plt.setp(axis.xaxis.get_majorticklabels(), rotation=20)
     colorbar(map_plot)
 #    plt.tight_layout()
