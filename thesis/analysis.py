@@ -390,39 +390,28 @@ def colorbar(ax):
     cbar.set_label('Litres')
  
 
-def autoplot(main, axes):
-   r,c=0,0
-   print(r, c)
-   for i in range(6):
-     main(r, c, axes)
-     if i % 2 != 0:
-       r+=1
-       c =0
-     elif i % 2 == 0 or i==1:
-       c=1   
-   
-def main(r,c, axes):
-    axis=axes[r][c]
-    # Create the figure and subplots
-    map_plot=buildings_rain_aggr.plot(ax=axis, column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9,edgecolor='0.6')
-    axis.grid()
-    # Figure title
-    fig.suptitle('Seasonal temperature observations - Helsinki Malmi airport')
 
+
+fig, axs = plt.subplots(2, 2, figsize=(12,12), constrained_layout=False)
+for ax in axs.flatten():
+    map_plot=buildings_rain_aggr.plot(ax=ax, column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9,edgecolor='0.6')
+    ax.grid()
+  # Figure title
+    fig.suptitle('Seasonal temperature observations - Helsinki Malmi airport')
+    plt.title('linear')
     # Rotate the x-axis labels so they don't overlap
-    plt.setp(axis.xaxis.get_majorticklabels(), rotation=20)  
-    
+    plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)  
+    map_plot.set_facecolor("#eeeeee")
     minx,miny,maxx,maxy =  buildings_rain_aggr.total_bounds
+    # these are matplotlib.patch.Patch properties
+    props = dict(boxstyle='round', facecolor='#eaeaea', alpha=0)
     map_plot.text(x=minx+1000,y=maxy-5000, s=u'N \n\u25B2 ', ha='center', fontsize=20, weight='bold', family='Courier new', rotation = 0)
+    map_plot.text(x=425000,y=maxy-2000, s='lowo',  ha='center', fontsize=20, weight='bold', family='Courier new', bbox=props)
     #ax11.text(datetime(2013, 2, 15), -25, 'Winter')
-    plt.setp(axis.xaxis.get_majorticklabels(), rotation=20)
+    plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)
     colorbar(map_plot)
 #    plt.tight_layout()
     plt.savefig(r'C:\Users\oyeda\Desktop\msc\test.jpg')
 
 
-
-fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(12,12), sharex=True, sharey=True) 
-   
-autoplot(main=main, axes=axes)
    
