@@ -375,6 +375,20 @@ buildings_rain_aggr.describe()
  #      c=1 
  
  
+def colorbar(ax):
+    vmin, vmax = buildings_rain_aggr['ann_rainPOT'].min(), buildings_rain_aggr['ann_rainPOT'].max()
+
+#    ax = gdf.plot(column='ann_rainPOT', colormap='RdBu',  scheme="quantiles", k=10, alpha=0.9, edgecolor='1')
+  # add colorbar
+    fig = ax.get_figure()
+    sm = plt.cm.ScalarMappable(cmap='RdBu', norm=plt.Normalize(vmin=vmin, vmax=vmax))
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+    # fake up the array of the scalar mappable. Urgh...
+    sm._A = []
+    cbar=fig.colorbar(sm, cax=cax)
+    cbar.set_label('Litres')
+ 
 
 def autoplot(main, axes):
    r,c=0,0
@@ -388,11 +402,27 @@ def autoplot(main, axes):
        c=1   
    
 def main(r,c, axes):
-   # Create the figure and subplots
-   buildings_rain_aggr.plot(ax=axes[r][c], column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9,edgecolor='0.6')
+    axis=axes[r][c]
+    # Create the figure and subplots
+    map_plot=buildings_rain_aggr.plot(ax=axis, column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9,edgecolor='0.6')
+    axis.grid()
+    # Figure title
+    fig.suptitle('Seasonal temperature observations - Helsinki Malmi airport')
 
-fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(12,12), sharex=True, sharey=True)    
+    # Rotate the x-axis labels so they don't overlap
+    plt.setp(axis.xaxis.get_majorticklabels(), rotation=20)  
+    
+    minx,miny,maxx,maxy =  buildings_rain_aggr.total_bounds
+    map_plot.text(x=minx+1000,y=maxy-5000, s='^ \nN ', ha='center', fontsize=20, family='Courier new', rotation = 0)
+    plt.setp(axis.xaxis.get_majorticklabels(), rotation=20)
+    colorbar(map_plot)
+#    plt.tight_layout()
+    plt.savefig(r'C:\Users\oyeda\Desktop\msc\test.jpg')
 
+
+
+fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(12,12), sharex=True, sharey=True) 
+   
 autoplot(main=main, axes=axes)
    
    print(axes[i,i+1])
