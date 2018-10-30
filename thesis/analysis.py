@@ -347,32 +347,13 @@ buildings_rain_aggr.describe()
  vmin, vmax = buildings_rain_aggr['ann_rainPOT'].min(), buildings_rain_aggr['ann_rainPOT'].max()
  
  ax = gdf.plot(column='ann_rainPOT', colormap='RdBu',  scheme="quantiles", k=10, alpha=0.9, edgecolor='1')
- #ax = gdf.plot(column='ann_rainPOT', colormap='RdBu', vmin=vmin, vmax=vmax)
- # add colorbar
- fig = ax.get_figure()
- sm = plt.cm.ScalarMappable(cmap='RdBu', norm=plt.Normalize(vmin=vmin, vmax=vmax))
- divider = make_axes_locatable(ax)
- cax = divider.append_axes("right", size="5%", pad=0.05)
- # fake up the array of the scalar mappable. Urgh...
- sm._A = []
- cbar=fig.colorbar(sm, cax=cax)
- cbar.set_label('Litres')
- 
+
  
  
  
  import numpy as np
  import matplotlib.pyplot as plt
  import matplotlib.colors
- 
- #  r,c=0,0
- #  main(r, c)
- #  for i in range(6):
- #    if i % 2 != 0:
- #      r+=1
- #      c =0
- #    elif i % 2 == 0 or i==1:
- #      c=1 
  
  
 def colorbar(ax):
@@ -392,13 +373,14 @@ def colorbar(ax):
 
 
 
-fig, axs = plt.subplots(2, 2, figsize=(12,12), constrained_layout=False)
-for ax in axs.flatten():
+def plot_map():
+  fig, axs = plt.subplots(3, 2, figsize=(12,12), sharex=True, sharey=True)
+  for ax in axs.flatten():
     map_plot=buildings_rain_aggr.plot(ax=ax, column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9,edgecolor='0.6')
     ax.grid()
   # Figure title
     fig.suptitle('Seasonal temperature observations - Helsinki Malmi airport')
-    plt.title('linear')
+  #    plt.title('linear')
     # Rotate the x-axis labels so they don't overlap
     plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)  
     map_plot.set_facecolor("#eeeeee")
@@ -410,8 +392,9 @@ for ax in axs.flatten():
     #ax11.text(datetime(2013, 2, 15), -25, 'Winter')
     plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)
     colorbar(map_plot)
-#    plt.tight_layout()
+  #    plt.tight_layout()
     plt.savefig(r'C:\Users\oyeda\Desktop\msc\test.jpg')
 
+plot_map()
 
    
