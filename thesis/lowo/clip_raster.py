@@ -109,7 +109,7 @@ def get_clipped_raster(raster_data, output_path, extent, bbox_epsg_code=4326):
 
 
 
-def create_grid(gridHeight, gridWidth,bbox=None, is_utm=False, zone_number=None,shapefile=None, geometry_field='geometry'):
+def create_grid(gridHeight, gridWidth,bbox=None, is_utm=False, zone_number=None,shapefile=None,convex_hull=False, geometry_field='geometry'):
     '''
     NOTE: you have to specify if your grid is in UTM or WGS84 longitude latitude
     bbox: should be provided
@@ -145,6 +145,8 @@ def create_grid(gridHeight, gridWidth,bbox=None, is_utm=False, zone_number=None,
         XrightOrigin = XrightOrigin + gridWidth
 
     grid = gpd.GeoDataFrame({'geometry':polygons})
+    if convex_hull:
+      grid['geometry'] = grid.convex_hull
     return grid
 
 

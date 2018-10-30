@@ -47,7 +47,9 @@ aoi_shapefile = gpd.read_file(r'E:\LIDAR_FINAL\data\AOI\fishnet_926_1sqm.shp')
 #bbox_aoi2 = ras.get_vector_extent(aoi_shapefile)'
 #bbox_aoi = ras.get_vector_extent(aoi_shapefile)
 #bbox_aoi = ras.get_raster_extent(r'E:\LIDAR_FINAL\data\AOI\clipped_mean_annual_rain.tif')
-bbox_aoi = [38.19986023835, -3.2418059025499986, 38.52486023705, -3.516805901449999]
+#bbox_aoi = [38.19986023835, -3.2418059025499986, 38.52486023705, -3.516805901449999]
+aoi_polygon =  gpd.read_file('E:\LIDAR_FINAL\data\AOI\AOI_polygon.shp')
+#bbox_aoi = ras.get_vector_extent(aoi_polygon)
 
 
 # =============================================================================
@@ -126,26 +128,6 @@ for i, month_file in enumerate(monthly_rain_clipped, 1):
 
 
 
-# =============================================================================
-# 
-# # CREATE A FISHNET/GRID OF 926.1m PIXEL
-# =============================================================================
-#generating grid by directly providing the bounding box
-grid = ras.create_grid(926.1, 926.1, bbox_aoi, is_utm=False)
-grid['grid_ID'] = grid.index + 1
-grid = grid.reset_index(drop=True)
-#generating grid based on shapefile extent
-#grid2 = ras.create_grid(926.1, 926.1, shapefile=aoi_shapefile)
-
-#grid = ras.create_grid(gridHeight=926.1, gridWidth=926.1,shapefile=aoi_shapefile)
-#grid.plot()
-
-grid_path = r'E:\LIDAR_FINAL\data\grid\grid.shp'
-grid.to_file(grid_path)
-# =============================================================================
-# 
-# =============================================================================
-
 
 
 
@@ -186,11 +168,108 @@ buildings_centroid.to_file(centroid_fp)
 
 
 # =============================================================================
+# 
+# # CREATE A FISHNET/GRID OF 926.1m PIXEL
+# =============================================================================
+#generating grid by directly providing the bounding box
+grid = ras.create_grid(926.1, 926.1, shapefile=buildings_centroid, convex_hull=True)
+
+grid_ = aoi_polygon.within(grid)
+del aoi_polygon['id']
+print(aoi_polygon.dtypes)
+print(grid.dtypes)
+
+
+import geopandas
+point = geopandas.GeoDataFrame.from_file('') 
+poly  = geopandas.GeoDataFrame.from_file('E:\LIDAR_FINAL\data\AOI\AOI_polygon.shp')
+from geopandas.tools import sjoin
+pointInPolys = sjoin(buildings_centroid, poly, how='left')
+grouped = pointInPolys.groupby('index_right')
+list(grouped)
+
+grid_clipped = gpd.read_file(r'E:\LIDAR_FINAL\data\grid\grid_clipped.shp')
+grid_clipped.plot()
+aoi_polygon.plot()
+
+poly = aoi_polygon.geometry.unary_union
+points_clip = buildings_centroid[buildings_centroid.geometry.intersects(poly)]
+points_clip.plot()
+
+
+import clip_data as cl
+
+# Create function to clip point data using geopandas
+
+
+def clip_points(shp, clip_obj):
+    '''
+    Docs Here
+    '''
+
+    poly = clip_obj.geometry.unary_union
+    return(shp[shp.geometry.intersects(poly)])
+
+# Create function to clip line and polygon data using geopandas
+
+
+grid.plot()
+
+grid.crs =myinput.crs=aoi_polygon.crs= aoi_crs_epsg
+grid.crs
+import subprocess
+mymask= aoi_polygon.copy()
+myinput = grid.copy()
+myresult = r'E:\LIDAR_FINAL\data\grid\grid_clipped.shp'
+subprocess.call(["ogr2ogr", "-f", "ESRI Shapefile", "-clipsrc", mymask, myresult, myinput], shell=True)
+mymask.crs
+myinput.crs
+aoi_polygon.total_bounds
+
+print(aoi_polygon)
+
+kk = gpd.overlay(aoi_polygon, buildings_centroid, how='intersection')
+
+kk= gpd.sjoin(buildings_centroid, aoi_polygon, how='right', op='intersects')
+kk.plot()
+res_intersection = pd.concat(gpd.sjoin(grid, aoi_polygon, how='left', op='intersects'))
+res_intersection.plot()
+grid['grid_ID'] = grid.index + 1
+grid['geometry']=grid.geometry.convex_hull
+grid.plot()
+grid['test'] = 0
+grid = grid.reset_index(drop=True)
+#generating grid based on shapefile extent
+#grid2 = ras.create_grid(926.1, 926.1, shapefile=aoi_shapefile)
+
+#grid = ras.create_grid(gridHeight=926.1, gridWidth=926.1,shapefile=aoi_shapefile)
+#grid.plot()
+
+grid_path = r'E:\LIDAR_FINAL\data\grid\grid.shp'
+grid.to_file(grid_path)
+# =============================================================================
+# 
+# =============================================================================
+
+
+
+
+
+
+# =============================================================================
 # SPATIAL JOIN
 # =============================================================================
 grid.crs = buildings_centroid.crs = aoi_crs_epsg
-buildings_grid = gpd.sjoin(grid,buildings_centroid, how="inner", op='intersects')
+buildings_grid = gpd.sjoin(grid,buildings_centroid, how="left", op='intersects') 
 del buildings_grid['index_right']
+joined_data = gpd.sjoin(buildings_grid, month_rain_data, how='inner', op='intersects')
+
+joined_data=joined_data.fillna(0)
+joined_data['pot']= joined_data['area'] * joined_data['Sep_rain']
+joined_data.plot(column='pot', cmap='RdBu',  scheme="quantiles", k=10, alpha=0.9, edgecolor='1')
+
+
+
 months_shp_filepaths = glob.glob(r'E:\LIDAR_FINAL\data\precipitation\mean_monthly\clipped\to_vector\*.shp')
 
 #The op options determines the type of join operation to apply. op can be set to “intersects”, “within” or 
@@ -300,7 +379,9 @@ for column in buildings_rain_aggr.columns:
 # =============================================================================
 for column in buildings_rain_aggr.columns:
     if column.endswith('rainPOT'):
-        buildings_rain_aggr.plot(column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9, edgecolor='1')
+        ax=grid.plot()
+        buildings_rain_aggr.plot(ax=ax,column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9, edgecolor='1')
+  
         print(column)
 #edgecolor='0.8
 buildings_rain_aggr.describe()
@@ -319,53 +400,131 @@ buildings_rain_aggr.describe()
 
 
 
-
-
-
-
-import pandas as pd
-import numpy as np
-import shapely
-import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-
-
-
-gdf = buildings_rain_aggr
-## the plotting
-#buildings_rain_aggr.plot(column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9, edgecolor='1')
-       
-vmin, vmax = buildings_rain_aggr['ann_rainPOT'].min(), buildings_rain_aggr['ann_rainPOT'].max()
-
-ax = gdf.plot(column='ann_rainPOT', colormap='RdBu',  scheme="quantiles", k=10, alpha=0.9, edgecolor='1')
-#ax = gdf.plot(column='ann_rainPOT', colormap='RdBu', vmin=vmin, vmax=vmax)
-# add colorbar
-fig = ax.get_figure()
-sm = plt.cm.ScalarMappable(cmap='RdBu', norm=plt.Normalize(vmin=vmin, vmax=vmax))
-divider = make_axes_locatable(ax)
-cax = divider.append_axes("right", size="5%", pad=0.05)
-# fake up the array of the scalar mappable. Urgh...
-sm._A = []
-cbar=fig.colorbar(sm, cax=cax)
-cbar.set_label('Litres')
-
-
-
-
-
-
-
 # =============================================================================
 # 
-# # create an axes on the right side of ax. The width of cax will be 5%
-# # of ax and the padding between cax and ax will be fixed at 0.05 inch.
-# divider = make_axes_locatable(ax)
-# cax = divider.append_axes("right", size="5%", pad=0.05)
-# 
-# plt.colorbar(gdf, cax=cax)
-# 
-# 
-# 
-# plt.colorbar(gdf,fraction=0.046, pad=0.04)
+ 
+ import pandas as pd
+ import numpy as np
+ import shapely
+ import matplotlib.pyplot as plt
+ from mpl_toolkits.axes_grid1 import make_axes_locatable
+ 
+ 
+ 
+ gdf = buildings_rain_aggr
+ ## the plotting
+ #buildings_rain_aggr.plot(column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9, edgecolor='1')
+        
+ vmin, vmax = buildings_rain_aggr['ann_rainPOT'].min(), buildings_rain_aggr['ann_rainPOT'].max()
+ 
+ ax = gdf.plot(column='ann_rainPOT', colormap='RdBu',  scheme="quantiles", k=10, alpha=0.9, edgecolor='1')
+ #ax = gdf.plot(column='ann_rainPOT', colormap='RdBu', vmin=vmin, vmax=vmax)
+ # add colorbar
+ fig = ax.get_figure()
+ sm = plt.cm.ScalarMappable(cmap='RdBu', norm=plt.Normalize(vmin=vmin, vmax=vmax))
+ divider = make_axes_locatable(ax)
+ cax = divider.append_axes("right", size="5%", pad=0.05)
+ # fake up the array of the scalar mappable. Urgh...
+ sm._A = []
+ cbar=fig.colorbar(sm, cax=cax)
+ cbar.set_label('Litres')
+ 
+ 
+ 
+ 
+ import numpy as np
+ import matplotlib.pyplot as plt
+ import matplotlib.colors
+ 
+ #  r,c=0,0
+ #  main(r, c)
+ #  for i in range(6):
+ #    if i % 2 != 0:
+ #      r+=1
+ #      c =0
+ #    elif i % 2 == 0 or i==1:
+ #      c=1 
+ 
+ 
+ 
+ def autoplot(r=0,c=0,main=None):
+   r,c=0,0
+   for i in range(6):
+     main(r=r, c=c)
+     if i % 2 != 0:
+       r+=1
+       c =0
+     elif i % 2 == 0 or i==1:
+       c=1   
+   
+ def main(r,c):
+   # Create the figure and subplots
+   buildings_rain_aggr.plot(ax=axes[r][c], column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9,edgecolor='0.6')
+ 
+ fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(12,12), sharex=True, sharey=True)    
+ autoplot(r, c,main)
+ 
+   
+   print(axes[i,i+1])
+ 
+ # Rename the axes for ease of use
+ ax11 = axes[0][0]
+ ax12 = axes[0][1]
+ ax21 = axes[1][0]
+ ax22 = axes[1][1]
+ 
+ # Set the plotted line width
+ line_width = 1.5
+ 
+ # Plot data
+ buildings_rain_aggr.plot(ax=ax11, column=column, cmap="RdBu", legend=True, scheme="quantiles", k=10, alpha=0.9,edgecolor='0.6')
+ buildings_rain_aggr.plot(ax=ax12, column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9)
+ buildings_rain_aggr.plot(ax=ax21, column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9)
+ buildings_rain_aggr.plot(ax=ax22, column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9)
+ 
+ 
+ leg = ax11.get_legend()
+ leg.set_bbox_to_anchor((0., 0., 0.5, 0.5))
+ 
+ 
+ # Set y-axis limits
+ minx,miny,maxx,maxy =  buildings_rain_aggr.total_bounds
+ #ax11.set_ylim(miny, maxy)
+ #ax12.set_ylim(miny, maxy)
+ #ax21.set_ylim(miny, maxy)
+ #ax22.set_ylim(miny, maxy)
+ 
+ # Turn plot grids on
+ ax11.grid()
+ ax12.grid()
+ ax21.grid()
+ ax22.grid()
+ 
+ # Figure title
+ fig.suptitle('Seasonal temperature observations - Helsinki Malmi airport')
+ 
+ # Rotate the x-axis labels so they don't overlap
+ plt.setp(ax11.xaxis.get_majorticklabels(), rotation=20)
+ plt.setp(ax12.xaxis.get_majorticklabels(), rotation=20)
+ plt.setp(ax21.xaxis.get_majorticklabels(), rotation=20)
+ plt.setp(ax22.xaxis.get_majorticklabels(), rotation=20)
+ 
+ # Axis labels
+ ax21.set_xlabel('Date')
+ ax22.set_xlabel('Date')
+ ax11.set_ylabel('Temperature [deg. C]')
+ ax21.set_ylabel('Temperature [deg. C]')
+ 
+ # Season label text
+ #ax11.text(datetime(2013, 2, 15), -25, 'Winter')
+ #ax12.text(datetime(2013, 5, 15), -25, 'Spring')
+ #ax21.text(datetime(2013, 8, 15), -25, 'Summer')
+ #ax22.text(datetime(2013, 11, 15), -25, 'Fall')
+ 
+ fig
+ 
+ plt.savefig(r'C:\Users\oyeda\Desktop\msc\test.jpg')
+ 
+ 
 # 
 # =============================================================================
