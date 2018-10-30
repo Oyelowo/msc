@@ -375,24 +375,25 @@ buildings_rain_aggr.describe()
  #      c=1 
  
  
- 
- def autoplot(r=0,c=0,main=None):
+
+def autoplot(main, axes):
    r,c=0,0
+   print(r, c)
    for i in range(6):
-     main(r=r, c=c)
+     main(r, c, axes)
      if i % 2 != 0:
        r+=1
        c =0
      elif i % 2 == 0 or i==1:
        c=1   
    
- def main(r,c):
+def main(r,c, axes):
    # Create the figure and subplots
    buildings_rain_aggr.plot(ax=axes[r][c], column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9,edgecolor='0.6')
- 
- fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(12,12), sharex=True, sharey=True)    
- autoplot(r, c,main)
- 
+
+fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(12,12), sharex=True, sharey=True)    
+
+autoplot(main=main, axes=axes)
    
    print(axes[i,i+1])
  
