@@ -168,7 +168,7 @@ ax11.set_ylabel('Temperature [deg. C]')
 ax21.set_ylabel('Temperature [deg. C]')
 
 # Season label text
-#ax11.text(datetime(2013, 2, 15), -25, 'Winter')
+
 #ax12.text(datetime(2013, 5, 15), -25, 'Spring')
 #ax21.text(datetime(2013, 8, 15), -25, 'Summer')
 #ax22.text(datetime(2013, 11, 15), -25, 'Fall')

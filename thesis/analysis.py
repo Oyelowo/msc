@@ -383,7 +383,7 @@ def colorbar(ax):
     fig = ax.get_figure()
     sm = plt.cm.ScalarMappable(cmap='RdBu', norm=plt.Normalize(vmin=vmin, vmax=vmax))
     divider = make_axes_locatable(ax)
-    cax = divider.append_axes("right", size="5%", pad=0.05)
+    cax = divider.append_axes("right", size="4%", pad=0.05)
     # fake up the array of the scalar mappable. Urgh...
     sm._A = []
     cbar=fig.colorbar(sm, cax=cax)
@@ -413,7 +413,7 @@ def main(r,c, axes):
     plt.setp(axis.xaxis.get_majorticklabels(), rotation=20)  
     
     minx,miny,maxx,maxy =  buildings_rain_aggr.total_bounds
-    map_plot.text(x=minx+1000,y=maxy-5000, s='^ \nN ', ha='center', fontsize=20, weight='bold', family='Courier new', rotation = 0)
+    map_plot.text(x=minx+1000,y=maxy-5000, s=u'N \n\u25B2 ', ha='center', fontsize=20, weight='bold', family='Courier new', rotation = 0)
     #ax11.text(datetime(2013, 2, 15), -25, 'Winter')
     plt.setp(axis.xaxis.get_majorticklabels(), rotation=20)
     colorbar(map_plot)
@@ -426,66 +426,3 @@ fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(12,12), sharex=True, sharey=
    
 autoplot(main=main, axes=axes)
    
-   print(axes[i,i+1])
- 
- # Rename the axes for ease of use
- ax11 = axes[0][0]
- ax12 = axes[0][1]
- ax21 = axes[1][0]
- ax22 = axes[1][1]
- 
- # Set the plotted line width
- line_width = 1.5
- 
- # Plot data
- buildings_rain_aggr.plot(ax=ax11, column=column, cmap="RdBu", legend=True, scheme="quantiles", k=10, alpha=0.9,edgecolor='0.6')
- buildings_rain_aggr.plot(ax=ax12, column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9)
- buildings_rain_aggr.plot(ax=ax21, column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9)
- buildings_rain_aggr.plot(ax=ax22, column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9)
- 
- 
- leg = ax11.get_legend()
- leg.set_bbox_to_anchor((0., 0., 0.5, 0.5))
- 
- 
- # Set y-axis limits
- minx,miny,maxx,maxy =  buildings_rain_aggr.total_bounds
- #ax11.set_ylim(miny, maxy)
- #ax12.set_ylim(miny, maxy)
- #ax21.set_ylim(miny, maxy)
- #ax22.set_ylim(miny, maxy)
- 
- # Turn plot grids on
- ax11.grid()
- ax12.grid()
- ax21.grid()
- ax22.grid()
- 
- # Figure title
- fig.suptitle('Seasonal temperature observations - Helsinki Malmi airport')
- 
- # Rotate the x-axis labels so they don't overlap
- plt.setp(ax11.xaxis.get_majorticklabels(), rotation=20)
- plt.setp(ax12.xaxis.get_majorticklabels(), rotation=20)
- plt.setp(ax21.xaxis.get_majorticklabels(), rotation=20)
- plt.setp(ax22.xaxis.get_majorticklabels(), rotation=20)
- 
- # Axis labels
- ax21.set_xlabel('Date')
- ax22.set_xlabel('Date')
- ax11.set_ylabel('Temperature [deg. C]')
- ax21.set_ylabel('Temperature [deg. C]')
- 
- # Season label text
- #ax11.text(datetime(2013, 2, 15), -25, 'Winter')
- #ax12.text(datetime(2013, 5, 15), -25, 'Spring')
- #ax21.text(datetime(2013, 8, 15), -25, 'Summer')
- #ax22.text(datetime(2013, 11, 15), -25, 'Fall')
- 
- fig
- 
- plt.savefig(r'C:\Users\oyeda\Desktop\msc\test.jpg')
- 
- 
-# 
-# =============================================================================
