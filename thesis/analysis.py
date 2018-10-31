@@ -48,8 +48,8 @@ aoi_shapefile = gpd.read_file(r'E:\LIDAR_FINAL\data\AOI\fishnet_926_1sqm.shp')
 #bbox_aoi = ras.get_vector_extent(aoi_shapefile)
 #bbox_aoi = ras.get_raster_extent(r'E:\LIDAR_FINAL\data\AOI\clipped_mean_annual_rain.tif')
 bbox_aoi = [38.19986023835, -3.2418059025499986, 38.52486023705, -3.516805901449999]
-#aoi_polygon =  gpd.read_file('E:\LIDAR_FINAL\data\AOI\AOI_polygon.shp')
-#aoi_polygon.crs = aoi_crs_epsg
+aoi_polygon =  gpd.read_file('E:\LIDAR_FINAL\data\AOI\AOI_polygon.shp')
+aoi_polygon.crs = aoi_crs_epsg
 #bbox_aoi = ras.get_vector_extent(aoi_polygon)
 
 
@@ -168,14 +168,31 @@ buildings_centroid.to_file(centroid_fp)
 # =============================================================================
 
 
+
+
+# =============================================================================
+# AOI POLYGON
+# =============================================================================
+# =============================================================================
+vertices = gpd.read_file(r'E:\LIDAR_FINAL\data\AOI\aoi_vertices.shp')
+vertices.plot()
+aoi_vertices_list = [p.xy for p in vertices.geometry]
+aoi_polygon = Polygon([[points.x, points.y] for points in vertices.geometry])
+aoi_polygon_df = gpd.GeoDataFrame(data=[aoi_polygon],  columns=['geometry'])
+aoi_polygon_df.crs= aoi_crs_epsg
+aoi_polygon_df.plot()
+print(aoi_polygon)
+# =============================================================================
+
+
+
+
 # =============================================================================
 # 
 # # CREATE A FISHNET/GRID OF 926.1m PIXEL
 # =============================================================================
 #generating grid by directly providing the bounding box
-grid = ras.create_grid(926.1, 926.1, shapefile=buildings_centroid, convex_hull=True)
-
-grid = gpd.read_file(r'E:\LIDAR_FINAL\data\grid\grid_clipped.shp')
+grid = ras.create_grid(926.1, 926.1, shapefile=buildings_centroid)
 #generating grid based on shapefile extent
 #grid2 = ras.create_grid(926.1, 926.1, shapefile=aoi_shapefile)
 
@@ -184,6 +201,16 @@ grid = gpd.read_file(r'E:\LIDAR_FINAL\data\grid\grid_clipped.shp')
 
 grid_path = r'E:\LIDAR_FINAL\data\grid\grid.shp'
 grid.to_file(grid_path)
+
+# =============================================================================
+# CLIP THE GRID INTO THE AOI
+# =============================================================================
+aoi_crs_epsg
+aoi_grid_clipped=gpd.sjoin(grid, aoi_polygon_df, how='right', op='intersects')
+aoi_grid_clipped.plot()
+aoi_grid_clipped.to_file(r'E:\LIDAR_FINAL\data\grid\aoi_grid_clipped.shp')
+
+#grid = gpd.read_file(r'E:\LIDAR_FINAL\data\grid\grid_clipped.shp'
 # =============================================================================
 # 
 # =============================================================================
