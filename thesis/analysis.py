@@ -344,7 +344,6 @@ buildings_rain_aggr.describe()
  ## the plotting
  #buildings_rain_aggr.plot(column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9, edgecolor='1')
         
- vmin, vmax = buildings_rain_aggr['ann_rainPOT'].min(), buildings_rain_aggr['ann_rainPOT'].max()
  
  ax = gdf.plot(column='ann_rainPOT', colormap='RdBu',  scheme="quantiles", k=10, alpha=0.9, edgecolor='1')
 
@@ -356,8 +355,8 @@ buildings_rain_aggr.describe()
  import matplotlib.colors
  
  
-def colorbar(ax):
-    vmin, vmax = buildings_rain_aggr['ann_rainPOT'].min(), buildings_rain_aggr['ann_rainPOT'].max()
+def colorbar(ax, vmin, vmax):
+#    vmin, vmax = buildings_rain_aggr['ann_rainPOT'].min(), buildings_rain_aggr['ann_rainPOT'].max()
 
 #    ax = gdf.plot(column='ann_rainPOT', colormap='RdBu',  scheme="quantiles", k=10, alpha=0.9, edgecolor='1')
   # add colorbar
@@ -373,28 +372,98 @@ def colorbar(ax):
 
 
 
-def plot_map():
+def plot_map(dataFrame, column, vmin, vmax):
   fig, axs = plt.subplots(3, 2, figsize=(12,12), sharex=True, sharey=True)
-  for ax in axs.flatten():
-    map_plot=buildings_rain_aggr.plot(ax=ax, column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9,edgecolor='0.6')
+  for i,ax in enumerate(axs.flatten()):
+    print(i, dataFrame)
+    map_plot=dataFrame.plot(ax=ax, column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9,edgecolor='0.6')
     ax.grid()
   # Figure title
-    fig.suptitle('Seasonal temperature observations - Helsinki Malmi airport')
+    fig.suptitle(column)
   #    plt.title('linear')
     # Rotate the x-axis labels so they don't overlap
     plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)  
+    map_plot.set_facecolor("#eeeeee")
+    minx,miny,maxx,maxy =  dataFrame.total_bounds
+    # these are matplotlib.patch.Patch properties
+    props = dict(boxstyle='round', facecolor='#eaeaea', alpha=0)
+    map_plot.text(x=minx+1000,y=maxy-5000, s=u'N \n\u25B2 ', ha='center', fontsize=20, weight='bold', family='Courier new', rotation = 0)
+    map_plot.text(x=425000,y=maxy-2000, s=column,  ha='center', fontsize=20, weight='bold', family='Courier new', bbox=props)
+    #ax11.text(datetime(2013, 2, 15), -25, 'Winter')
+    plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)
+    colorbar(map_plot, vmin, vmax)
+  #    plt.tight_layout()
+    plt.savefig(r'C:\Users\oyeda\Desktop\msc\test.jpg')
+
+# =============================================================================
+# 
+# =============================================================================
+
+pot_list = [pot for pot in buildings_rain_aggr.columns if pot.endswith('rainPOT')]
+
+fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(12,12), sharex=True, sharey=True) 
+def autoplot(main, column):
+   fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(12,12), sharex=True, sharey=True) 
+
+   r,c=0,0
+   for i in range(6):
+     print(r, c)
+#     main(r, c, axes, column)
+     axis=axes[r][c]
+     map_plot=buildings_rain_aggr.plot(ax=axis, column=pot_list[i], cmap="RdBu", scheme="quantiles", k=10, alpha=0.9,edgecolor='0.6')
+     print(pot_list[i])
+     if i % 2 != 0:
+       r+=1
+       c =0
+     elif i % 2 == 0 or i==1:
+       c=1   
+
+fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(12,12), sharex=True, sharey=True) 
+
+def main(r,c, axes, column):
+    
+    axis=axes[r][c]
+    # Create the figure and subplots
+    map_plot=buildings_rain_aggr.plot(ax=axis, column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9,edgecolor='0.6')
+    axis.grid()
+    # Figure title
+    fig.suptitle('Seasonal temperature observations - Helsinki Malmi airport')
+    plt.title('linear')
+    # Rotate the x-axis labels so they don't overlap
+    plt.setp(axis.xaxis.get_majorticklabels(), rotation=20)  
     map_plot.set_facecolor("#eeeeee")
     minx,miny,maxx,maxy =  buildings_rain_aggr.total_bounds
     # these are matplotlib.patch.Patch properties
     props = dict(boxstyle='round', facecolor='#eaeaea', alpha=0)
     map_plot.text(x=minx+1000,y=maxy-5000, s=u'N \n\u25B2 ', ha='center', fontsize=20, weight='bold', family='Courier new', rotation = 0)
-    map_plot.text(x=425000,y=maxy-2000, s='lowo',  ha='center', fontsize=20, weight='bold', family='Courier new', bbox=props)
+    map_plot.text(x=425000,y=maxy-2000, s=column,  ha='center', fontsize=20, weight='bold', family='Courier new', bbox=props)
     #ax11.text(datetime(2013, 2, 15), -25, 'Winter')
-    plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)
-    colorbar(map_plot)
-  #    plt.tight_layout()
+    plt.setp(axis.xaxis.get_majorticklabels(), rotation=20)
+#    colorbar(map_plot)
+#    plt.tight_layout()
+    
+    print(column)
     plt.savefig(r'C:\Users\oyeda\Desktop\msc\test.jpg')
 
-plot_map()
 
-   
+
+for i, column in enumerate(buildings_rain_aggr.columns,1):
+  if column.endswith('rainPOT'):
+    autoplot(main=main,column=column)
+    print(column)
+
+fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(12,12), sharex=True, sharey=True) 
+
+
+        vmin, vmax = buildings_rain_aggr[column].min(), buildings_rain_aggr[column].max()
+#        colorbar(map_plot, vmin, vmax)
+
+#        plot_map(buildings_rain_aggr, column, vmin, vmax )
+        print(column, 'is done')
+        if i > 6:
+          break
+        
+        
+        
+        buildings_rain_aggr.plot(ax=ax,column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9, edgecolor='1')
+ 
