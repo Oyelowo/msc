@@ -371,29 +371,13 @@ buildings_rain_aggr.describe()
  import numpy as np
  import shapely
  import matplotlib.pyplot as plt
- from mpl_toolkits.axes_grid1 import make_axes_locatable
- 
- 
- 
- gdf = buildings_rain_aggr
- ## the plotting
- #buildings_rain_aggr.plot(column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9, edgecolor='1')
-        
- 
- ax = gdf.plot(column='ann_rainPOT', colormap='RdBu',  scheme="quantiles", k=10, alpha=0.9, edgecolor='1')
-
- 
- 
- 
+ from mpl_toolkits.axes_grid1 import make_axes_locatable 
  import numpy as np
  import matplotlib.pyplot as plt
  import matplotlib.colors
  
  
 def colorbar(ax, vmin, vmax):
-#    vmin, vmax = buildings_rain_aggr['ann_rainPOT'].min(), buildings_rain_aggr['ann_rainPOT'].max()
-
-#    ax = gdf.plot(column='ann_rainPOT', colormap='RdBu',  scheme="quantiles", k=10, alpha=0.9, edgecolor='1')
   # add colorbar
     fig = ax.get_figure()
     sm = plt.cm.ScalarMappable(cmap='RdBu', norm=plt.Normalize(vmin=vmin, vmax=vmax))
@@ -402,20 +386,23 @@ def colorbar(ax, vmin, vmax):
     # fake up the array of the scalar mappable. Urgh...
     sm._A = []
     cbar=fig.colorbar(sm, cax=cax)
-    cbar.set_label('Litres')
+    cbar.set_label('100,000 litres')
  
 
 
 
-def plot_map(dataFrame, column, vmin, vmax):
-  fig, axs = plt.subplots(3, 2, figsize=(12,12), sharex=True, sharey=True)
-  for i,ax in enumerate(axs.flatten()):
-    print(i, dataFrame)
-    map_plot=dataFrame.plot(ax=ax, column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9,edgecolor='0.6')
+def plot_map(dataFrame,  column_list):
+  fig, axes = plt.subplots(3, 2, figsize=(12,12), sharex=True, sharey=True)
+  
+  for i,ax in enumerate(axes.flatten()):
+    print(i)
+    column =  column_list[i]
+    vmin, vmax = dataFrame[column].min(), dataFrame[column].max()
+    map_plot=dataFrame.plot(ax=ax, column=column, cmap="RdBu", scheme="quantiles", k=19, alpha=0.9,edgecolor='0.6')
     ax.grid()
   # Figure title
-    fig.suptitle(column)
-  #    plt.title('linear')
+    fig.suptitle('RAINWATER HARVESTING POTENTIAL IN TAITA')
+    
     # Rotate the x-axis labels so they don't overlap
     plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)  
     map_plot.set_facecolor("#eeeeee")
@@ -423,82 +410,17 @@ def plot_map(dataFrame, column, vmin, vmax):
     # these are matplotlib.patch.Patch properties
     props = dict(boxstyle='round', facecolor='#eaeaea', alpha=0)
     map_plot.text(x=minx+1000,y=maxy-5000, s=u'N \n\u25B2 ', ha='center', fontsize=20, weight='bold', family='Courier new', rotation = 0)
-    map_plot.text(x=425000,y=maxy-2000, s=column,  ha='center', fontsize=20, weight='bold', family='Courier new', bbox=props)
+    map_plot.text(x=426000,y=maxy+2100, s=column,  ha='center', fontsize=20, weight='bold', family='Courier new', bbox=props)
     #ax11.text(datetime(2013, 2, 15), -25, 'Winter')
     plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)
-    colorbar(map_plot, vmin, vmax)
+    colorbar(map_plot, vmin/100000, vmax/100000)
+#    fig.colorbar(map_plot, ax=axes.ravel().tolist())
   #    plt.tight_layout()
     plt.savefig(r'C:\Users\oyeda\Desktop\msc\test.jpg')
 
+
+pot_list = [pot for pot in buildings_rain_aggr.columns if pot.endswith('rainPOT')]
+plot_map(buildings_rain_aggr, pot_list)
 # =============================================================================
 # 
 # =============================================================================
-
-pot_list = [pot for pot in buildings_rain_aggr.columns if pot.endswith('rainPOT')]
-
-fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(12,12), sharex=True, sharey=True) 
-def autoplot(main, column):
-   fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(12,12), sharex=True, sharey=True) 
-
-   r,c=0,0
-   for i in range(6):
-     print(r, c)
-#     main(r, c, axes, column)
-     axis=axes[r][c]
-     map_plot=buildings_rain_aggr.plot(ax=axis, column=pot_list[i], cmap="RdBu", scheme="quantiles", k=10, alpha=0.9,edgecolor='0.6')
-     print(pot_list[i])
-     if i % 2 != 0:
-       r+=1
-       c =0
-     elif i % 2 == 0 or i==1:
-       c=1   
-
-fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(12,12), sharex=True, sharey=True) 
-
-def main(r,c, axes, column):
-    
-    axis=axes[r][c]
-    # Create the figure and subplots
-    map_plot=buildings_rain_aggr.plot(ax=axis, column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9,edgecolor='0.6')
-    axis.grid()
-    # Figure title
-    fig.suptitle('Seasonal temperature observations - Helsinki Malmi airport')
-    plt.title('linear')
-    # Rotate the x-axis labels so they don't overlap
-    plt.setp(axis.xaxis.get_majorticklabels(), rotation=20)  
-    map_plot.set_facecolor("#eeeeee")
-    minx,miny,maxx,maxy =  buildings_rain_aggr.total_bounds
-    # these are matplotlib.patch.Patch properties
-    props = dict(boxstyle='round', facecolor='#eaeaea', alpha=0)
-    map_plot.text(x=minx+1000,y=maxy-5000, s=u'N \n\u25B2 ', ha='center', fontsize=20, weight='bold', family='Courier new', rotation = 0)
-    map_plot.text(x=425000,y=maxy-2000, s=column,  ha='center', fontsize=20, weight='bold', family='Courier new', bbox=props)
-    #ax11.text(datetime(2013, 2, 15), -25, 'Winter')
-    plt.setp(axis.xaxis.get_majorticklabels(), rotation=20)
-#    colorbar(map_plot)
-#    plt.tight_layout()
-    
-    print(column)
-    plt.savefig(r'C:\Users\oyeda\Desktop\msc\test.jpg')
-
-
-
-for i, column in enumerate(buildings_rain_aggr.columns,1):
-  if column.endswith('rainPOT'):
-    autoplot(main=main,column=column)
-    print(column)
-
-fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(12,12), sharex=True, sharey=True) 
-
-
-        vmin, vmax = buildings_rain_aggr[column].min(), buildings_rain_aggr[column].max()
-#        colorbar(map_plot, vmin, vmax)
-
-#        plot_map(buildings_rain_aggr, column, vmin, vmax )
-        print(column, 'is done')
-        if i > 6:
-          break
-        
-        
-        
-        buildings_rain_aggr.plot(ax=ax,column=column, cmap="RdBu", scheme="quantiles", k=10, alpha=0.9, edgecolor='1')
- 
