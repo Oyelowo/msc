@@ -125,10 +125,21 @@ for i, month_file in enumerate(monthly_rain_clipped, 1):
     month_rain_data_test = gpd.read_file(output_shp)
     month_rain_data_test.plot(column=month_field_name, cmap="Blues", scheme="equal_interval", k=9, alpha=0.9)
 
- 
 
 
-
+# =============================================================================
+# AOI POLYGON
+# =============================================================================
+# =============================================================================
+vertices = gpd.read_file(r'E:\LIDAR_FINAL\data\AOI\aoi_vertices.shp')
+vertices.plot()
+aoi_vertices_list = [p.xy for p in vertices.geometry]
+aoi_polygon = Polygon([[points.x, points.y] for points in vertices.geometry])
+aoi_polygon_df = gpd.GeoDataFrame(data=[aoi_polygon],  columns=['geometry'])
+aoi_polygon_df.crs= aoi_crs_epsg
+aoi_polygon_df.plot()
+print(aoi_polygon)
+# =============================================================================
 
 
 
@@ -170,21 +181,6 @@ buildings_centroid.to_file(centroid_fp)
 
 
 
-# =============================================================================
-# AOI POLYGON
-# =============================================================================
-# =============================================================================
-vertices = gpd.read_file(r'E:\LIDAR_FINAL\data\AOI\aoi_vertices.shp')
-vertices.plot()
-aoi_vertices_list = [p.xy for p in vertices.geometry]
-aoi_polygon = Polygon([[points.x, points.y] for points in vertices.geometry])
-aoi_polygon_df = gpd.GeoDataFrame(data=[aoi_polygon],  columns=['geometry'])
-aoi_polygon_df.crs= aoi_crs_epsg
-aoi_polygon_df.plot()
-print(aoi_polygon)
-# =============================================================================
-
-
 
 
 # =============================================================================
@@ -204,9 +200,8 @@ grid.to_file(grid_path)
 
 # =============================================================================
 # CLIP THE GRID INTO THE AOI
-# =============================================================================
-aoi_crs_epsg
-aoi_grid_clipped=gpd.sjoin(grid, aoi_polygon_df, how='right', op='intersects')
+grid.crs = aoi_crs_epsg
+aoi_grid_clipped = gpd.overlay(grid, aoi_polygon_df, how='intersection')
 aoi_grid_clipped.plot()
 aoi_grid_clipped.to_file(r'E:\LIDAR_FINAL\data\grid\aoi_grid_clipped.shp')
 
@@ -219,13 +214,12 @@ aoi_grid_clipped.to_file(r'E:\LIDAR_FINAL\data\grid\aoi_grid_clipped.shp')
 
 
 
-
 # =============================================================================
 # SPATIAL JOIN
 # =============================================================================
 grid.crs = buildings_centroid.crs = aoi_crs_epsg
 #join the grid with the buildings, to get the areas per grid
-buildings_grid = gpd.sjoin(aoi_grid_clipped,buildings_centroid, how="left", op='intersects') 
+buildings_grid = gpd.sjoin(grid,buildings_centroid, how="left", op='intersects') 
 
 #some grids might be without buildings and will be nan values. Replace those with 0
 buildings_grid = buildings_grid.fillna(0)
@@ -235,16 +229,14 @@ del buildings_grid['index_right']
 
 months_shp_filepaths = glob.glob(r'E:\LIDAR_FINAL\data\precipitation\mean_monthly\clipped\to_vector\*.shp')
 
-#The op options determines the type of join operation to apply. op can be set to “intersects”, “within” or 
-#“contains” (these are all equivalent when joining points to polygons, but differ when 
-#joining polygons to other polygons or lines).
-grid.plot()
-
 
 
 # =============================================================================
 # AGGREGATE ROOF AREAS BASED ON GRID ID
 # =============================================================================
+
+import time
+start_time = time.time()
 
 buildings_grouped = buildings_grid.groupby('grid_ID')
 buildings_aggr = gpd.GeoDataFrame()
@@ -257,6 +249,7 @@ for key, (i, group ) in enumerate(buildings_grouped,1):
     buildings_aggr.loc[key,'area_sum'] = group['area'].sum()
     print('Aggregating', key, group['area'].sum())
 
+print("--- %s seconds ---" % (time.time() - start_time))
 
 buildings_aggr.plot('area_sum', linewidth=0.03, cmap="Blues", scheme="quantiles", k=19, alpha=0.9)
 
