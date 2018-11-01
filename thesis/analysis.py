@@ -238,16 +238,15 @@ months_shp_filepaths = glob.glob(r'E:\LIDAR_FINAL\data\precipitation\mean_monthl
 # AGGREGATE ROOF AREAS BASED ON GRID ID
 # =============================================================================
 
-import time
-start_time = time.time()
+
 
 buildings_grouped = buildings_grid.groupby('grid_ID')
 buildings_aggr = gpd.GeoDataFrame()
 #buildings_aggr['geometry']=None
-keyy = geom= area = []
+grid_ID, geom ,area = [], [], []
 for key, (i, group ) in enumerate(buildings_grouped,1):
     group_geometry = group.iloc[0]['geometry']
-    keyy.append(key)
+    grid_ID.append(key)
     geom.append(group_geometry)
     area.append(group['area'].sum())
     print('Aggregating grid', key,  'Total Area=', group['area'].sum())
@@ -255,7 +254,6 @@ buildings_aggr['grid_ID'] = keyy
 buildings_aggr['geometry'] = geom
 buildings_aggr['area_sum'] = area
     
-print("--- %s seconds ---" % (time.time() - start_time))
 
 buildings_aggr.plot('area_sum', linewidth=0.03, cmap="Blues", scheme="quantiles", k=19, alpha=0.9)
 
@@ -264,7 +262,6 @@ buildings_aggr.plot('area_sum', linewidth=0.03, cmap="Blues", scheme="quantiles"
 # =============================================================================
 # AGGREGATE RAINFALL DATA
 # =============================================================================
-
 #3CREATE FUNCTION TO HELP WITH AGGREGATING THE DATA
 #test['geometry'] = test.centroid
 def aggregate_grid_rain(new_dataframe, old_dataframe, month_field_name):
@@ -285,6 +282,8 @@ def aggregate_grid_rain(new_dataframe, old_dataframe, month_field_name):
 # =============================================================================
 # SPATIAL JOIN OF RAINFALL AND ROOF AREAS TO GRID DATA
 # =============================================================================
+import time
+start_time = time.time()
 
 months_shp_filepaths = glob.glob(r'E:\LIDAR_FINAL\data\precipitation\mean_monthly\clipped\to_vector\*.shp')
 
@@ -307,6 +306,7 @@ for i, month_filepath in enumerate(months_shp_filepaths, 1):
     buildings_rain_aggr = aggregate_grid_rain(buildings_rain_aggr, joined_data, month_field_name)
     
 
+print("--- %s seconds ---" % (time.time() - start_time))
 # =============================================================================
 # PLOT THE ROOF AREA AND RAINFALL DATA
 # =============================================================================
