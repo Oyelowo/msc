@@ -250,7 +250,7 @@ for key, (i, group ) in enumerate(buildings_grouped,1):
     geom.append(group_geometry)
     area.append(group['area'].sum())
     print('Aggregating grid', key,  'Total Area=', group['area'].sum())
-buildings_aggr['grid_ID'] = keyy
+buildings_aggr['grid_ID'] = grid_ID
 buildings_aggr['geometry'] = geom
 buildings_aggr['area_sum'] = area
     
@@ -268,16 +268,16 @@ buildings_aggr.plot('area_sum', linewidth=0.03, cmap="Blues", scheme="quantiles"
 def aggregate_grid_rain(new_dataframe, old_dataframe, month_field_name):
     grouped_data = old_dataframe.groupby('grid_ID')
     #buildings_aggr['geometry']=None
-    grid_ID, geometry, total_grid_rain =[], [], []
+    grid_ID_list, geometry_list, total_grid_rain_list =[], [], []
     for key, (i, group ) in enumerate(grouped_data,1):
         group_geometry = group.iloc[0]['geometry']
-        grid_ID.append(key)
-        geometry.append(group_geometry)
-        total_grid_rain.append(round(group[month_field_name].mean(), 2))
+        grid_ID_list.append(key)
+        geometry_list.append(group_geometry)
+        total_grid_rain_list.append(round(group[month_field_name].mean(), 2))
         print('Aggregating', key, month_field_name, group[month_field_name].mean())
-    new_dataframe['geometry'] = group_geometry
-    new_dataframe['grid_ID'] =grid_ID
-    new_dataframe[month_field_name] = total_grid_rain
+    new_dataframe['geometry'] = geometry_list
+    new_dataframe['grid_ID'] =grid_ID_list
+    new_dataframe[month_field_name] = total_grid_rain_list
         
 #        
 #        if i == len(new_dataframe):
@@ -323,8 +323,8 @@ for column in buildings_rain_aggr.columns[2:]:
     buildings_rain_aggr.plot(column=column, cmap="Blues", scheme="quantiles", k=9, alpha=0.9)
     print(column)
     
-
-
+    
+    
 # =============================================================================
 #     CALCULATE MONTHLY RAINWATER HARVESTING POTENTIALS
 # =============================================================================
