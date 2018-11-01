@@ -224,8 +224,13 @@ aoi_grid_clipped.to_file(r'E:\LIDAR_FINAL\data\grid\aoi_grid_clipped.shp')
 # SPATIAL JOIN
 # =============================================================================
 grid.crs = buildings_centroid.crs = aoi_crs_epsg
-buildings_grid = gpd.sjoin(grid,buildings_centroid, how="left", op='intersects') 
+#join the grid with the buildings, to get the areas per grid
+buildings_grid = gpd.sjoin(aoi_grid_clipped,buildings_centroid, how="left", op='intersects') 
+
+#some grids might be without buildings and will be nan values. Replace those with 0
 buildings_grid = buildings_grid.fillna(0)
+
+#delete the index_right column to avoid issues later
 del buildings_grid['index_right']
 
 months_shp_filepaths = glob.glob(r'E:\LIDAR_FINAL\data\precipitation\mean_monthly\clipped\to_vector\*.shp')
