@@ -1,36 +1,17 @@
 # =============================================================================
-from rasterio.plot import show
-from rasterio.plot import show_hist
-from rasterio.mask import mask
-from shapely.geometry import box
 import geopandas as gpd
-from fiona.crs import from_epsg
-import pycrs
 import matplotlib.pyplot as plt
-from osgeo import gdal
-import utm
-from rasterToPolygon import polygonize
-import clip_raster
-import numpy as np
-import geopandas as gpd
 from shapely.geometry import Polygon
-import numpy as np
-# =============================================================================
-
 import rasterio
 from rasterio.plot import show
 from rasterio.plot import show_hist
-from rasterio.mask import mask
-import geopandas as gpd
-from shapely.geometry import box
 import seaborn as sns
 import glob
 import os
 import calendar
 import re
-import pysal as ps
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-from rasterToPolygon import polygonize
 import clip_raster as ras
 
 
@@ -366,15 +347,7 @@ buildings_rain_aggr.describe()
 
 # =============================================================================
 # 
- 
- import pandas as pd
- import numpy as np
- import shapely
- import matplotlib.pyplot as plt
- from mpl_toolkits.axes_grid1 import make_axes_locatable 
- import numpy as np
- import matplotlib.pyplot as plt
- import matplotlib.colors
+  
  
  
 def colorbar(ax, vmin, vmax):
@@ -387,19 +360,20 @@ def colorbar(ax, vmin, vmax):
     sm._A = []
     cbar=fig.colorbar(sm, cax=cax)
     cbar.set_label('100,000 litres')
- 
 
+month_list = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+              'August', 'September', 'October', 'November', 'December']
 
-buildings_rain_aggr.max(axis=0)
 def plot_map(dataFrame,  column_list):
   fig, axes = plt.subplots(3, 2, figsize=(12,12), sharex=True, sharey=True)
   
   for ax, column in zip(axes.flatten(), column_list):
     print(column)
     vmin, vmax = dataFrame[column].min(), dataFrame[column].max()
-    map_plot=dataFrame.plot(ax=ax, column=column,cmap="RdBu", scheme="quantiles", k=10, alpha=0.9,edgecolor='0.6')
+    map_plot=dataFrame.plot(ax=ax, column=column,cmap="RdBu", scheme="quantiles", k=100, alpha=0.9,edgecolor='0.6')
     ax.grid()
   # Figure title
+#    month = month_list.index(column[:3])
     fig.suptitle('RAINWATER HARVESTING POTENTIAL IN TAITA')
     
     # Rotate the x-axis labels so they don't overlap
@@ -410,10 +384,8 @@ def plot_map(dataFrame,  column_list):
     props = dict(boxstyle='round', facecolor='#eaeaea', alpha=0)
     map_plot.text(x=minx+1000,y=maxy-5000, s=u'N \n\u25B2 ', ha='center', fontsize=20, weight='bold', family='Courier new', rotation = 0)
     map_plot.text(x=426000,y=maxy+2100, s=column,  ha='center', fontsize=20, weight='bold', family='Courier new', bbox=props)
-    #ax11.text(datetime(2013, 2, 15), -25, 'Winter')
     plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)
     colorbar(map_plot, vmin/100000, vmax/100000)
-#    fig.colorbar(map_plot, ax=axes.ravel().tolist())
   #    plt.tight_layout()
     plt.savefig(r'C:\Users\oyeda\Desktop\msc\test.jpg')
 
@@ -423,3 +395,5 @@ plot_map(buildings_rain_aggr, pot_list)
 # =============================================================================
 # 
 # =============================================================================
+
+
