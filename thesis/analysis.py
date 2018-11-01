@@ -202,6 +202,9 @@ grid.to_file(grid_path)
 # CLIP THE GRID INTO THE AOI
 grid.crs = aoi_crs_epsg
 aoi_grid_clipped = gpd.overlay(grid, aoi_polygon_df, how='intersection')
+
+#reset the index of the joined data and use the index values + 1, as the ID of each grid
+aoi_grid_clipped['grid_ID'] = aoi_grid_clipped.reset_index(drop=True).index + 1
 aoi_grid_clipped.plot()
 aoi_grid_clipped.to_file(r'E:\LIDAR_FINAL\data\grid\aoi_grid_clipped.shp')
 
@@ -219,7 +222,7 @@ aoi_grid_clipped.to_file(r'E:\LIDAR_FINAL\data\grid\aoi_grid_clipped.shp')
 # =============================================================================
 grid.crs = buildings_centroid.crs = aoi_crs_epsg
 #join the grid with the buildings, to get the areas per grid
-buildings_grid = gpd.sjoin(grid,buildings_centroid, how="left", op='intersects') 
+buildings_grid = gpd.sjoin(aoi_grid_clipped,buildings_centroid, how="left", op='intersects') 
 
 #some grids might be without buildings and will be nan values. Replace those with 0
 buildings_grid = buildings_grid.fillna(0)
@@ -241,14 +244,17 @@ start_time = time.time()
 buildings_grouped = buildings_grid.groupby('grid_ID')
 buildings_aggr = gpd.GeoDataFrame()
 #buildings_aggr['geometry']=None
+keyy = geom= area = []
 for key, (i, group ) in enumerate(buildings_grouped,1):
-    print(i)
     group_geometry = group.iloc[0]['geometry']
-    buildings_aggr.loc[key, 'grid_ID'] = key
-    buildings_aggr.loc[key,'geometry'] = group_geometry
-    buildings_aggr.loc[key,'area_sum'] = group['area'].sum()
-    print('Aggregating', key, group['area'].sum())
-
+    keyy.append(key)
+    geom.append(group_geometry)
+    area.append(group['area'].sum())
+    print('Aggregating grid', key,  'Total Area=', group['area'].sum())
+buildings_aggr['grid_ID'] = keyy
+buildings_aggr['geometry'] = geom
+buildings_aggr['area_sum'] = area
+    
 print("--- %s seconds ---" % (time.time() - start_time))
 
 buildings_aggr.plot('area_sum', linewidth=0.03, cmap="Blues", scheme="quantiles", k=19, alpha=0.9)
