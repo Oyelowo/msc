@@ -390,15 +390,14 @@ def colorbar(ax, vmin, vmax):
  
 
 
-
+buildings_rain_aggr.max(axis=0)
 def plot_map(dataFrame,  column_list):
   fig, axes = plt.subplots(3, 2, figsize=(12,12), sharex=True, sharey=True)
   
-  for i,ax in enumerate(axes.flatten()):
-    print(i)
-    column =  column_list[i]
+  for ax, column in zip(axes.flatten(), column_list):
+    print(column)
     vmin, vmax = dataFrame[column].min(), dataFrame[column].max()
-    map_plot=dataFrame.plot(ax=ax, column=column, cmap="RdBu", scheme="quantiles", k=19, alpha=0.9,edgecolor='0.6')
+    map_plot=dataFrame.plot(ax=ax, column=column,cmap="RdBu", scheme="quantiles", k=10, alpha=0.9,edgecolor='0.6')
     ax.grid()
   # Figure title
     fig.suptitle('RAINWATER HARVESTING POTENTIAL IN TAITA')
@@ -419,7 +418,7 @@ def plot_map(dataFrame,  column_list):
     plt.savefig(r'C:\Users\oyeda\Desktop\msc\test.jpg')
 
 
-pot_list = [pot for pot in buildings_rain_aggr.columns if pot.endswith('rainPOT')]
+pot_list = [pot for pot in buildings_rain_aggr.columns if pot.endswith('rainPOT') and pot != 'ann_rainPOT']
 plot_map(buildings_rain_aggr, pot_list)
 # =============================================================================
 # 
