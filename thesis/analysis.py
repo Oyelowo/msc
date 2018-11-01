@@ -264,18 +264,24 @@ buildings_aggr.plot('area_sum', linewidth=0.03, cmap="Blues", scheme="quantiles"
 # =============================================================================
 #3CREATE FUNCTION TO HELP WITH AGGREGATING THE DATA
 #test['geometry'] = test.centroid
+
 def aggregate_grid_rain(new_dataframe, old_dataframe, month_field_name):
     grouped_data = old_dataframe.groupby('grid_ID')
     #buildings_aggr['geometry']=None
+    grid_ID, geometry, total_grid_rain =[], [], []
     for key, (i, group ) in enumerate(grouped_data,1):
         group_geometry = group.iloc[0]['geometry']
-        new_dataframe.loc[key,'geometry'] = group_geometry
-        new_dataframe.loc[key, 'grid_ID'] = key
-        new_dataframe.loc[key, month_field_name] =round(group[month_field_name].mean(), 2)
+        grid_ID.append(key)
+        geometry.append(group_geometry)
+        total_grid_rain.append(round(group[month_field_name].mean(), 2))
         print('Aggregating', key, month_field_name, group[month_field_name].mean())
+    new_dataframe['geometry'] = group_geometry
+    new_dataframe['grid_ID'] =grid_ID
+    new_dataframe[month_field_name] = total_grid_rain
+        
 #        
-        if i == len(new_dataframe):
-            new_dataframe.loc[key,'area_sum'] = group['area_sum'].sum()
+#        if i == len(new_dataframe):
+#            new_dataframe.loc[key,'area_sum'] = group['area_sum'].sum()
     return new_dataframe
 
 
@@ -284,6 +290,8 @@ def aggregate_grid_rain(new_dataframe, old_dataframe, month_field_name):
 # =============================================================================
 import time
 start_time = time.time()
+
+
 
 months_shp_filepaths = glob.glob(r'E:\LIDAR_FINAL\data\precipitation\mean_monthly\clipped\to_vector\*.shp')
 
