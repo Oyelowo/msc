@@ -268,20 +268,19 @@ buildings_aggr.plot('area_sum', linewidth=0.03, cmap="Blues", scheme="quantiles"
 def aggregate_grid_rain(new_dataframe, old_dataframe, month_field_name):
     grouped_data = old_dataframe.groupby('grid_ID')
     #buildings_aggr['geometry']=None
-    grid_ID_list, geometry_list, total_grid_rain_list =[], [], []
+    grid_ID_list, geometry_list, total_grid_rain_list , roof_area_list=[], [], [], []
     for key, (i, group ) in enumerate(grouped_data,1):
         group_geometry = group.iloc[0]['geometry']
         grid_ID_list.append(key)
         geometry_list.append(group_geometry)
         total_grid_rain_list.append(round(group[month_field_name].mean(), 2))
+        roof_area_list.append(group['area_sum'].sum())
         print('Aggregating', key, month_field_name, group[month_field_name].mean())
+
+    new_dataframe['area_sum'] = roof_area_list
     new_dataframe['geometry'] = geometry_list
     new_dataframe['grid_ID'] =grid_ID_list
     new_dataframe[month_field_name] = total_grid_rain_list
-        
-#        
-#        if i == len(new_dataframe):
-#            new_dataframe.loc[key,'area_sum'] = group['area_sum'].sum()
     return new_dataframe
 
 
@@ -297,15 +296,14 @@ months_shp_filepaths = glob.glob(r'E:\LIDAR_FINAL\data\precipitation\mean_monthl
 
 
 buildings_rain_aggr = gpd.GeoDataFrame()
-buildings_rain  = buildings_aggr.copy()
 #del buildings_rain['area']
 for i, month_filepath in enumerate(months_shp_filepaths, 1):  
     print(i)
     month_rain_data = gpd.read_file(month_filepath)
     
-    buildings_rain.crs = month_rain_data.crs=  aoi_crs_epsg
+    buildings_aggr.crs = month_rain_data.crs=  aoi_crs_epsg
     
-    joined_data = gpd.sjoin(buildings_rain, month_rain_data, how='left', op='intersects')
+    joined_data = gpd.sjoin(buildings_aggr, month_rain_data, how='left', op='intersects')
     
 #    Get field name from file name and exclude the file format
     month_field_name = os.path.basename(month_filepath)[:-4]
@@ -319,11 +317,9 @@ print("--- %s seconds ---" % (time.time() - start_time))
 # PLOT THE ROOF AREA AND RAINFALL DATA
 # =============================================================================
 
-for column in buildings_rain_aggr.columns[2:]:
+for column in buildings_rain_aggr.columns[3:]:
     buildings_rain_aggr.plot(column=column, cmap="Blues", scheme="quantiles", k=9, alpha=0.9)
     print(column)
-    
-    
     
 # =============================================================================
 #     CALCULATE MONTHLY RAINWATER HARVESTING POTENTIALS
