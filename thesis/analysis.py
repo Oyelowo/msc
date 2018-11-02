@@ -362,8 +362,8 @@ def colorbar(ax, vmin, vmax):
     cax = divider.append_axes("right", size="4%", pad=0.05)
     # fake up the array of the scalar mappable. Urgh...
     sm._A = []
-    cbar=fig.colorbar(sm, cax=cax)
-    cbar.set_label(' litres')
+    cbar=fig.colorbar(sm, cax = cax, fraction=0.046)
+    cbar.set_label('per million litres')
 #    cbar.ax.set_title('RWHP')
 
 
@@ -378,13 +378,13 @@ def find_month(column_name):
 
 
 
-def userDefinedClassifer(class_lower_limit=0, class_upper_limit=300000, class_step=25000):
+def userDefinedClassifer(class_lower_limit=0, class_upper_limit=300000, class_step=10000):
   breaks = [x for x in range(class_lower_limit, class_upper_limit, class_step)]
   classifier = ps.User_Defined.make(bins=breaks)
   return classifier
 
-def plot_map(dataFrame,  column_list):
-  fig, axes = plt.subplots(4, 3, figsize=(12,12), sharex=True, sharey=True)
+def plot_map(dataFrame,  column_list, output_fp):
+  fig, axes = plt.subplots(3, 2, figsize=(8,12), sharex=True, sharey=True)
 #  plt.suptitle('RAINWATER HARVESTING POTENTIAL IN TAITA')
   vmin, vmax = dataFrame[column_list].min().min(), dataFrame[column_list].max().max()
   classified_df = dataFrame.copy()
@@ -410,9 +410,9 @@ def plot_map(dataFrame,  column_list):
     map_plot.text(x=minx+1000,y=maxy-5000, s=u'N \n\u25B2 ', ha='center', fontsize=17, weight='bold', family='Courier new', rotation = 0)
     map_plot.text(x=426000,y=maxy+2100, s=month,  ha='center', fontsize=20, weight='bold', family='Courier new', bbox=props)
     plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)
-    colorbar(map_plot, vmin, vmax)
-    plt.tight_layout()
-    plt.savefig(r'C:\Users\oyeda\Desktop\msc\test.jpg', bbox_inches='tight', pad_inches=0.1)
+    colorbar(map_plot, vmin/1000000, vmax/1000000)
+#    plt.tight_layout()
+    plt.savefig(output_fp, bbox_inches='tight', pad_inches=0.1)
 
 
 #pot_list = [pot for pot in buildings_rain_aggr.columns if pot.endswith('rainPOT') and pot != 'ann_rainPOT']
@@ -427,8 +427,9 @@ rain_pot_list = list(map(lambda x: x[:3] + '_rainPOT', month_list))
 rain_list =list(map(lambda x: x[:3] + '_rain', month_list))
 #plot_map(buildings_rain_aggr, rain_list)
 
-kj = buildings_rain_aggr.copy()
-plot_map(buildings_rain_aggr, rain_pot_list)
+
+plot_map(buildings_rain_aggr, rain_pot_list[:6], r'C:\Users\oyeda\Desktop\msc\jan_jun.jpg')
+plot_map(buildings_rain_aggr, rain_pot_list[6:], r'C:\Users\oyeda\Desktop\msc\jun_dec.jpg')
 # =============================================================================
 # 
 # =============================================================================
@@ -437,3 +438,4 @@ plt.hist(buildings_rain_aggr['Sep_rainPOT'])
 
 
 buildings_rain_aggr[rain_list].mean()
+
