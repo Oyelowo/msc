@@ -361,29 +361,37 @@ def colorbar(ax, vmin, vmax):
     cbar=fig.colorbar(sm, cax=cax)
     cbar.set_label('100,000 litres')
 
-month_list = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+
+def find_month(column_name):
+  month_list = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
               'August', 'September', 'October', 'November', 'December']
+  month_abbreviation= column_name[:3]
+  print(month_abbreviation)
+#  month = filter(lambda x: x.startswith(month_abbreviation), month_list)
+  month = [month for month in month_list if month.startswith(month_abbreviation)]
+  return ' '.join(month)
+
 
 def plot_map(dataFrame,  column_list):
   fig, axes = plt.subplots(3, 2, figsize=(12,12), sharex=True, sharey=True)
   
   for ax, column in zip(axes.flatten(), column_list):
-    print(column)
+    month = find_month(column)
+    print(month)
     vmin, vmax = dataFrame[column].min(), dataFrame[column].max()
     map_plot=dataFrame.plot(ax=ax, column=column,cmap="RdBu", scheme="quantiles", k=100, alpha=0.9,edgecolor='0.6')
     ax.grid()
-  # Figure title
-#    month = month_list.index(column[:3])
     fig.suptitle('RAINWATER HARVESTING POTENTIAL IN TAITA')
     
     # Rotate the x-axis labels so they don't overlap
     plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)  
     map_plot.set_facecolor("#eeeeee")
     minx,miny,maxx,maxy =  dataFrame.total_bounds
+    
     # these are matplotlib.patch.Patch properties
     props = dict(boxstyle='round', facecolor='#eaeaea', alpha=0)
     map_plot.text(x=minx+1000,y=maxy-5000, s=u'N \n\u25B2 ', ha='center', fontsize=20, weight='bold', family='Courier new', rotation = 0)
-    map_plot.text(x=426000,y=maxy+2100, s=column,  ha='center', fontsize=20, weight='bold', family='Courier new', bbox=props)
+    map_plot.text(x=426000,y=maxy+2100, s=month,  ha='center', fontsize=20, weight='bold', family='Courier new', bbox=props)
     plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)
     colorbar(map_plot, vmin/100000, vmax/100000)
   #    plt.tight_layout()
