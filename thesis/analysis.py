@@ -11,6 +11,7 @@ import os
 import calendar
 import re
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+import pysal as ps
 from shapely import speedups
 speedups.available
 speedups.enable()
@@ -362,9 +363,9 @@ def colorbar(ax, vmin, vmax):
     # fake up the array of the scalar mappable. Urgh...
     sm._A = []
     cbar=fig.colorbar(sm, cax=cax)
-    cbar.set_label('100,000 litres')
-    cbar.ax.set_title('RWHP')
-import pysal as ps
+    cbar.set_label(' litres')
+#    cbar.ax.set_title('RWHP')
+
 
 def find_month(column_name):
   month_list = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
@@ -376,33 +377,28 @@ def find_month(column_name):
   return ' '.join(month)
 
 
-month_list = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
-              'August', 'September', 'October', 'November', 'December']
-rain_pot_list = list(map(lambda x: x[:3] + '_rainPOT', month_list))
-rain_list =list(map(lambda x: x[:3] + '_rain', month_list))
 
+def userDefinedClassifer(class_lower_limit=0, class_upper_limit=300000, class_step=25000):
+  breaks = [x for x in range(class_lower_limit, class_upper_limit, class_step)]
+  classifier = ps.User_Defined.make(bins=breaks)
+  return classifier
 
-#classifier = ps.Natural_Breaks.make(k=150)
-#dataFrame[rain_pot_list] = dataFrame[rain_pot_list].apply(classifier)
-#
-#mode_classif.columns = [ rain_pot_list + '_class']
-  
 def plot_map(dataFrame,  column_list):
-  fig, axes = plt.subplots(3, 2, figsize=(12,12), sharex=True, sharey=True)
-  classied_df = dataFrame.copy()
-  classifier = ps.Natural_Breaks.make(k=7)
-  classied_df[rain_pot_list] = classied_df[rain_pot_list].apply(classifier)
-  for ax, column in zip(axes.flatten(), column_list):
+  fig, axes = plt.subplots(4, 3, figsize=(12,12), sharex=True, sharey=True)
+#  plt.suptitle('RAINWATER HARVESTING POTENTIAL IN TAITA')
+  vmin, vmax = dataFrame[column_list].min().min(), dataFrame[column_list].max().max()
+  classified_df = dataFrame.copy()
+  classified_df[column_list] = classified_df[column_list].apply(userDefinedClassifer())
+  for i, (ax, column) in enumerate(zip(axes.flatten(), column_list), 1):
     #Join the classes back to the main data.
     month = find_month(column)
 #    print(month)
 #    vmin, vmax = dataFrame[column].min(), dataFrame[column].max()
-    vmin, vmax = dataFrame[rain_pot_list].min().min(), dataFrame[rain_pot_list].max().max()
-    map_plot=classied_df.plot(ax=ax, column=column , cmap='RdBu')
+    map_plot=classified_df.plot(ax=ax, column=column , cmap='RdBu')
     print(column)
     ax.grid()
-    fig.suptitle('RAINWATER HARVESTING POTENTIAL IN TAITA')
     ax.set_aspect('equal')
+    
     
     # Rotate the x-axis labels so they don't overlap
     plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)  
@@ -411,121 +407,33 @@ def plot_map(dataFrame,  column_list):
     
     # these are matplotlib.patch.Patch properties
     props = dict(boxstyle='round', facecolor='#eaeaea', alpha=0)
-    map_plot.text(x=minx+1000,y=maxy-5000, s=u'N \n\u25B2 ', ha='center', fontsize=20, weight='bold', family='Courier new', rotation = 0)
+    map_plot.text(x=minx+1000,y=maxy-5000, s=u'N \n\u25B2 ', ha='center', fontsize=17, weight='bold', family='Courier new', rotation = 0)
     map_plot.text(x=426000,y=maxy+2100, s=month,  ha='center', fontsize=20, weight='bold', family='Courier new', bbox=props)
     plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)
-    colorbar(map_plot, vmin/1000, vmax/1000)
-  #    plt.tight_layout()
+    colorbar(map_plot, vmin, vmax)
+    plt.tight_layout()
     plt.savefig(r'C:\Users\oyeda\Desktop\msc\test.jpg', bbox_inches='tight', pad_inches=0.1)
 
 
 #pot_list = [pot for pot in buildings_rain_aggr.columns if pot.endswith('rainPOT') and pot != 'ann_rainPOT']
 
 #classifier = ps.Natural_Breaks.make(k=10)
-#jj = buildings_rain_aggr.copy()
-#
-#jj[rain_pot_list] = jj[rain_pot_list].apply(classifier)
+    
 
+
+month_list = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+              'August', 'September', 'October', 'November', 'December']
+rain_pot_list = list(map(lambda x: x[:3] + '_rainPOT', month_list))
+rain_list =list(map(lambda x: x[:3] + '_rain', month_list))
 #plot_map(buildings_rain_aggr, rain_list)
+
+kj = buildings_rain_aggr.copy()
 plot_map(buildings_rain_aggr, rain_pot_list)
 # =============================================================================
 # 
 # =============================================================================
 
+plt.hist(buildings_rain_aggr['Sep_rainPOT'])
 
 
-
-
-
-    #Rename the columns of our classified columns.
-
-# =============================================================================
-# 
-# 
-# aa= buildings_rain_aggr.copy()
-# aa[rain_pot_list].min(axis=0).min()
-# aa[rain_pot_list].max(axis=0).max()
-# #aa=aa.loc[aa['Sep_rainPOT']>0]
-# classifier = ps.Natural_Breaks.make(k=100)
-# aa[rain_pot_list] = aa[rain_pot_list].apply(classifier)
-# aa.plot(column='Jun_rainPOT', cmap='RdBu', scheme='equal_interval', k=20)
-# aa.plot(column='Apr_rainPOT', cmap='RdBu',scheme='equal_interval', k=20)
-# aa.plot(column='Nov_rainPOT', cmap='RdBu',scheme='equal_interval', k=20)
-# aa.plot(column='Sep_rainPOT', cmap='RdBu',scheme='equal_interval', k=20)
-# =============================================================================
-# =============================================================================
-# 
-# merged_metro['label_' + tt_col ] = mode_classif
-#         
-# 
-# 
-# 
-# my_map = merged_metro.plot(column=tt_col, linewidth=0.02, legend=True, cmap="RdYlGn", scheme=class_type, k=n_classes, alpha=0.9)
-# # =============================================================================
-# #  
-# =============================================================================
-# 
-# 
-# if class_type == "Natural_Breaks":
-#         classifier = ps.Natural_Breaks.make(k=n_classes)
-#     elif class_type == "Equal_Interval":
-#         classifier = ps.Equal_Interval.make(k=n_classes)
-#     elif class_type == "Box_Plot":
-#         classifier = ps.Box_Plot.make(hinge)
-#     elif class_type == "Fisher_Jenks":
-#         classifier = ps.Fisher_Jenks.make(k=n_classes)
-# #                elif class_type == "Fisher_Jenks_Sampled":
-# #                    classifier = ps.Fisher_Jenks_Sampled.make(k=n_classes, pct=0.1)
-#     elif class_type == "HeadTail_Breaks":
-#         classifier = ps.HeadTail_Breaks.make(k=n_classes)
-#     elif class_type == "Jenks_Caspall":
-#         classifier = ps.Jenks_Caspall.make(k=n_classes)
-#     elif class_type == "Jenks_Caspall_Forced":
-#         classifier = ps.Jenks_Caspall_Forced.make(k=n_classes)
-#     elif class_type == "Quantiles":
-#         classifier = ps.Quantiles.make(k=n_classes)
-#     elif class_type == "Percentiles":
-#         classifier = ps.Percentiles.make(pct_classes)
-#     elif class_type == "Std_Mean":
-#         classifier = ps.Std_Mean.make(multiples)
-#     mode_classif = merged_metro[[tt_col]].apply(classifier)
-#    
-#     
-#     #Rename the columns of our classified columns.
-#     mode_classif.columns = [tt_col+"_ud"]
-#     
-#     
-#     #Join the classes back to the main data.
-#     merged_metro = merged_metro.join(mode_classif)
-#     
-#         
-#     merged_metro['label_' + tt_col ] = mode_classif
-#         
-#     
-# 
-# elif classification == "User_Defined":
-#      #Next, we want to classify the travel times with 5 minute intervals until 200 minutes.
-# 
-#     #Let’s create a list of values where minumum value is 5, maximum value is 200 and step is 5.
-#     breaks = [x for x in range(class_lower_limit, class_upper_limit, class_step)]
-#     #Now we can create a pysal User_Defined classifier and classify our travel time values.
-# 
-#     classifier = ps.User_Defined.make(bins=breaks)
-# 
-#     #walk_classif = data[['walk_t']].apply(classifier)
-#     
-#     mode_classif = merged_metro[[tt_col]].apply(classifier)
-#     
-#     
-#     #Rename the columns of our classified columns.
-#     mode_classif.columns = [tt_col+"_ud"]
-#     #walk_classif.columns = ['walk_t_ud']
-#     
-#     #Join the classes back to the main data.
-#     merged_metro = merged_metro.join(mode_classif)
-# 
-# 
-# 
-# my_map = merged_metro.plot(column=tt_col, linewidth=0.02, legend=True, cmap="RdYlGn", scheme=class_type, k=n_classes, alpha=0.9)
-#                         
-# =============================================================================
+buildings_rain_aggr[rain_list].mean()
