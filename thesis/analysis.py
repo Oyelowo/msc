@@ -390,15 +390,16 @@ rain_list =list(map(lambda x: x[:3] + '_rain', month_list))
 def plot_map(dataFrame,  column_list):
   fig, axes = plt.subplots(3, 2, figsize=(12,12), sharex=True, sharey=True)
   classied_df = dataFrame.copy()
-  classifier = ps.Natural_Breaks.make(k=15)
+  classifier = ps.Natural_Breaks.make(k=7)
   classied_df[rain_pot_list] = classied_df[rain_pot_list].apply(classifier)
   for ax, column in zip(axes.flatten(), column_list):
     #Join the classes back to the main data.
     month = find_month(column)
-    print(month)
+#    print(month)
 #    vmin, vmax = dataFrame[column].min(), dataFrame[column].max()
     vmin, vmax = dataFrame[rain_pot_list].min().min(), dataFrame[rain_pot_list].max().max()
     map_plot=classied_df.plot(ax=ax, column=column , cmap='RdBu')
+    print(column)
     ax.grid()
     fig.suptitle('RAINWATER HARVESTING POTENTIAL IN TAITA')
     ax.set_aspect('equal')
@@ -420,6 +421,10 @@ def plot_map(dataFrame,  column_list):
 
 #pot_list = [pot for pot in buildings_rain_aggr.columns if pot.endswith('rainPOT') and pot != 'ann_rainPOT']
 
+#classifier = ps.Natural_Breaks.make(k=10)
+#jj = buildings_rain_aggr.copy()
+#
+#jj[rain_pot_list] = jj[rain_pot_list].apply(classifier)
 
 #plot_map(buildings_rain_aggr, rain_list)
 plot_map(buildings_rain_aggr, rain_pot_list)
