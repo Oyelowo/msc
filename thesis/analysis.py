@@ -398,8 +398,15 @@ def plot_map(dataFrame,  column_list):
     plt.savefig(r'C:\Users\oyeda\Desktop\msc\test.jpg')
 
 
-pot_list = [pot for pot in buildings_rain_aggr.columns if pot.endswith('rainPOT') and pot != 'ann_rainPOT']
-plot_map(buildings_rain_aggr, pot_list)
+#pot_list = [pot for pot in buildings_rain_aggr.columns if pot.endswith('rainPOT') and pot != 'ann_rainPOT']
+
+
+month_list = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+              'August', 'September', 'October', 'November', 'December']
+rain_pot_list = list(map(lambda x: x[:3] + '_rainPOT', month_list))
+rain_list =list(map(lambda x: x[:3] + '_rain', month_list))
+plot_map(buildings_rain_aggr, rain_list)
+plot_map(buildings_rain_aggr, rain_pot_list)
 # =============================================================================
 # 
 # =============================================================================
