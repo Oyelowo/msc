@@ -354,19 +354,67 @@ buildings_rain_aggr.describe()
   
  
  
-def colorbar(ax, vmin, vmax):
-  # add colorbar
-    fig = ax.get_figure()
-    sm = plt.cm.ScalarMappable(cmap='RdBu', norm=plt.Normalize(vmin=vmin, vmax=vmax))
-    divider = make_axes_locatable(ax)
-    cax = divider.append_axes("right", size="4%", pad=0.05)
-    # fake up the array of the scalar mappable. Urgh...
-    sm._A = []
-    cbar=fig.colorbar(sm, cax = cax, fraction=0.046)
-    cbar.set_label('per million litres')
+#def colorbar(ax, vmin, vmax):
+#  # add colorbar
+#    fig = ax.get_figure()
+#    sm = plt.cm.ScalarMappable(cmap='RdBu', norm=plt.Normalize(vmin=vmin, vmax=vmax))
+#    divider = make_axes_locatable(ax)
+#    cax = divider.append_axes("right", size="4%", pad=0.05)
+#    # fake up the array of the scalar mappable. Urgh...
+#    sm._A = []
+#    cbar=fig.colorbar(sm, cax = cax, fraction=0.046)
+#    cbar.set_label('per million litres')
+#    ticks = [str(i) for i in range(vmin, vmax, 5)]
+#    ticks[-1] = '>' + ticks[-1]
+#    ticks_dol =[ '$' + x +'$' for x in ticks]
+#    for i, lab in enumerate(ticks_dol):
+#        cbar.ax.text(2, (2 * i) / 10, lab, ha='center', va='center')
+#    cbar.ax.get_yaxis().labelpad = 15
+#    cbar.ax.set_yticklabels(ticks)
+    
 #    cbar.ax.set_title('RWHP')
 
+# =============================================================================
+# PLOTTING MAPS
+# =============================================================================
 
+cmap = 'RdBu'
+
+def organise_colorbar(cbar, vmin, vmax, number_of_ticks=6, cbar_texts_padding=2, labelpad=45):
+  #    organise the labels of the colorbar
+    interval = int((vmax-vmin)/(number_of_ticks-1))
+    scale_divider = ((vmax-vmin)/interval) 
+    ticks=[]
+    for i in range(vmin, vmax+1, interval):
+      ticks.append(str(i))
+#    add greater than sign to the upper end of the scale
+    ticks[-1] = '>' + ticks[-1]
+    cbar.ax.set_yticklabels(ticks)
+    ticks_dol =[ '$' + x +'$' for x in ticks]
+    for i, lab in enumerate(ticks_dol,0):
+      if i == len(ticks_dol) -1:
+        cbar_texts_padding += 0.75
+      cbar.ax.text(cbar_texts_padding, (i) / scale_divider, lab, ha='center', va='center')
+    cbar.ax.get_yaxis().labelpad = labelpad
+
+
+def colorbar(ax, vmin, vmax, truncate_cbar_texts=True, number_of_ticks=6, cbar_label_pad=2, labelpad = 35):
+  # add colorbar
+    fig = ax.get_figure()
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="4%", pad=0.05)
+    # fake up the array of the scalar mappable....
+    sm._A = []
+    cbar=fig.colorbar(sm, cax = cax, fraction=0.046)
+    cbar.set_label('per 100,000 litres', rotation=270)
+    if truncate_cbar_texts:
+      cbar.ax.get_yaxis().set_ticks([])
+      organise_colorbar(cbar, vmin, vmax)
+    
+
+
+    
 def find_month(column_name):
   month_list = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
               'August', 'September', 'October', 'November', 'December']
@@ -378,24 +426,24 @@ def find_month(column_name):
 
 
 
-def userDefinedClassifer(class_lower_limit=0, class_upper_limit=500000, class_step=5000):
+def userDefinedClassifer(class_lower_limit, class_upper_limit, class_step):
   breaks = [x for x in range(class_lower_limit, class_upper_limit, class_step)]
   classifier = ps.User_Defined.make(bins=breaks)
   return classifier
 
  
-def plot_map(dataFrame,  column_list, output_fp):
-  fig, axes = plt.subplots(3, 2, figsize=(8,12), sharex=True, sharey=True)
+def plot_map(dataFrame,  column_list, vmin, vmax,truncate_cbar_texts, l_limit, h_limit, step, output_fp):
+  fig, axes = plt.subplots(3, 2, figsize=(12,12), sharex=True, sharey=True)
 #  plt.suptitle('RAINWATER HARVESTING POTENTIAL IN TAITA')
-  vmin, vmax = dataFrame[column_list].min().min(), dataFrame[column_list].max().max()
+#  vmin, vmax = dataFrame[column_list].min().min(), dataFrame[column_list].max().max()
   classified_df = dataFrame.copy()
-  classified_df[column_list] = classified_df[column_list].apply(userDefinedClassifer())
+  classified_df[column_list] = classified_df[column_list].apply(userDefinedClassifer(l_limit, h_limit, step))
   for i, (ax, column) in enumerate(zip(axes.flatten(), column_list), 1):
     #Join the classes back to the main data.
     month = find_month(column)
 #    print(month)
 #    vmin, vmax = dataFrame[column].min(), dataFrame[column].max()
-    map_plot=classified_df.plot(ax=ax, column=column , cmap='RdBu')
+    map_plot=classified_df.plot(ax=ax, column=column , cmap=cmap)
     print(column)
     ax.grid()
     ax.set_aspect('equal')
@@ -411,7 +459,7 @@ def plot_map(dataFrame,  column_list, output_fp):
     map_plot.text(x=minx+1000,y=maxy-5000, s=u'N \n\u25B2 ', ha='center', fontsize=17, weight='bold', family='Courier new', rotation = 0)
     map_plot.text(x=426000,y=maxy+2100, s=month,  ha='center', fontsize=20, weight='bold', family='Courier new', bbox=props)
     plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)
-    colorbar(map_plot, vmin/1000000, vmax/1000000)
+    colorbar(map_plot, vmin, vmax, truncate_cbar_texts)
 #    plt.tight_layout()
     plt.savefig(output_fp, bbox_inches='tight', pad_inches=0.1)
 
@@ -429,11 +477,15 @@ rain_list =list(map(lambda x: x[:3] + '_rain', month_list))
 #plot_map(buildings_rain_aggr, rain_list)
 
 
-plot_map(buildings_rain_aggr, rain_pot_list[:6], r'C:\Users\oyeda\Desktop\msc\jan_jun.jpg')
-plot_map(buildings_rain_aggr, rain_pot_list[6:], r'C:\Users\oyeda\Desktop\msc\jun_dec.jpg')
+plot_map(buildings_rain_aggr, rain_list[:6],0 , 193,True, 6, 193, 1, r'C:\Users\oyeda\Desktop\msc\jan_jun_rain.jpg')
+plot_map(buildings_rain_aggr, rain_list[:6],0 , 193,False, 6, 193, 1,r'C:\Users\oyeda\Desktop\msc\jan_jun_rain.jpg')
+plot_map(buildings_rain_aggr, rain_pot_list[:6],0 , 50, True, 0, 500000, 1000, r'C:\Users\oyeda\Desktop\msc\jan_jun_potential.jpg')
+plot_map(buildings_rain_aggr, rain_pot_list[6:], 0, 50,True, 0, 500000, 1000, r'C:\Users\oyeda\Desktop\msc\jun_dec_potential.jpg')
 # =============================================================================
 # 
 # =============================================================================
+
+
 
 plt.hist(buildings_rain_aggr['Sep_rainPOT'])
 
@@ -441,7 +493,7 @@ from matplotlib.pyplot import figure
 figure(num=None, figsize=(6, 2), dpi=80, facecolor='w', edgecolor='k')
 
 first_letter = [first[:3] for first in rain_pot_list]
-plt.bar(first_letter, buildings_rain_aggr[ rain_pot_list].mean())
-plt.plot(first_letter, buildings_rain_aggr[ rain_pot_list].mean(), 'b--')
+plt.bar(first_letter, buildings_rain_aggr[ rain_pot_list].sum())
+plt.plot(first_letter, buildings_rain_aggr[ rain_pot_list].sum(), 'b--')
 buildings_rain_aggr[rain_list].mean()
 

@@ -1,3 +1,86 @@
+def colorbar(ax, vmin=0, vmax=50):
+  # add colorbar
+    fig = ax.get_figure()
+    sm = plt.cm.ScalarMappable(cmap='RdBu', norm=plt.Normalize(vmin=vmin, vmax=vmax))
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="4%", pad=0.05)
+    # fake up the array of the scalar mappable. Urgh...
+    sm._A = []
+    cbar=fig.colorbar(sm, cax = cax, fraction=0.046)
+    cbar.set_label('per million litres')
+    cbar.ax.get_yaxis().set_ticks([])
+    vmin, vmax = 0, 50
+    number_of_ticks = 6
+    interval = int(vmax/(number_of_ticks-1))
+    scale_divider = (vmax/interval) 
+    ticks=[]
+    for i in range(vmin, vmax+1, interval):
+      ticks.append(str(i))
+    ticks[-1] = '>' + ticks[-1]
+    cbar.ax.set_yticklabels(ticks)
+    ticks_dol =[ '$' + x +'$' for x in ticks]
+    for i, lab in enumerate(ticks_dol,0):
+      right_shift=2.5
+      if i == len(ticks_dol) -1:
+        right_shift = 3.5
+      cbar.ax.text(right_shift, (i) / scale_divider, lab, ha='center', va='center')
+    cbar.ax.get_yaxis().labelpad = 25
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+def colorbar(ax, vmin=0, vmax=40):
+  # add colorbar
+    fig = ax.get_figure()
+    sm = plt.cm.ScalarMappable(cmap='RdBu', norm=plt.Normalize(vmin=vmin, vmax=vmax))
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="4%", pad=0.05)
+    # fake up the array of the scalar mappable. Urgh...
+    sm._A = []
+    cbar=fig.colorbar(sm, cax = cax, fraction=0.046)
+    cbar.set_label('per million litres')
+    cbar.ax.get_yaxis().set_ticks([])
+    vmin, vmax = 0, 40
+    ticks=[]
+    for i in range(vmin, vmax+10, 10):
+      ticks.append(str(i))
+#      ticks.append('')
+    ticks[-1] = '>' + ticks[-1]
+    cbar.ax.set_yticklabels(ticks)
+    ticks_dol =[ '$' + x +'$' for x in ticks]
+    for i, lab in enumerate(ticks_dol,0):
+      right_shift=2.5
+      if i == len(ticks_dol) -1:
+        right_shift = 3.5
+      cbar.ax.text(right_shift, (2 * i) / 8, lab, ha='center', va='center')
+    cbar.ax.get_yaxis().labelpad = 25
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
  
 def colorbar(ax, vmin, vmax):
