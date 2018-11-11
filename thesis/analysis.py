@@ -19,6 +19,7 @@ speedups.enable()
 import clip_raster as ras
 
 
+
 # =============================================================================
 # 
 # =============================================================================
@@ -53,13 +54,13 @@ aoi_polygon.crs = aoi_crs_epsg
 
 
 #SPECIFY PLOT SIZE IN THE CONSOLE
-plt.rcParams['figure.figsize'] = (4, 12) 
+#plt.rcParams['figure.figsize'] = (4, 12) 
 
 
 #PLOT
-sns.set_style("white")
+#sns.set_style("white")
 # Plot newly classified and masked raster
-fig, ax = plt.subplots(figsize = (3,2))
+#fig, ax = plt.subplots(figsize = (3,2))
 #show((mean_annual_rain_clipped, 1),cmap='Blues', title="Mean Annual Rainfall")
 #show((clipped, 1), cmap='Blues', title="Mean Annual Rainfall", contour=True)
 
