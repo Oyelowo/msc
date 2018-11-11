@@ -12,6 +12,25 @@ roof_2015 = gpd.read_file(r'E:\LIDAR_FINAL\data\2015\buildings\buildings_2015_si
 aoi = gpd.read_file(r'E:\LIDAR_FINAL\diigised_Samples_roofs\aoi_roof_samples.shp')
 
 
+
+# =============================================================================
+# SELECT ONLY ROOFS WITHIN THE AOI
+# =============================================================================
+aoi_boundary = aoi.loc[0].geometry
+type(aoi_boundary)
+roof_2013 = roof_2013[roof_2013.geometry.within(aoi_boundary)]
+roof_2013.plot()
+roof_2015 = roof_2015[roof_2015.geometry.within(aoi_boundary)]
+roof_2015.plot()
+
+
+len(roof_2013)
+len(roof_2015)
+len(digitized_roof)
+# =============================================================================
+# 
+# =============================================================================
+
 del digitized_roof['buildings']
 
 
@@ -63,12 +82,9 @@ for index, orig in poly1.iterrows():
          owdspd=orig['id']
          data.append({'geometry':ref['geometry'].intersection(orig['geometry']),'wdspd':owdspd})
     print(index)
-data
 
 m = gpd.GeoDataFrame(data)
-m[0:5].plot()
 m.loc[m['wdspd']==15]
-
 
 kkn = m.groupby('wdspd')
 len(kkn)
@@ -77,19 +93,25 @@ len(kkn)
 
 
 
-len(data)
-for geom in data: 
-   print(geom)
-   
-len(data)
-
-poly1.columns
 #poly1_c = poly1[['geometry', 'ID']]
 poly1_geom, poly1_ID = poly1['geometry'], poly1['ID']
 poly2_geom, poly2_ID = poly2['geometry'], poly2['ID']
 list(zip(poly1_geom, poly1_ID))
 
+poly1_c = list(zip(poly1['geometry'], poly1['ID']))
+poly2_c = list(zip(poly2['geometry'], poly2['ID']))
+
+poly2_list = poly2['geometry'].tolist()
 h = gpd.GeoDataFrame()
+del intersected
+for i, (orig_geom, orig_ID) in enumerate(poly1_c):
+  intersected = [{'geometry': ref_geom.intersection(orig_geom), 'orig_ID': orig_ID}
+  for ref_geom in poly2_list if ref_geom.intersection(orig_geom)]
+  print('Checking:', orig_ID)
+
+
+intersected
+
 for i, (orig_geom, orig_ID) in enumerate(zip(poly1_geom, poly1_ID)):   
    print(orig_ID)
 
