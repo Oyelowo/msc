@@ -129,7 +129,7 @@ digi_inter_roof15_df = gpd.GeoDataFrame(digi_intersect_roof_2015)
 
 
 # =============================================================================
-# ACCURACY ANALYSIS
+# ACCURACY ANALYSIS: ERROR OF OMISSION
 # =============================================================================
 digi_roofs_count = len(digitized_roof)
 
@@ -149,7 +149,29 @@ omission_roof_2015 = ((digi_roofs_count - correct_roof2015_count) *100)/ digi_ro
 print('The error of ommission for 2013 extraction is {0}%'.format(omission_roof_2015))
 print('Accuracy is {0}%'.format(100-omission_roof_2015))
 
-digi_inter_roof13_df_grouped.geometry.agg(lambda x: x.centroid)
+
+
+# =============================================================================
+# ACCURACY: AREA, RMSE, MAE, AND SCATTERPLOT
+# =============================================================================
+roof_13_agg=gpd.GeoDataFrame()
+roof_13_agg['geometry'] = None
+for key, group in digi_inter_roof13_df_grouped:
+  roof_13_agg.loc[key,'ID'] = key
+#  print(group['geometry'].iloc[0])
+#  roof_13_agg.loc[key,'geometry'] =  group.iloc[0]['geometry']
+  roof_13_agg.loc[key,'digi_area'] = group['orig_area'].unique()
+  roof_13_agg.loc[key,'ref_area'] =  group['ref_area'].sum()
+  roof_13_agg.loc[key,'one_to_N_rel'] = len(group['ref_area'])
+  print('Aggregating: ', key)
+
+
+
+digi_inter_roof13_df_grouped['ref_area'].agg(lambda x: print(x.mean()))
+
+
+
+digi_inter_roof13_df_grouped[['geometry', '']].agg(lambda x,y: print(x,y))
 
 
 digi_inter_roof13_df.geometry[10]
