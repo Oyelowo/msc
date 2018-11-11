@@ -158,20 +158,39 @@ roof_13_agg=gpd.GeoDataFrame()
 roof_13_agg['geometry'] = None
 for key, group in digi_inter_roof13_df_grouped:
   roof_13_agg.loc[key,'ID'] = key
-#  print(group['geometry'].iloc[0])
-#  roof_13_agg.loc[key,'geometry'] =  group.iloc[0]['geometry']
   roof_13_agg.loc[key,'digi_area'] = group['orig_area'].unique()
   roof_13_agg.loc[key,'ref_area'] =  group['ref_area'].sum()
   roof_13_agg.loc[key,'one_to_N_rel'] = len(group['ref_area'])
   print('Aggregating: ', key)
 
 
+from pandas.plotting import scatter_matrix
+import scipy
+import numpy as np
+roof_13_agg[23:25].plot()
 
+roof_13_agg.iloc[:,2:4].corr()
+scatter_matrix(roof_13_agg.iloc[:,2:4].corr())
+roof_13_agg_ = roof_13_agg.loc[roof_13_agg['one_to_N_rel']==1]
+x, y = roof_13_agg_.digi_area, roof_13_agg_.ref_area
+slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(x, y)
+r_value **2 * 100
+
+plt.scatter(x,y)
+plt.plot(np.unique(x), np.poly1d(np.polyfit(x, y, 1))(np.unique(x)))
+#%timeit plt.scatter(roof_13_agg.digi_area, roof_13_agg.ref_area)
+
+plt.hist(roof_13_agg.one_to_N_rel)
+
+((x-y)/x) *100
+
+roof_13_agg_.mean()
 digi_inter_roof13_df_grouped['ref_area'].agg(lambda x: print(x.mean()))
 
 
 
-digi_inter_roof13_df_grouped[['geometry', '']].agg(lambda x,y: print(x,y))
 
-
-digi_inter_roof13_df.geometry[10]
+def smape(A, F):
+    return 100/len(A) * np.sum(2 * np.abs(F - A) / (np.abs(A) + np.abs(F)))
+  
+print(smape(x,y))
