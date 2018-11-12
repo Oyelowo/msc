@@ -24,7 +24,7 @@ for year in range(2011, 2014):
 print(url_list[0])
 # File locations
 
-url_list = url_list[1:]
+
 # Create folder if it does no exist
 if not os.path.exists(outdir):
     os.makedirs(outdir)
@@ -75,7 +75,8 @@ for i, rain_data in enumerate(rain_fp_list[2:]):
   agg_data = aggregateDataByMonth(data)
   station_name = rain_data.split('\\')[-1].split('.')[0]
   agg_data['station'] = station_name
-  plt.plot(agg_data.Date, agg_data.rain_mm)
+  if station_name == "Mwatate_Ar112509":
+    print(agg_data)
   all_data = all_data.append(agg_data)
 #  merged_df = pd.merge(merged_df, agg_data,  on='Date', how='outer')
   print(agg_data.head(5))
@@ -83,6 +84,29 @@ for i, rain_data in enumerate(rain_fp_list[2:]):
 
 
 
+from datetime import datetime
+
+stations = all_data['station'].unique()
+         
+         
+fig, axes = plt.subplots(3, 2, figsize=(12,12), sharex=True, sharey=True)
+#  plt.suptitle('RAINWATER HARVESTING POTENTIAL IN TAITA')
+#  vmin, vmax = dataFrame[column_list].min().min(), dataFrame[column_list].max().max()
+for i, (ax, station) in enumerate(zip(axes.flatten(), stations), 1):
+  sub_data = all_data.loc[all_data['station']==station]
+  ax.plot(sub_data.Date, sub_data.rain_mm)
+  ax.text(datetime(2012, 2, 15), 380, station)
+
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         )
 
 plt.plot(agg_data.Date, agg_data.rain_mm)
 merged_df = pd.merge(agg_data, agg_data,  on='Date', how='outer')
