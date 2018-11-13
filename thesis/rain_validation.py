@@ -105,18 +105,18 @@ for i, (ax, station) in enumerate(zip(axes.flatten(), stations), 1):
          
 
 
-plt.plot(agg_data.Date, agg_data.rain_mm)
-merged_df = pd.merge(agg_data, agg_data,  on='Date', how='outer')
-
-
-
-
-start_dates = '1/1/2011'
-end_dates = '1/1/2018'
-[pd.date_range(start, end, freq='M') for start, end in zip(start_dates, end_dates)] 
-
-
-data["Rain_(mm)"].max()
-plt.plot(data['Date'], data["Rain_(mm)"])
+#plt.plot(agg_data.Date, agg_data.rain_mm)
+#merged_df = pd.merge(agg_data, agg_data,  on='Date', how='outer')
+#
+#
+#
+#
+#start_dates = '1/1/2011'
+#end_dates = '1/1/2018'
+#[pd.date_range(start, end, freq='M') for start, end in zip(start_dates, end_dates)] 
+#
+#
+#data["Rain_(mm)"].max()
+#plt.plot(data['Date'], data["Rain_(mm)"])
 
 all_data = pd.read_excel(os.path.join(rain_dir, 'Taita_prec&temp_summary_statistics.xls.XLSX')) 
