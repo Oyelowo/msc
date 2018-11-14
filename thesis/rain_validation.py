@@ -105,7 +105,7 @@ for i, (ax, station) in enumerate(zip(axes.flatten(), stations), 1):
          
 
 
-#plt.plot(agg_data.Date, agg_data.rain_mm)
+# plt.plot(agg_data.Date, agg_data.rain_mm)
 #merged_df = pd.merge(agg_data, agg_data,  on='Date', how='outer')
 #
 #
