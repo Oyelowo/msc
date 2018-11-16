@@ -120,3 +120,10 @@ for i, (ax, station) in enumerate(zip(axes.flatten(), stations), 1):
 #plt.plot(data['Date'], data["Rain_(mm)"])
 
 all_data = pd.read_excel(os.path.join(rain_dir, 'Taita_prec&temp_summary_statistics.xls.XLSX')) 
+
+
+
+
+
+
+stations = pd.read_csv(r'E:\LIDAR_FINAL\data\rainfall_data_field\stations_locations\stations.csv')
