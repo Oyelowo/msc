@@ -32,7 +32,7 @@ for i, rain_data in enumerate(rain_fp_list[2:]):
   data = data[['Date', 'Rain_(mm)']]
   agg_data = aggregateDataByMonth(data)
   station_name = rain_data.split('\\')[-1].split('.')[0]
-  agg_data['station'] = station_name
+  agg_data['station'] = station_name.split('_Ar')[0]
   all_data = all_data.append(agg_data)
 #  merged_df = pd.merge(merged_df, agg_data,  on='Date', how='outer')
   print(agg_data.head(5))
@@ -44,7 +44,7 @@ from datetime import datetime
 
 stations = all_data['station'].unique().tolist()
 
-stations.remove('Mwatate_Ar112509')
+#stations.remove('Mwatate_Ar112509')
 
 min_temp, max_temp = all_data.rain_mm.min()-20, all_data.rain_mm.max() + 20
 fig, axes = plt.subplots(3, 2, figsize=(10,12), sharex=True, sharey=True)
@@ -124,6 +124,15 @@ all_data = pd.read_excel(os.path.join(rain_dir, 'Taita_prec&temp_summary_statist
 
 
 
-
+from shapely.geometry import Point
+import geopandas as gpd
 
 stations = pd.read_csv(r'E:\LIDAR_FINAL\data\rainfall_data_field\stations_locations\stations.csv')
+stations = gpd.GeoDataFrame(stations)
+stations = stations.iloc[:,:5]
+stations_list = [Point(x, y) for x,y in zip(stations.x, stations.y)]
+stations_list[0]
+stations['geometry'] = stations_list
+stations.plot()
+print(stations.crs)
+stations.crs = {'init' :'epsg:32737'}
