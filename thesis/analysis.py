@@ -498,3 +498,16 @@ plt.bar(first_letter, buildings_rain_aggr[ rain_pot_list].sum())
 plt.plot(first_letter, buildings_rain_aggr[ rain_pot_list].sum(), 'b--')
 buildings_rain_aggr[rain_list].mean()
 
+
+
+
+buildings_rain_aggr.to_file(r'E:\LIDAR_FINAL\data\aggregated\buildings_rain_aggr.shp')
+
+
+
+
+
+
+
+
+
