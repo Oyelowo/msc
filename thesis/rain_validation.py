@@ -6,8 +6,10 @@ import glob
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
+import geopandas as gpd
 rain_dir = r"E:\LIDAR_FINAL\data\rainfall_data_field\rain"
 rain_dir_all = r"E:\LIDAR_FINAL\data\rainfall_data_field\rain\Precipitation\*.XLSX"
+buildings_rain_aggr = gpd.read_file(r'E:\LIDAR_FINAL\data\aggregated\buildings_rain_aggr.shp')
 
 rain_fp_list = glob.glob(rain_dir_all)
 
@@ -124,6 +126,10 @@ all_data = pd.read_excel(os.path.join(rain_dir, 'Taita_prec&temp_summary_statist
 
 
 
+
+
+
+import pandas as pd
 from shapely.geometry import Point
 import geopandas as gpd
 
@@ -136,3 +142,66 @@ stations['geometry'] = stations_list
 stations.plot()
 print(stations.crs)
 stations.crs = {'init' :'epsg:32737'}
+
+
+kl = buildings_rain_aggr.plot()
+stations.plot(ax=kl, c='red')
+
+len(stations)
+ground_stations_rain_model = gpd.sjoin(stations, buildings_rain_aggr, how='inner', op='intersects')
+ground_stations_rain_model.Location
+
+stations_abbr = [station.split(',')[0].split(' ')[0] for station in ground_stations_rain_model.Location]
+wundayi_index = stations_abbr.index('Wundanyi')
+stations_abbr[wundayi_index] = 'Taita_RS'
+
+ground_stations_rain_model['station'] = stations_abbr
+
+def get_column_names_lists(ending, except_this):
+  return [month for month in ground_stations_rain_model.columns if month.endswith(ending) and not month.startswith(except_this)]
+months_rain = get_column_names_lists('rain', 'ann')
+months_rain_pot = get_column_names_lists('POT', "ann")
+
+stations_rain_model_df = pd.DataFrame(columns=[ 'station', 'month', 'model_rain_mm','rain_pot'])
+for i, row in ground_stations_rain_model.iterrows():
+  monthly_rain = row[months_rain]
+  months_list = [month[0:3] for month in monthly_rain.index]
+  monthly_rain_pot = row[months_rain_pot].tolist()
+  month, rain, rain_pot = monthly_rain.index, monthly_rain, monthly_rain_pot
+  data = {'station': row.station, 'month': months_list, 'model_rain_mm': monthly_rain, 'rain_pot':rain_pot, 'x':row.x,'y':row.y,'z':row.z}
+  each_station = pd.DataFrame(data)
+  stations_rain_model_df = pd.concat([each_station, stations_rain_model_df], sort=False)
+
+
+
+
+
+stations_rain_model_df.columns
+monthly_agg_data.columns
+joined = pd.merge(stations_rain_model_df, monthly_agg_data, left_on=['station','month'], right_on=['station', 'month_name'])
+
+
+import numpy as np
+
+def rmse(predictions, targets):
+    return np.sqrt(((predictions - targets) ** 2).mean())
+
+rmse_val = rmse(joined.model_rain_mm, joined.rain_mm)
+print("rms error is: " + str(rmse_val))
+
+
+from scipy.stats import linregress
+rain_stat = linregress(joined.model_rain_mm.tolist(), joined.rain_mm.tolist())
+rain_stat.rvalue**2
+x,y = joined.model_rain_mm.tolist(), joined.rain_mm.tolist()
+
+
+import seaborn as sns;sns.set(color_codes=True)
+from scipy import stats
+
+def r2(x, y):
+    return stats.pearsonr(x, y)[0] ** 2
+  
+x=np.array(x) 
+y=np.array(y)
+sns.jointplot(x, y, kind="reg", stat_func=r2)
