@@ -7,9 +7,18 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 import geopandas as gpd
+from datetime import datetime
+from shapely.geometry import Point
+from scipy.stats import linregress
+import seaborn as sns;sns.set(color_codes=True)
+from scipy import stats
+
+
+
 rain_dir = r"E:\LIDAR_FINAL\data\rainfall_data_field\rain"
 rain_dir_all = r"E:\LIDAR_FINAL\data\rainfall_data_field\rain\Precipitation\*.XLSX"
 buildings_rain_aggr = gpd.read_file(r'E:\LIDAR_FINAL\data\aggregated\buildings_rain_aggr.shp')
+stations_filepath = r'E:\LIDAR_FINAL\data\rainfall_data_field\stations_locations\stations.csv'
 
 rain_fp_list = glob.glob(rain_dir_all)
 
@@ -41,8 +50,6 @@ for i, rain_data in enumerate(rain_fp_list[2:]):
   print(i)
 
 
-
-from datetime import datetime
 
 stations_list = all_data['station'].unique().tolist()
 
@@ -104,36 +111,10 @@ for i, (ax, station) in enumerate(zip(axes.flatten(), stations_list), 1):
   if i== 5 or i==6:
     ax.set_xlabel('Date')
          
-         
-
-
-# plt.plot(agg_data.Date, agg_data.rain_mm)
-#merged_df = pd.merge(agg_data, agg_data,  on='Date', how='outer')
-#
-#
-#
-#
-#start_dates = '1/1/2011'
-#end_dates = '1/1/2018'
-#[pd.date_range(start, end, freq='M') for start, end in zip(start_dates, end_dates)] 
-#
-#
-#data["Rain_(mm)"].max()
-#plt.plot(data['Date'], data["Rain_(mm)"])
-
-#all_data = pd.read_excel(os.path.join(rain_dir, 'Taita_prec&temp_summary_statistics.xls.XLSX')) 
 
 
 
-
-
-
-
-import pandas as pd
-from shapely.geometry import Point
-import geopandas as gpd
-
-stations = pd.read_csv(r'E:\LIDAR_FINAL\data\rainfall_data_field\stations_locations\stations.csv')
+stations = pd.read_csv(stations_filepath)
 stations = gpd.GeoDataFrame(stations)
 stations = stations.iloc[:,:5]
 stations_list = [Point(x, y) for x,y in zip(stations.x, stations.y)]
@@ -191,14 +172,13 @@ rmse_val = rmse(joined.model_rain_mm, joined.rain_mm)
 print("rms error is: " + str(rmse_val))
 
 
-from scipy.stats import linregress
+
 rain_stat = linregress(joined.model_rain_mm.tolist(), joined.rain_mm.tolist())
 r2 = rain_stat.rvalue**2
 measured_rain, modelled_rain = joined.rain_mm.tolist() , joined.model_rain_mm.tolist()
 
 
-import seaborn as sns;sns.set(color_codes=True)
-from scipy import stats
+
 
 def r2(x, y):
     return stats.pearsonr(x, y)[0] ** 2

@@ -13,6 +13,7 @@ import re
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import pysal as ps
 from shapely import speedups
+from pathlib import Path
 speedups.available
 speedups.enable()
 
@@ -34,25 +35,28 @@ def create_dir(dirName):
 create_dir(work_dir)
 
 
-
-aoi_filepath =os.path.join(work_dir,  'AOI', 'fishnet_926_1sqm.shp')
-bbox_raster_filepath = os.path.join(work_dir,  'AOI', 'clipped_mean_annual_rain.tif')
-aoi_poly_filepath = os.path.join(work_dir,  'AOI', 'AOI_polygon.shp')
-aoi_vertices_filepath= os.path.join(work_dir,  'AOI', 'aoi_vertices.shp')
+aoi_dir = os.path.join(work_dir, 'AOI') 
+aoi_filepath =os.path.join(aoi_dir, 'fishnet_926_1sqm.shp')
+bbox_raster_filepath = os.path.join(aoi_dir, 'clipped_mean_annual_rain.tif')
+aoi_poly_filepath = os.path.join(aoi_dir, 'AOI_polygon.shp')
+aoi_vertices_filepath= os.path.join(aoi_dir, 'aoi_vertices.shp')
 buildings_filepath = os.path.join(work_dir,  'buildings', '2015', 'buildings', 'buildings_2015_simplified.shp')
-# buildings_filepath = r'E:\LIDAR_FINAL\data\buildings\2015\buildings\buildings_2015_simplified.shp'
-rain_rasters_dir = create_dir(os.path.join(work_dir,'precipitation'))
-# rain_rasters_dir = r'E:\LIDAR_FINAL\data\precipitation'
-output_clipped_raster_dir = create_dir(os.path.join(work_dir, 'precipitation', 'clipped'))
-# output_clipped_raster_dir = 'E:/LIDAR_FINAL/data/precipitation/clipped'
-monthly_rain_shp_dir= create_dir(os.path.join(work_dir, 'precipitation', 'clipped', 'to_vector'))
-# monthly_rain_shp_dir='E:/LIDAR_FINAL/data/precipitation/clipped/to_vector'
-centroid_filepath = create_dir(os.path.join(work_dir,  'buildings', '2015', 'buildings_centroid', 'buildings_centroid.shp'))
-# centroid_filepath = r'E:\LIDAR_FINAL\data\2015\buildings_centroid\buildings_centroid.shp'
-grid_filepath = create_dir(os.path.join(work_dir,  'grid', 'grid.shp'))
-# grid_filepath = r'E:\LIDAR_FINAL\data\grid\grid.shp'
-aoi_grid_clipped_shp_filepath = create_dir(os.path.join(work_dir,  'grid', 'aoi_grid_clipped.shp'))
-# aoi_grid_clipped_shp_filepath=r'E:\LIDAR_FINAL\data\grid\aoi_grid_clipped.shp'
+
+#rain_rasters_dir = ras.create_dir(os.path.join(work_dir,'precipitation'))
+#output_clipped_raster_dir = ras.create_dir(os.path.join(work_dir, 'precipitation', 'clipped'))
+#monthly_rain_shp_dir= ras.create_dir(os.path.join(work_dir, 'precipitation', 'clipped', 'to_vector'))
+#centroid_filepath = ras.create_dir(os.path.join(work_dir,  'buildings', '2015', 'buildings_centroid', 'buildings_centroid.shp'))
+#grid_filepath = ras.create_dir(os.path.join(work_dir,  'grid', 'grid.shp'))
+#aoi_grid_clipped_shp_filepath = ras.create_dir(os.path.join(work_dir,  'grid', 'aoi_grid_clipped.shp'))
+
+rain_rasters_dir = ras.create_dir(Path(work_dir + '/precipitation'))
+output_clipped_raster_dir = ras.create_dir(Path(work_dir + '/precipitation/clipped'))
+monthly_rain_shp_dir= ras.create_dir(Path(work_dir + '/precipitation/clipped/to_vector'))
+centroid_filepath = ras.create_dir(Path(work_dir +  '/buildings/2015/buildings_centroid/buildings_centroid.shp'))
+grid_filepath = ras.create_dir(Path(work_dir +  '/grid/grid.shp'))
+aoi_grid_clipped_shp_filepath = ras.create_dir(Path(work_dir +'/grid/aoi_grid_clipped.shp'))
+
+
 
 
 

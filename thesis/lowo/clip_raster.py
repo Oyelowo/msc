@@ -23,14 +23,22 @@ Purpose: For my thesis
 Contact: www.github.com(Oyelowo)
 '''
 
+def create_dir(dirName):
+# Create target directory & all intermediate directories if don't exists
+  if not os.path.exists(dirName):
+    os.makedirs(dirName)
+    print("Directory " , dirName ,  " Created ")
+  else:    
+    print("Directory " , dirName ,  " already exists") 
+  return dirName
+
 
 def bbox_to_utm(bbox, zone_number):
     lonlow, lathigh, lonhigh, latlow = bbox
     minx, maxy,*others = utm.from_latlon(lathigh, lonlow, zone_number)
     maxx, miny, *others = utm.from_latlon(latlow, lonhigh, zone_number)
     return [minx, maxy , maxx, miny]
-    
-    
+      
     
 def get_raster_extent(raster_file_path):
     data = gdal.Open(raster_file_path, GA_ReadOnly)
@@ -148,8 +156,6 @@ def create_grid(gridHeight, gridWidth,bbox=None, is_utm=False, zone_number=None,
     if convex_hull:
       grid['geometry'] = grid.convex_hull
     return grid
-
-
 
 
 
