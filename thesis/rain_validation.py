@@ -144,9 +144,10 @@ print(stations.crs)
 stations.crs = {'init' :'epsg:32737'}
 
 
-kl = buildings_rain_aggr.plot()
-stations.plot(ax=kl, c='red')
+ax = buildings_rain_aggr.plot()
+stations.plot(ax=ax, c='red')
 
+buildings_rain_aggr.crs = stations.crs
 len(stations)
 ground_stations_rain_model = gpd.sjoin(stations, buildings_rain_aggr, how='inner', op='intersects')
 ground_stations_rain_model.Location
@@ -160,7 +161,7 @@ ground_stations_rain_model['station'] = stations_abbr
 def get_column_names_lists(ending, except_this):
   return [month for month in ground_stations_rain_model.columns if month.endswith(ending) and not month.startswith(except_this)]
 months_rain = get_column_names_lists('rain', 'ann')
-months_rain_pot = get_column_names_lists('POT', "ann")
+months_rain_pot = get_column_names_lists('PO', "ann")
 
 stations_rain_model_df = pd.DataFrame(columns=[ 'station', 'month', 'model_rain_mm','rain_pot'])
 for i, row in ground_stations_rain_model.iterrows():
@@ -179,8 +180,8 @@ for i, row in ground_stations_rain_model.iterrows():
 stations_rain_model_df.columns
 monthly_agg_data.columns
 joined = pd.merge(stations_rain_model_df, monthly_agg_data, left_on=['station','month'], right_on=['station', 'month_name'])
-
-
+joined.columns
+joined['rain_err'] = joined['rain_mm']- joined['model_rain_mm']
 import numpy as np
 
 def rmse(predictions, targets):
@@ -192,8 +193,8 @@ print("rms error is: " + str(rmse_val))
 
 from scipy.stats import linregress
 rain_stat = linregress(joined.model_rain_mm.tolist(), joined.rain_mm.tolist())
-rain_stat.rvalue**2
-x,y = joined.model_rain_mm.tolist(), joined.rain_mm.tolist()
+r2 = rain_stat.rvalue**2
+measured_rain, modelled_rain = joined.rain_mm.tolist() , joined.model_rain_mm.tolist()
 
 
 import seaborn as sns;sns.set(color_codes=True)
@@ -201,7 +202,57 @@ from scipy import stats
 
 def r2(x, y):
     return stats.pearsonr(x, y)[0] ** 2
-  
-x=np.array(x) 
-y=np.array(y)
-sns.jointplot(x, y, kind="reg", stat_func=r2)
+print(r2(measured_rain, modelled_rain))
+x=np.array(measured_rain) 
+y=np.array(modelled_rain)
+
+x = pd.Series(measured_rain, name="measured rain")
+y = pd.Series(modelled_rain, name="modelled rain")
+ax = sns.jointplot(x, y, kind="reg", stat_func=r2, logx=True, truncate=True, space=0.1)
+plt.title('YOUR TITLE HERE')
+
+
+
+
+#
+#import numpy as np
+#import pandas as pd
+#import seaborn as sns
+#sns.set(style="white")
+#
+## Generate a random correlated bivariate dataset
+#mean = [0, 0]
+#cov = [(1, .5), (.5, 1)]
+#x1 = pd.Series(x, name="$X_1$")
+#x2 = pd.Series(y, name="$X_2$")
+#
+## Show the joint distribution using kernel density estimation
+#g = sns.jointplot(x1, x2, kind="kde", height=7, space=0)
+
+
+# =============================================================================
+# 
+# 
+# import numpy as np
+# import seaborn as sns
+# import matplotlib.pyplot as plt
+# 
+# sns.set(style="dark")
+# rs = np.random.RandomState(50)
+# 
+# # Set up the matplotlib figure
+# f, axes = plt.subplots(3, 3, figsize=(9, 9), sharex=True, sharey=True)
+# 
+# # Rotate the starting point around the cubehelix hue circle
+# for ax, s in zip(axes.flat, np.linspace(0, 3, 10)):
+# 
+#     # Create a cubehelix colormap to use with kdeplot
+#     cmap = sns.cubehelix_palette(start=s, light=1, as_cmap=True)
+# 
+#     # Generate and plot a random bivariate dataset
+# #    x, y = rs.randn(2, 50)
+#     sns.kdeplot(x, y, cmap=cmap, shade=True, cut=5, ax=ax)
+# #    ax.set(xlim=(-3, 3), ylim=(-3, 3))
+# 
+# f.tight_layout()
+# =============================================================================
