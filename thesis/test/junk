@@ -1,3 +1,34 @@
+mean_annual_rain_raster = rasterio.open(mean_annual_filepath)
+
+#clip the mean annual rainfall raster data
+mean_annual_rain_clipped = ras.get_clipped_raster(mean_annual_rain_raster, mean_annual_clipped_path,
+                                                  bbox_aoi, 4326)
+
+#READ THE VALUES OF THE JUST CLIPPED RASTER
+mean_annual_rain = rasterio.open(mean_annual_clipped_path).read().astype(float)
+
+
+#SPECIFY PLOT SIZE IN THE CONSOLE
+plt.rcParams['figure.figsize'] = (4, 12) 
+
+
+#PLOT
+sns.set_style("white")
+# Plot newly classified and masked raster
+fig, ax = plt.subplots(figsize = (3,2))
+show((mean_annual_rain_clipped, 1),cmap='Blues', title="Mean Annual Rainfall")
+show((clipped, 1), cmap='Blues', title="Mean Annual Rainfall", contour=True)
+
+
+
+
+
+
+
+
+
+
+
 def colorbar(ax, vmin=0, vmax=50):
   # add colorbar
     fig = ax.get_figure()

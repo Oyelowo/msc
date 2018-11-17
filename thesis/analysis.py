@@ -18,6 +18,42 @@ speedups.enable()
 
 import clip_raster as ras
 
+#my_path = os.path.abspath(os.path.dirname('__file__'))
+work_dir = r'E:\LIDAR_FINAL\data'
+
+def create_dir(dirName):
+# Create target directory & all intermediate directories if don't exists
+  if not os.path.exists(dirName):
+    os.makedirs(dirName)
+    print("Directory " , dirName ,  " Created ")
+  else:    
+    print("Directory " , dirName ,  " already exists") 
+  return dirName
+
+
+create_dir(work_dir)
+
+
+
+aoi_filepath =os.path.join(work_dir,  'AOI', 'fishnet_926_1sqm.shp')
+bbox_raster_filepath = os.path.join(work_dir,  'AOI', 'clipped_mean_annual_rain.tif')
+aoi_poly_filepath = os.path.join(work_dir,  'AOI', 'AOI_polygon.shp')
+aoi_vertices_filepath= os.path.join(work_dir,  'AOI', 'aoi_vertices.shp')
+buildings_filepath = os.path.join(work_dir,  'buildings', '2015', 'buildings', 'buildings_2015_simplified.shp')
+# buildings_filepath = r'E:\LIDAR_FINAL\data\buildings\2015\buildings\buildings_2015_simplified.shp'
+rain_rasters_dir = create_dir(os.path.join(work_dir,'precipitation'))
+# rain_rasters_dir = r'E:\LIDAR_FINAL\data\precipitation'
+output_clipped_raster_dir = create_dir(os.path.join(work_dir, 'precipitation', 'clipped'))
+# output_clipped_raster_dir = 'E:/LIDAR_FINAL/data/precipitation/clipped'
+monthly_rain_shp_dir= create_dir(os.path.join(work_dir, 'precipitation', 'clipped', 'to_vector'))
+# monthly_rain_shp_dir='E:/LIDAR_FINAL/data/precipitation/clipped/to_vector'
+centroid_filepath = create_dir(os.path.join(work_dir,  'buildings', '2015', 'buildings_centroid', 'buildings_centroid.shp'))
+# centroid_filepath = r'E:\LIDAR_FINAL\data\2015\buildings_centroid\buildings_centroid.shp'
+grid_filepath = create_dir(os.path.join(work_dir,  'grid', 'grid.shp'))
+# grid_filepath = r'E:\LIDAR_FINAL\data\grid\grid.shp'
+aoi_grid_clipped_shp_filepath = create_dir(os.path.join(work_dir,  'grid', 'aoi_grid_clipped.shp'))
+# aoi_grid_clipped_shp_filepath=r'E:\LIDAR_FINAL\data\grid\aoi_grid_clipped.shp'
+
 
 
 # =============================================================================
@@ -28,59 +64,35 @@ aoi_crs_epsg_code = 32737
 rain_raster_data_epsg_code = 4326
 
 #readthe shapefile for the area of interest
-aoi_shapefile = gpd.read_file(r'E:\LIDAR_FINAL\data\AOI\fishnet_926_1sqm.shp')
+aoi_shapefile = gpd.read_file(aoi_filepath)
+
 
 #bbox_aoi2 = ras.get_vector_extent(aoi_shapefile)'
 #bbox_aoi = ras.get_vector_extent(aoi_shapefile)
-#bbox_aoi = ras.get_raster_extent(r'E:\LIDAR_FINAL\data\AOI\clipped_mean_annual_rain.tif')
+#bbox_aoi = ras.get_raster_extent(bbox_raster_filepath)
 bbox_aoi = [38.19986023835, -3.2418059025499986, 38.52486023705, -3.516805901449999]
-aoi_polygon =  gpd.read_file('E:\LIDAR_FINAL\data\AOI\AOI_polygon.shp')
+aoi_polygon =  gpd.read_file(aoi_poly_filepath)
 aoi_polygon.crs = aoi_crs_epsg
 #bbox_aoi = ras.get_vector_extent(aoi_polygon)
 
-
-# =============================================================================
-# #LOAD THE FILEPATH
-# =============================================================================
-#mean_annual_filepath = r'E1:\LIDAR_FINAL\data\precipitation\mean_annual\CHELSA_bio_12.tif'
-#mean_annual_clipped_path = r'E:\LIDAR_FINAL\data\precipitation\mean_annual\mean_annual_rain_clipped.tif'
-#mean_annual_rain_raster = rasterio.open(mean_annual_filepath)
-#clip the mean annual rainfall raster data
-#mean_annual_rain_clipped = ras.get_clipped_raster(mean_annual_rain_raster, mean_annual_clipped_path,
-#                                                  bbox_aoi, 4326)
-
-#READ THE VALUES OF THE JUST CLIPPED RASTER
-#mean_annual_rain = rasterio.open(mean_annual_clipped_path).read().astype(float)
-
-
-#SPECIFY PLOT SIZE IN THE CONSOLE
-#plt.rcParams['figure.figsize'] = (4, 12) 
-
-
-#PLOT
-#sns.set_style("white")
-# Plot newly classified and masked raster
-#fig, ax = plt.subplots(figsize = (3,2))
-#show((mean_annual_rain_clipped, 1),cmap='Blues', title="Mean Annual Rainfall")
-#show((clipped, 1), cmap='Blues', title="Mean Annual Rainfall", contour=True)
 
 
 # =============================================================================
 # # CLIP ALL THE MONTHLY DATA AND ALSO SUM THEM
 # =============================================================================
 sum_rain = 0
-monthly_rain_raster = glob.glob(r'E:\LIDAR_FINAL\data\precipitation\mean_monthly\*.tif')
-for i, month_file_path in enumerate(monthly_rain_raster, 1):
+rain_raster = glob.glob(os.path.join(rain_rasters_dir, '*.tif'))
+for i, month_file_path in enumerate(rain_raster, 1):
     print(i)
     filename = os.path.basename(month_file_path)
-#    Match the first number in the file name which is the month
+#    Match the file name, excluding the extension name
     if filename[:-4] == 'annual_rainfall':
         month_name = 'ann'
     else:
         month_number = re.search(r'\d+', filename).group()
         month_name = calendar.month_name[int(month_number)]
     month_abbreviation = month_name[:3]+'_rain'
-    output_tif = os.path.join('E:/LIDAR_FINAL/data/precipitation/mean_monthly/clipped', month_abbreviation + '.tif')
+    output_tif = os.path.join(output_clipped_raster_dir, month_abbreviation + '.tif')
     print(output_tif)
     ras.clip_and_export_raster(month_file_path, output_tif, bbox_aoi)
     
@@ -97,10 +109,10 @@ show(sum_rain,cmap='Blues', title="Mean Annual Rainfall")
 # =============================================================================
 # CONVERT THE RASTER FILES INTO VECTOR
 # =============================================================================
-monthly_rain_clipped=glob.glob(r'E:\LIDAR_FINAL\data\precipitation\mean_monthly\clipped\*.tif')
+monthly_rain_clipped=glob.glob(os.path.join(output_clipped_raster_dir, '*.tif'))
 for i, month_file in enumerate(monthly_rain_clipped, 1):
     month_field_name = os.path.basename(month_file)[:3] + '_rain'
-    output_shp = os.path.join('E:/LIDAR_FINAL/data/precipitation/mean_monthly/clipped/to_vector', month_field_name + '.shp')
+    output_shp = os.path.join(monthly_rain_shp_dir, month_field_name + '.shp')
     print(month_field_name)
 #    month_raster = rasterio.open(month_file)
     polygonized_raster = ras.polygonize(month_file, rain_raster_data_epsg_code, aoi_crs_epsg_code)
@@ -117,7 +129,7 @@ for i, month_file in enumerate(monthly_rain_clipped, 1):
 # AOI POLYGON
 # =============================================================================
 # =============================================================================
-vertices = gpd.read_file(r'E:\LIDAR_FINAL\data\AOI\aoi_vertices.shp')
+vertices = gpd.read_file(aoi_vertices_filepath)
 vertices.plot()
 aoi_vertices_list = [p.xy for p in vertices.geometry]
 aoi_polygon = Polygon([[points.x, points.y] for points in vertices.geometry])
@@ -133,8 +145,7 @@ print(aoi_polygon)
 # =============================================================================
 # WORKING WITH THE BUILDING SHAPEFILE
 # =============================================================================
-buildings_fp = r'E:\LIDAR_FINAL\data\2015\buildings\buildings_2015_simplified.shp'
-buildings_shp = gpd.read_file(buildings_fp)
+buildings_shp = gpd.read_file(buildings_filepath)
 
 # calculate area and centroid of the buildings
 buildings_shp['area'] = buildings_shp['geometry'].area
@@ -156,8 +167,8 @@ buildings_centroid['ID'] =  buildings_centroid.index + 1
 del buildings_centroid['centroid']
 
 
-centroid_fp = r'E:\LIDAR_FINAL\data\2015\buildings_centroid\buildings_centroid.shp'
-buildings_centroid.to_file(centroid_fp)
+
+buildings_centroid.to_file(centroid_filepath)
 #buildings_centroid.plot()
 
 # =============================================================================
@@ -181,8 +192,8 @@ grid = ras.create_grid(926.1, 926.1, shapefile=buildings_centroid)
 #grid = ras.create_grid(gridHeight=926.1, gridWidth=926.1,shapefile=aoi_shapefile)
 #grid.plot()
 
-grid_path = r'E:\LIDAR_FINAL\data\grid\grid.shp'
-grid.to_file(grid_path)
+
+grid.to_file(grid_filepath)
 
 # =============================================================================
 # CLIP THE GRID INTO THE AOI
@@ -192,7 +203,7 @@ aoi_grid_clipped = gpd.overlay(grid, aoi_polygon_df, how='intersection')
 #reset the index of the joined data and use the index values + 1, as the ID of each grid
 aoi_grid_clipped['grid_ID'] = aoi_grid_clipped.reset_index(drop=True).index + 1
 aoi_grid_clipped.plot()
-aoi_grid_clipped.to_file(r'E:\LIDAR_FINAL\data\grid\aoi_grid_clipped.shp')
+aoi_grid_clipped.to_file(aoi_grid_clipped_shp_filepath)
 
 #grid = gpd.read_file(r'E:\LIDAR_FINAL\data\grid\grid_clipped.shp'
 # =============================================================================
@@ -216,7 +227,7 @@ buildings_grid = buildings_grid.fillna(0)
 #delete the index_right column to avoid issues later
 del buildings_grid['index_right']
 
-months_shp_filepaths = glob.glob(r'E:\LIDAR_FINAL\data\precipitation\mean_monthly\clipped\to_vector\*.shp')
+months_shp_filepaths = glob.glob(os.path.join(monthly_rain_shp_dir,'*.shp'))
 
 
 
@@ -278,7 +289,7 @@ start_time = time.time()
 
 
 
-months_shp_filepaths = glob.glob(r'E:\LIDAR_FINAL\data\precipitation\mean_monthly\clipped\to_vector\*.shp')
+months_shp_filepaths = glob.glob(os.path.join(monthly_rain_shp_dir, '*.shp'))
 
 
 buildings_rain_aggr = gpd.GeoDataFrame()
@@ -476,6 +487,7 @@ month_list = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
 rain_pot_list = list(map(lambda x: x[:3] + '_rainPOT', month_list))
 rain_list =list(map(lambda x: x[:3] + '_rain', month_list))
 #plot_map(buildings_rain_aggr, rain_list)
+
 
 
 plot_map(buildings_rain_aggr, rain_list[:6],0 , 193,True, 6, 193, 1, r'C:\Users\oyeda\Desktop\msc\jan_jun_rain.jpg')
