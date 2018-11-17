@@ -10,7 +10,7 @@ import geopandas as gpd
 from datetime import datetime
 from shapely.geometry import Point
 from scipy.stats import linregress
-import seaborn as sns;sns.set(color_codes=True)
+import seaborn as sns
 from scipy import stats
 
 
@@ -51,7 +51,7 @@ for i, rain_data in enumerate(rain_fp_list[2:]):
 
 
 
-stations_list = all_data['station'].unique().tolist()
+stations_names_list = all_data['station'].unique().tolist()
 
 #stations_list.remove('Mwatate_Ar112509')
 
@@ -59,7 +59,7 @@ min_temp, max_temp = all_data.rain_mm.min()-20, all_data.rain_mm.max() + 20
 fig, axes = plt.subplots(3, 2, figsize=(10,12), sharex=True, sharey=True)
 #  plt.suptitle('RAINWATER HARVESTING POTENTIAL IN TAITA')
 #  vmin, vmax = dataFrame[column_list].min().min(), dataFrame[column_list].max().max()
-for i, (ax, station) in enumerate(zip(axes.flatten(), stations_list), 1):
+for i, (ax, station) in enumerate(zip(axes.flatten(), stations_names_list), 1):
   sub_data = all_data.loc[all_data['station']==station]
   ax.plot(sub_data.Date, sub_data.rain_mm, lw = 1.5)
   # Figure title
@@ -77,7 +77,7 @@ for i, (ax, station) in enumerate(zip(axes.flatten(), stations_list), 1):
          
 monthly_agg_data = pd.DataFrame(columns=["station", "month", "rain_mm"])
 i=0
-for station in stations_list:
+for station in stations_names_list:
   sub_data = all_data.loc[all_data['station']==station]
   sub_data["month"] = sub_data.Date.astype(str).str.slice(5,7)
   grouped = sub_data.groupby('month')
@@ -96,7 +96,7 @@ min_temp, max_temp = monthly_agg_data.rain_mm.min()-20, monthly_agg_data.rain_mm
 fig, axes = plt.subplots(3, 2, figsize=(10,12), sharex=True, sharey=True)
 #  plt.suptitle('RAINWATER HARVESTING POTENTIAL IN TAITA')
 #  vmin, vmax = dataFrame[column_list].min().min(), dataFrame[column_list].max().max()
-for i, (ax, station) in enumerate(zip(axes.flatten(), stations_list), 1):
+for i, (ax, station) in enumerate(zip(axes.flatten(), stations_names_list), 1):
   sub_data = monthly_agg_data.loc[monthly_agg_data['station']==station]
   ax.plot(sub_data.month_name, sub_data.rain_mm, lw = 1.5)
   # Figure title
@@ -197,11 +197,11 @@ plt.title('YOUR TITLE HERE')
 
 
 
-
-stations_list.remove('Mwatate')
+sns.set(color_codes=True)
+stations_names_list.remove('Mwatate')
 min_rain, max_rain = joined.rain_mm.min()-20, joined.rain_mm.max() + 30
 fig, axes = plt.subplots(3, 2, figsize=(10,12), sharex=True, sharey=True)
-for i, (ax, station) in enumerate(zip(axes.flatten(), stations_list), 1):
+for i, (ax, station) in enumerate(zip(axes.flatten(), stations_names_list), 1):
   sub_data = joined.loc[joined['station']==station].sort_values(by='month_y')
   ax.plot(sub_data.month_name, sub_data.rain_mm, lw = 1.5, color = 'blue', label= 'measured')
   ax.plot(sub_data.month_name, sub_data.model_rain_mm, lw = 1.5, color='red', label= 'modelled')
@@ -217,8 +217,8 @@ for i, (ax, station) in enumerate(zip(axes.flatten(), stations_list), 1):
     ax.set_ylabel('Rainfall [mm]')
   if i== 5 or i==6:
     ax.set_xlabel('Date')
-    plt.tight_layout()
-    plt.subplots_adjust(top=0.95)
+  plt.tight_layout()
+  plt.subplots_adjust(top=0.95)
 
 
 
