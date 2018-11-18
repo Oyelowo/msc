@@ -31,6 +31,7 @@ def get_density_spacing_info(input_dir):
         lidar_info= lidar_info.append({
             'tilesNumber':int(i), 
             'last_returns_density':last_returns_density,
+            'all_returns_density':all_returns_density, 
             'all_returns_spacing':all_returns_spacing, 
             'last_returns_spacing':last_returns_spacing 
           }, 
@@ -39,15 +40,15 @@ def get_density_spacing_info(input_dir):
   
   
 
-
+import clip_raster as ras
 outputdir_2015 = r'E:\LIDAR_FINAL\data\lidar_tiles_info_output\lidar_info_2015.txt'
 inputdir_2015 = r'E:\LIDAR_FINAL\data\lidar_tiles_info\2015'
 
 outputdir_2013 = r'E:\LIDAR_FINAL\data\lidar_tiles_info_output\lidar_info_2013.txt'
 inputdir_2013 = r'E:\LIDAR_FINAL\data\lidar_tiles_info\2013'
 
-lidar2015_info = get_density_spacing_info(inputdir_2015)
+lidar2015_info = ras.get_density_spacing_info(inputdir_2015)
 lidar2015_info.to_csv(outputdir_2015)
 
-lidar2013_info = get_density_spacing_info(inputdir_2013)
+lidar2013_info = ras.get_density_spacing_info(inputdir_2013)
 lidar2013_info.to_csv(outputdir_2013)

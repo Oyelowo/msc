@@ -4,17 +4,25 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from lowo.extract_lidar_info import get_density_spacing_info as ex
 import pandas as pd
+import clip_raster as ras
+
+
+outputdir_2015 = r'E:\LIDAR_FINAL\data\lidar_tiles_info_output\lidar_info_2015.txt'
+inputdir_2015 = r'E:\LIDAR_FINAL\data\lidar_tiles_info\2015'
+
+outputdir_2013 = r'E:\LIDAR_FINAL\data\lidar_tiles_info_output\lidar_info_2013.txt'
+inputdir_2013 = r'E:\LIDAR_FINAL\data\lidar_tiles_info\2013'
+
+lidar2015_info = ras.get_density_spacing_info(inputdir_2015)
+lidar2015_info.to_csv(outputdir_2015)
+
+lidar2013_info = ras.get_density_spacing_info(inputdir_2013)
+lidar2013_info.to_csv(outputdir_2013)
+
 data = pd.read_csv('./lidar_info_extracted.csv')
 
-# skip the first two column
-data=data.iloc[:, 2:] 
-# ex()
 
-import sys
-sys.path
-from rasterToPolygon import polygonize
-
-data.describe().to_csv('output_data/2015_lidar_info_stat.csv')
+data.describe().to_csv(r'E:\LIDAR_FINAL\data\lidar_tiles_info_output\2015_lidar_info_stat.csv')
 fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12,8))
 
 ax11=axes[0, 0]

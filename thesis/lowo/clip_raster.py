@@ -43,6 +43,7 @@ def get_density_spacing_info(input_dir):
         lidar_info= lidar_info.append({
             'tilesNumber':int(i), 
             'last_returns_density':last_returns_density,
+            'all_returns_density':all_returns_density, 
             'all_returns_spacing':all_returns_spacing, 
             'last_returns_spacing':last_returns_spacing 
           }, 
