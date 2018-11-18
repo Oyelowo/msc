@@ -42,10 +42,10 @@ def get_density_spacing_info(input_dir):
     # Insert the values into the dataframe
         lidar_info= lidar_info.append({
             'tilesNumber':int(i), 
-            'last_returns_density':last_returns_density,
-            'all_returns_density':all_returns_density, 
-            'all_returns_spacing':all_returns_spacing, 
-            'last_returns_spacing':last_returns_spacing 
+            'last_returns_density':float(last_returns_density),
+            'all_returns_density': float(all_returns_density), 
+            'all_returns_spacing': float(all_returns_spacing), 
+            'last_returns_spacing': float(last_returns_spacing) 
           }, 
           ignore_index=True)
     return lidar_info
