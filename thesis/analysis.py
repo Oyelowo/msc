@@ -102,8 +102,13 @@ for i, month_file_path in enumerate(rain_raster, 1):
    
 
 cc = sum_rain/12
-
-show(sum_rain,cmap='Blues', title="Mean Annual Rainfall")
+# =============================================================================
+# ['nearest' | 'bilinear' | 'bicubic' | 'spline16' |
+#            'spline36' | 'hanning' | 'hamming' | 'hermite' | 'kaiser' |
+#            'quadric' | 'catrom' | 'gaussian' | 'bessel' | 'mitchell' |
+#            'sinc' | 'lanczos' | 'none' ]
+# =============================================================================
+show(sum_rain,cmap='RdBu',interpolation="sinc", title="Mean Annual Rainfall")
 
 # =============================================================================
 # CONVERT THE RASTER FILES INTO VECTOR
@@ -456,7 +461,7 @@ def plot_map(dataFrame,  column_list, vmin, vmax,truncate_cbar_texts, l_limit, h
     month = find_month(column)
 #    print(month)
 #    vmin, vmax = dataFrame[column].min(), dataFrame[column].max()
-    map_plot=classified_df.plot(ax=ax, column=column , cmap=rain_potential_cmap)
+    map_plot=classified_df.plot(ax=ax, column=column , cmap=rain_potential_cmap,  alpha=0.9,edgecolor='0.6')
     print(column)
     ax.grid(b=True, which='major', color='#D3D3D3', linestyle='-')
     ax.set_aspect('equal')
@@ -493,12 +498,13 @@ rain_list =list(map(lambda x: x[:3] + '_rain', month_list))
 rain_potential_cmap = 'RdBu'
 plot_map(buildings_rain_aggr, rain_list[:6],0 , 193,True, 6, 193, 1, r'E:\LIDAR_FINAL\data\plots\jan_jun_rain.jpg')
 plot_map(buildings_rain_aggr, rain_list[6:],0 , 193,False, 6, 193, 1,r'E:\LIDAR_FINAL\data\plots\jan_jun_rain.jpg')
-plot_map(buildings_rain_aggr, rain_pot_list[:6],0 , 5, True, 0, 500000, 1000, r'E:\LIDAR_FINAL\data\plots\jan_jun_tight_potential.jpg')
-plot_map(buildings_rain_aggr, rain_pot_list[6:], 0, 5,True, 0, 500000, 1000, r'E:\LIDAR_FINAL\data\plots\jun_dec_tight_potential.jpg')
+#plot_map(buildings_rain_aggr, rain_pot_list[:6],0 , 5, True, 0, 500000, 1000, r'E:\LIDAR_FINAL\data\plots\jan_jun_tight_potential____.jpg')
+#plot_map(buildings_rain_aggr, rain_pot_list[6:], 0, 5,True, 0, 500000, 1000, r'E:\LIDAR_FINAL\data\plots\jun_dec_tight_potential____.jpg')
 # =============================================================================
 # 
 # =============================================================================
-
+plot_map(buildings_rain_aggr, 'ann_rain',0 , 5, True, 0, 500000, 1000, r'E:\LIDAR_FINAL\data\plots\annual_tight_potential.jpg')
+buildings_rain_aggr.plot(column='ann_rainPOT', cmap='RdBu', scheme="quantiles", k=10, alpha=0.9,edgecolor='0.6')
 plt.hist(buildings_rain_aggr['Sep_rainPOT'])
 
 from matplotlib.pyplot import figure
