@@ -394,7 +394,7 @@ buildings_rain_aggr.describe()
 # PLOTTING MAPS
 # =============================================================================
 
-rain_potential_cmap = 'YlGnBu'
+rain_potential_cmap = 'RdYlBu'
 
 def organise_colorbar(cbar, vmin, vmax, number_of_ticks=6, cbar_texts_padding=2, labelpad=45):
   #    organise the labels of the colorbar
@@ -423,7 +423,7 @@ def colorbar(ax, vmin, vmax, truncate_cbar_texts=True, number_of_ticks=6, cbar_l
     # fake up the array of the scalar mappable....
     sm._A = []
     cbar=fig.colorbar(sm, cax = cax, fraction=0.046)
-    cbar.set_label('100, 000 litres', rotation=270)
+    cbar.set_label('100, 000 litres', rotation=270, labelpad=15)
     if truncate_cbar_texts:
       cbar.ax.get_yaxis().set_ticks([])
       organise_colorbar(cbar, vmin, vmax)
@@ -455,15 +455,15 @@ def plot_map(dataFrame,  column_list, vmin, vmax,truncate_cbar_texts, l_limit, h
   classified_df = dataFrame.copy()
   classified_df[column_list] = classified_df[column_list].apply(userDefinedClassifer(l_limit, h_limit, step))
   plt.suptitle('Rain Water Harvesting Potential in Taita Region', fontsize=18)
-  plt.tight_layout()
+#  plt.tight_layout()
   for i, (ax, column) in enumerate(zip(axes.flatten(), column_list), 1):
     #Join the classes back to the main data.
     month = find_month(column)
 #    print(month)
 #    vmin, vmax = dataFrame[column].min(), dataFrame[column].max()
-    map_plot=classified_df.plot(ax=ax, column=column , cmap=rain_potential_cmap,  alpha=0.9,edgecolor='0.6')
+    map_plot=classified_df.plot(ax=ax, column=column,linewidth=0.02, cmap=rain_potential_cmap,  alpha=0.9)
     print(column)
-    ax.grid(b=True, which='major', color='#D3D3D3', linestyle='-')
+    ax.grid(b=True, which='minor', color='#D3D3D3', linestyle='-')
     ax.set_aspect('equal')
     
     
@@ -482,10 +482,28 @@ def plot_map(dataFrame,  column_list, vmin, vmax,truncate_cbar_texts, l_limit, h
     plt.savefig(output_fp, bbox_inches='tight', pad_inches=0.1)
 
 
+
+
+ax= buildings_rain_aggr.plot(column='ann_rainPOT',linewidth=0.02, cmap='RdYlBu', scheme="quantiles", k=9,  alpha=0.9)
+ax.grid(b=True, which='minor', color='#D3D3D3',linewidth=0.2, linestyle='-')
+        
+plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)  
+ax.set_facecolor("#eeeeee")
+minx,miny,maxx,maxy =  buildings_rain_aggr.total_bounds
+vmin, vmax = buildings_rain_aggr.ann_rainPOT.min(), buildings_rain_aggr.ann_rainPOT.max()
+# these are matplotlib.patch.Patch properties
+props = dict(boxstyle='round', facecolor='#eaeaea', alpha=0)
+ax.text(x=minx+1000,y=maxy-5000, s=u'N \n\u25B2 ', ha='center', fontsize=17, weight='bold', family='Courier new', rotation = 0)
+#ax.text(x=426000,y=maxy+2000, s="Total Annual Rain Potential",  ha='center', fontsize=20, weight='bold', family='Courier new', bbox=props)
+plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)
+colorbar(ax, vmin, vmax, truncate_cbar_texts=False)
+plt.subplots_adjust(top=0.92)
+
+
 #pot_list = [pot for pot in buildings_rain_aggr.columns if pot.endswith('rainPOT') and pot != 'ann_rainPOT']
 
 #classifier = ps.Natural_Breaks.make(k=10)
-    
+
 
 
 month_list = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
@@ -493,13 +511,14 @@ month_list = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
 rain_pot_list = list(map(lambda x: x[:3] + '_rainPOT', month_list))
 rain_list =list(map(lambda x: x[:3] + '_rain', month_list))
 #plot_map(buildings_rain_aggr, rain_list)
+plot_map(buildings_rain_aggr, rain_pot_list[:6],0 , 5, True, 0, 500000, 1000, r'E:\LIDAR_FINAL\data\plots\jajun_tight_potential____.jpg')
 
 
 rain_potential_cmap = 'RdBu'
 plot_map(buildings_rain_aggr, rain_list[:6],0 , 193,True, 6, 193, 1, r'E:\LIDAR_FINAL\data\plots\jan_jun_rain.jpg')
 plot_map(buildings_rain_aggr, rain_list[6:],0 , 193,False, 6, 193, 1,r'E:\LIDAR_FINAL\data\plots\jan_jun_rain.jpg')
-#plot_map(buildings_rain_aggr, rain_pot_list[:6],0 , 5, True, 0, 500000, 1000, r'E:\LIDAR_FINAL\data\plots\jan_jun_tight_potential____.jpg')
-#plot_map(buildings_rain_aggr, rain_pot_list[6:], 0, 5,True, 0, 500000, 1000, r'E:\LIDAR_FINAL\data\plots\jun_dec_tight_potential____.jpg')
+plot_map(buildings_rain_aggr, rain_pot_list,0 , 5, True, 0, 500000, 1000, r'E:\LIDAR_FINAL\data\plots\jan_jun_RdYlBu__free_labelpadbet.jpg')
+plot_map(buildings_rain_aggr, rain_pot_list[6:], 0, 5,True, 0, 500000, 1000, r'E:\LIDAR_FINAL\data\plots\jul_dec_RdYlBu__free_labelpadbeta.jpg')
 # =============================================================================
 # 
 # =============================================================================
@@ -511,8 +530,8 @@ from matplotlib.pyplot import figure
 figure(num=None, figsize=(6, 2), dpi=80, facecolor='w', edgecolor='k')
 
 first_letter = [first[:3] for first in rain_pot_list]
-plt.bar(first_letter, buildings_rain_aggr[ rain_pot_list].sum())
-plt.plot(first_letter, buildings_rain_aggr[ rain_pot_list].sum(), 'b--')
+plt.bar(first_letter, buildings_rain_aggr[ rain_pot_list].sum(), color='lightblue')
+plt.plot(first_letter, buildings_rain_aggr[ rain_pot_list].sum(), 'p-')
 buildings_rain_aggr[rain_list].mean()
 
 
