@@ -494,15 +494,16 @@ buildings_rain_aggr_['ann_rainPOT'] = round((buildings_rain_aggr['ann_rainPOT']/
 minx, miny, maxx, maxy =  buildings_rain_aggr.total_bounds
 
 
-fig, ax = plt.subplots(figsize  = (9, 5))
+fig, ax = plt.subplots(figsize  = (6, 6))
 buildings_rain_aggr_.plot(ax =ax,figsize=fig, column='ann_rainPOT',scheme='quantiles', k=9,linewidth=0.02, cmap='RdYlBu', alpha=0.9,legend = True)
-ax.get_legend().set_bbox_to_anchor((1.42, .8))
+ax.get_legend().set_bbox_to_anchor((1.43, 0.8))
+ax.get_legend().set_title('RWHP(thousand mm)')
 ax.get_figure()
-ax.set_title("United States Roads by Type", fontsize=25)
+ax.set_title("Total Annual Rainwater Harvesting Potential, Taita Region", fontsize=15)
 #plt.axis('equal')
 #plt.show()
 
-plt.savefig(r'E:\LIDAR_FINAL\data\plots\annual_potential___test')
+plt.savefig(r'E:\LIDAR_FINAL\data\plots\annual_potential___test',  bbox_inches='tight', pad_inches=0.1)
 
 
 
