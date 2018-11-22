@@ -423,7 +423,7 @@ def colorbar(ax, vmin, vmax, truncate_cbar_texts=True, number_of_ticks=6, cbar_l
     # fake up the array of the scalar mappable....
     sm._A = []
     cbar=fig.colorbar(sm, cax = cax, fraction=0.046)
-    cbar.set_label('100, 000 litres', rotation=270, labelpad=15)
+    cbar.set_label('million litres', rotation=270, labelpad=15)
     if truncate_cbar_texts:
       cbar.ax.get_yaxis().set_ticks([])
       organise_colorbar(cbar, vmin, vmax)
@@ -481,23 +481,51 @@ def plot_map(dataFrame,  column_list, vmin, vmax,truncate_cbar_texts, l_limit, h
     plt.subplots_adjust(top=0.92)
     plt.savefig(output_fp, bbox_inches='tight', pad_inches=0.1)
 
+import pysal as ps
 
+mmax= buildings_rain_aggr.ann_rainPOT.max()
+buildings_rain_aggr_ = buildings_rain_aggr.copy()
+buildings_rain_aggr_.ann_rainPOT = buildings_rain_aggr_.ann_rainPOT/1000000
 
+buildings_rain_aggr_['ann_rainPOT'] = buildings_rain_aggr_['ann_rainPOT'].apply(userDefinedClassifer(0, int(mmax), 1000))
 
-ax= buildings_rain_aggr.plot(column='ann_rainPOT',linewidth=0.02, cmap='RdYlBu', scheme="quantiles", k=9,  alpha=0.9)
+ax= buildings_rain_aggr_.plot(column='ann_rainPOT',legend = True,linewidth=0.02, cmap='RdYlBu', alpha=0.9)
 ax.grid(b=True, which='minor', color='#D3D3D3',linewidth=0.2, linestyle='-')
         
 plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)  
 ax.set_facecolor("#eeeeee")
 minx,miny,maxx,maxy =  buildings_rain_aggr.total_bounds
-vmin, vmax = buildings_rain_aggr.ann_rainPOT.min(), buildings_rain_aggr.ann_rainPOT.max()
+vmin, vmax = buildings_rain_aggr.ann_rainPOT.min()/1000000, buildings_rain_aggr.ann_rainPOT.max()/1000000
 # these are matplotlib.patch.Patch properties
 props = dict(boxstyle='round', facecolor='#eaeaea', alpha=0)
 ax.text(x=minx+1000,y=maxy-5000, s=u'N \n\u25B2 ', ha='center', fontsize=17, weight='bold', family='Courier new', rotation = 0)
 #ax.text(x=426000,y=maxy+2000, s="Total Annual Rain Potential",  ha='center', fontsize=20, weight='bold', family='Courier new', bbox=props)
 plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)
-colorbar(ax, vmin, vmax, truncate_cbar_texts=False)
+#colorbar(ax, vmin, vmax, truncate_cbar_texts=False)
+# add colorbar
+fig = ax.get_figure()
+sm = plt.cm.ScalarMappable(cmap='RdBu', norm=plt.Normalize(vmin=vmin, vmax=vmax))
+divider = make_axes_locatable(ax)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+# fake up the array of the scalar mappable. Urgh...
+sm._A = []
+cbar=fig.colorbar(sm, cax=cax)
+cbar.set_label('Litres')
 plt.subplots_adjust(top=0.92)
+plt.savefig(r'E:\LIDAR_FINAL\data\plots\annual_RWHP_mm.jpg', bbox_inches='tight', pad_inches=0.1, dpi=300)
+
+
+import pysal as ps
+
+# Define the number of classes
+n_classes = 9
+
+# Create a Natural Breaks classifier
+classifier = ps.Quantiles.make(k=n_classes)
+buildings_rain_aggr_['ann_POT_class'] = buildings_rain_aggr_[['ann_rainPOT']].apply(classifier)
+
+buildings_rain_aggr_.plot(column='ann_POT_class',legend = True,linewidth=0, cmap='RdYlBu', k=9,  alpha=0.9)
+
 
 
 #pot_list = [pot for pot in buildings_rain_aggr.columns if pot.endswith('rainPOT') and pot != 'ann_rainPOT']
@@ -515,10 +543,10 @@ plot_map(buildings_rain_aggr, rain_pot_list[:6],0 , 5, True, 0, 500000, 1000, r'
 
 
 rain_potential_cmap = 'RdBu'
-plot_map(buildings_rain_aggr, rain_list[:6],0 , 193,True, 6, 193, 1, r'E:\LIDAR_FINAL\data\plots\jan_jun_rain.jpg')
-plot_map(buildings_rain_aggr, rain_list[6:],0 , 193,False, 6, 193, 1,r'E:\LIDAR_FINAL\data\plots\jan_jun_rain.jpg')
-plot_map(buildings_rain_aggr, rain_pot_list,0 , 5, True, 0, 500000, 1000, r'E:\LIDAR_FINAL\data\plots\jan_jun_RdYlBu__free_labelpadbet.jpg')
-plot_map(buildings_rain_aggr, rain_pot_list[6:], 0, 5,True, 0, 500000, 1000, r'E:\LIDAR_FINAL\data\plots\jul_dec_RdYlBu__free_labelpadbeta.jpg')
+#plot_map(buildings_rain_aggr, rain_list[:6],0 , 193,True, 6, 193, 1, r'E:\LIDAR_FINAL\data\plots\jan_jun_rain.jpg')
+#plot_map(buildings_rain_aggr, rain_list[6:],0 , 193,False, 6, 193, 1,r'E:\LIDAR_FINAL\data\plots\jan_jun_rain.jpg')
+#plot_map(buildings_rain_aggr, rain_pot_list,0 , 5, True, 0, 500000, 1000, r'E:\LIDAR_FINAL\data\plots\jan_jun_RdYlBu__free_labelpadbet.jpg')
+#plot_map(buildings_rain_aggr, rain_pot_list[6:], 0, 5,True, 0, 500000, 1000, r'E:\LIDAR_FINAL\data\plots\jul_dec_RdYlBu__free_labelpadbeta.jpg')
 # =============================================================================
 # 
 # =============================================================================
@@ -537,7 +565,7 @@ buildings_rain_aggr[rain_list].mean()
 
 
 
-buildings_rain_aggr.to_file(r'E:\LIDAR_FINAL\data\aggregated\buildings_rain_aggr.shp')
+#buildings_rain_aggr.to_file(r'E:\LIDAR_FINAL\data\aggregated\buildings_rain_aggr.shp')
 
 
 
