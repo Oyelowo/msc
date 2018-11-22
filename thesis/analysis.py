@@ -486,33 +486,28 @@ import pysal as ps
 mmax= buildings_rain_aggr.ann_rainPOT.max()
 buildings_rain_aggr_ = buildings_rain_aggr.copy()
 buildings_rain_aggr_.ann_rainPOT = buildings_rain_aggr_.ann_rainPOT/1000000
+kk =buildings_rain_aggr[['ann_rainPOT']].apply(userDefinedClassifer(0, 2000000, 20000))
+print(kk)
+buildings_rain_aggr_['ann_rainPOT'] = buildings_rain_aggr[['ann_rainPOT']].apply(userDefinedClassifer(0, 2000000, 20000))
 
-buildings_rain_aggr_['ann_rainPOT'] = buildings_rain_aggr_['ann_rainPOT'].apply(userDefinedClassifer(0, int(mmax), 1000))
+buildings_rain_aggr_['ann_rainPOT'] = round((buildings_rain_aggr['ann_rainPOT']/1000),0).astype(int)
+minx, miny, maxx, maxy =  buildings_rain_aggr.total_bounds
 
-ax= buildings_rain_aggr_.plot(column='ann_rainPOT',legend = True,linewidth=0.02, cmap='RdYlBu', alpha=0.9)
-ax.grid(b=True, which='minor', color='#D3D3D3',linewidth=0.2, linestyle='-')
-        
-plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)  
-ax.set_facecolor("#eeeeee")
-minx,miny,maxx,maxy =  buildings_rain_aggr.total_bounds
-vmin, vmax = buildings_rain_aggr.ann_rainPOT.min()/1000000, buildings_rain_aggr.ann_rainPOT.max()/1000000
-# these are matplotlib.patch.Patch properties
-props = dict(boxstyle='round', facecolor='#eaeaea', alpha=0)
-ax.text(x=minx+1000,y=maxy-5000, s=u'N \n\u25B2 ', ha='center', fontsize=17, weight='bold', family='Courier new', rotation = 0)
-#ax.text(x=426000,y=maxy+2000, s="Total Annual Rain Potential",  ha='center', fontsize=20, weight='bold', family='Courier new', bbox=props)
-plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)
-#colorbar(ax, vmin, vmax, truncate_cbar_texts=False)
-# add colorbar
-fig = ax.get_figure()
-sm = plt.cm.ScalarMappable(cmap='RdBu', norm=plt.Normalize(vmin=vmin, vmax=vmax))
-divider = make_axes_locatable(ax)
-cax = divider.append_axes("right", size="5%", pad=0.05)
-# fake up the array of the scalar mappable. Urgh...
-sm._A = []
-cbar=fig.colorbar(sm, cax=cax)
-cbar.set_label('Litres')
-plt.subplots_adjust(top=0.92)
-plt.savefig(r'E:\LIDAR_FINAL\data\plots\annual_RWHP_mm.jpg', bbox_inches='tight', pad_inches=0.1, dpi=300)
+
+fig, ax = plt.subplots(figsize  = (9, 5))
+buildings_rain_aggr_.plot(ax =ax,figsize=fig, column='ann_rainPOT',scheme='quantiles', k=9,linewidth=0.02, cmap='RdYlBu', alpha=0.9,legend = True)
+ax.get_legend().set_bbox_to_anchor((1.42, .8))
+ax.get_figure()
+ax.set_title("United States Roads by Type", fontsize=25)
+#plt.axis('equal')
+#plt.show()
+
+plt.savefig(r'E:\LIDAR_FINAL\data\plots\annual_potential___test')
+
+
+
+
+plt.savefig(r'E:\LIDAR_FINAL\data\plots\annual_potential___test')
 
 
 import pysal as ps
@@ -522,7 +517,7 @@ n_classes = 9
 
 # Create a Natural Breaks classifier
 classifier = ps.Quantiles.make(k=n_classes)
-buildings_rain_aggr_['ann_POT_class'] = buildings_rain_aggr_[['ann_rainPOT']].apply(classifier)
+buildings_rain_aggr_['ann_POT_class'] = buildings_rain_aggr[['ann_rainPOT']].apply(classifier)
 
 buildings_rain_aggr_.plot(column='ann_POT_class',legend = True,linewidth=0, cmap='RdYlBu', k=9,  alpha=0.9)
 
