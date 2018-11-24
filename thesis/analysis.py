@@ -592,12 +592,16 @@ plot_annual(buildings_rain_aggr_, 'area_sum', map_title, legend_title,cmap, outp
 # =============================================================================
 
 from matplotlib.pyplot import figure
-figure(num=None, figsize=(6, 2), dpi=80, facecolor='w', edgecolor='k')
+figure(num=None, figsize=(8, 3), dpi=80, facecolor='w', edgecolor='k')
 
 first_letter = [first[:3] for first in rain_pot_list]
 plt.bar(first_letter, buildings_rain_aggr[ rain_pot_list].sum(), color='lightblue')
 plt.plot(first_letter, buildings_rain_aggr[ rain_pot_list].sum(), 'p-')
+plt.ylim(0, buildings_rain_aggr[ rain_pot_list].sum().max() + 100000000)
 buildings_rain_aggr[rain_list].mean()
+plt.title('Total Monthly Roof Rainwater Harveting Potential, Taita')
+plt.xlabel('Month')
+plt.ylabel('RRHP\n(100 million litres)')
 
 
 
