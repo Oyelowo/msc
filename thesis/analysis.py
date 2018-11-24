@@ -99,8 +99,6 @@ for i, month_file_path in enumerate(rain_raster, 1):
     sum_rain += month_raster
 
 
-   
-
 cc = sum_rain/12
 # =============================================================================
 # ['nearest' | 'bilinear' | 'bicubic' | 'spline16' |
@@ -109,7 +107,7 @@ cc = sum_rain/12
 #            'sinc' | 'lanczos' | 'none' ]
 # =============================================================================
 show(sum_rain,cmap='RdBu',interpolation="sinc", title="Mean Annual Rainfall")
-
+#show(month_raster,ax =ax, cmap='RdBu',interpolation="bessel", title="Mean Annual Rainfall")
 # =============================================================================
 # CONVERT THE RASTER FILES INTO VECTOR
 # =============================================================================
@@ -256,7 +254,7 @@ buildings_aggr['geometry'] = geom
 buildings_aggr['area_sum'] = area
     
 
-buildings_aggr.plot('area_sum', linewidth=0.03, cmap="Blues", scheme="quantiles", k=19, alpha=0.9)
+buildings_aggr.plot('area_sum', linewidth=0.03, cmap="YlOrBr", scheme="quantiles", k=19, alpha=0.9)
 
 
 
@@ -394,27 +392,28 @@ buildings_rain_aggr.describe()
 # PLOTTING MAPS
 # =============================================================================
 
-rain_potential_cmap = 'RdYlBu'
 
-def organise_colorbar(cbar, vmin, vmax, number_of_ticks=6, cbar_texts_padding=2, labelpad=45):
+def organise_colorbar(cbar, vmin, vmax, number_of_ticks=6, cbar_texts_padding=2.5, labelpad=17):
   #    organise the labels of the colorbar
+    tick_padding=1.4
     interval = int((vmax-vmin)/(number_of_ticks-1))
     scale_divider = ((vmax-vmin)/interval) 
-    ticks=[]
+    labels=[]
     for i in range(vmin, vmax+1, interval):
-      ticks.append(str(i))
+      labels.append(str(i))
 #    add greater than sign to the upper end of the scale
-    ticks[-1] = '>' + ticks[-1]
-    cbar.ax.set_yticklabels(ticks)
-    ticks_dol =[ '$' + x +'$' for x in ticks]
-    for i, lab in enumerate(ticks_dol,0):
-      if i == len(ticks_dol) -1:
+    labels[-1] = '>' + labels[-1]
+    cbar.ax.set_yticklabels(labels)
+    ticks = ['-'] * len(labels)
+    for i, (tick, lab) in enumerate(zip(ticks , labels),0):
+      cbar.ax.text(tick_padding, (i) / scale_divider, tick, ha='center', va='center', weight='bold')
+      if i == len(labels) -1:
         cbar_texts_padding += 0.75
       cbar.ax.text(cbar_texts_padding, (i) / scale_divider, lab, ha='center', va='center')
-    cbar.ax.get_yaxis().labelpad = labelpad
+#    cbar.ax.get_yaxis().labelpad = labelpad
 
 
-def colorbar(ax, vmin, vmax, truncate_cbar_texts=True, number_of_ticks=6, cbar_label_pad=2, labelpad = 35):
+def colorbar(ax, vmin, vmax, truncate_cbar_texts=True, cbar_title=None, number_of_ticks=6, cbar_label_pad=2, labelpad = 17):
   # add colorbar
     fig = ax.get_figure()
     sm = plt.cm.ScalarMappable(cmap=rain_potential_cmap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
@@ -423,7 +422,8 @@ def colorbar(ax, vmin, vmax, truncate_cbar_texts=True, number_of_ticks=6, cbar_l
     # fake up the array of the scalar mappable....
     sm._A = []
     cbar=fig.colorbar(sm, cax = cax, fraction=0.046)
-    cbar.set_label('million litres', rotation=270, labelpad=15)
+    cbar.set_label(cbar_title, rotation=270)
+    cbar.ax.get_yaxis().labelpad = labelpad
     if truncate_cbar_texts:
       cbar.ax.get_yaxis().set_ticks([])
       organise_colorbar(cbar, vmin, vmax)
@@ -448,19 +448,21 @@ def userDefinedClassifer(class_lower_limit, class_upper_limit, class_step):
   return classifier
 
 
-def plot_map(dataFrame,  column_list, vmin, vmax,truncate_cbar_texts, l_limit, h_limit, step, output_fp):
-  fig, axes = plt.subplots(3, 2, figsize=(12,12), sharex=True, sharey=True)
+def plot_map(dataFrame, column_list, scale_cmaps, vmin, vmax,truncate_cbar_texts, l_limit, h_limit, step, output_fp, main_title, cbar_title, labelpad):
+  fig, axes = plt.subplots(4, 3, figsize=(12,12), sharex=True, sharey=True)
 #  plt.suptitle('RAINWATER HARVESTING POTENTIAL IN TAITA')
 #  vmin, vmax = dataFrame[column_list].min().min(), dataFrame[column_list].max().max()
   classified_df = dataFrame.copy()
   classified_df[column_list] = classified_df[column_list].apply(userDefinedClassifer(l_limit, h_limit, step))
-  plt.suptitle('Rain Water Harvesting Potential in Taita Region', fontsize=18)
+  plt.suptitle(main_title, fontsize=18)
 #  plt.tight_layout()
   for i, (ax, column) in enumerate(zip(axes.flatten(), column_list), 1):
     #Join the classes back to the main data.
     month = find_month(column)
 #    print(month)
-#    vmin, vmax = dataFrame[column].min(), dataFrame[column].max()
+    if not scale_cmaps:
+      vmin, vmax = dataFrame[column].min(), dataFrame[column].max()
+      map_plot=dataFrame.plot(ax=ax, column=column,linewidth=0.02,scheme="equal_interval", k=9, cmap=rain_potential_cmap,  alpha=0.9)
     map_plot=classified_df.plot(ax=ax, column=column,linewidth=0.02, cmap=rain_potential_cmap,  alpha=0.9)
     print(column)
     ax.grid(b=True, which='minor', color='#D3D3D3', linestyle='-')
@@ -477,12 +479,42 @@ def plot_map(dataFrame,  column_list, vmin, vmax,truncate_cbar_texts, l_limit, h
     map_plot.text(x=minx+1000,y=maxy-5000, s=u'N \n\u25B2 ', ha='center', fontsize=17, weight='bold', family='Courier new', rotation = 0)
     map_plot.text(x=426000,y=maxy+2000, s=month,  ha='center', fontsize=20, weight='bold', family='Courier new', bbox=props)
     plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)
-    colorbar(map_plot, vmin, vmax, truncate_cbar_texts)
+    colorbar(map_plot, vmin, vmax, truncate_cbar_texts, cbar_title, labelpad=labelpad)
     plt.subplots_adjust(top=0.92)
     plt.savefig(output_fp, bbox_inches='tight', pad_inches=0.1)
 
-import pysal as ps
 
+
+month_list = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+              'August', 'September', 'October', 'November', 'December']
+rain_pot_list = list(map(lambda x: x[:3] + '_rainPOT', month_list))
+rain_list =list(map(lambda x: x[:3] + '_rain', month_list))
+
+rain_potential_cmap = 'Blues'
+monthly_main_title = "Monthly Distribution of Rainfall in Taita Region"
+monthly_rain_cbar_title = "mm"
+monthly_rain_output_fp = r'E:\LIDAR_FINAL\data\plots\jan_dec_rain_distribution_final.jpg'
+
+class_upper_limit = int(buildings_rain_aggr[rain_list].max().max())
+class_lower_limit = int(buildings_rain_aggr[rain_list].min().min())
+
+plot_map(buildings_rain_aggr, rain_list, False, None , None, False, 0, 200, 1,
+         monthly_rain_output_fp, main_title= monthly_main_title,  cbar_title= monthly_rain_cbar_title)
+
+
+
+monthly_main_title = "Spatio-temporal Distribution of Roof RainWater Harvesting Potential in Taita"
+monthly_rain_cbar_title = "100, 000 litres"
+monthly_rain_output_fp = r'E:\LIDAR_FINAL\data\plots\jan_dec_rain__Potential4__distribution_final.jpg'
+
+
+rain_potential_cmap = 'RdYlBu'
+plot_map(buildings_rain_aggr, rain_pot_list, True, 0 , 5, True, 0, 500000, 1000,
+         monthly_rain_output_fp, main_title= monthly_main_title,  cbar_title= monthly_rain_cbar_title, labelpad=30)
+buildings_rain_aggr[rain_pot_list].max()
+# =============================================================================
+# 
+# =============================================================================
 mmax= buildings_rain_aggr.ann_rainPOT.max()
 buildings_rain_aggr_ = buildings_rain_aggr.copy()
 buildings_rain_aggr_.ann_rainPOT = buildings_rain_aggr_.ann_rainPOT/1000000
@@ -505,22 +537,24 @@ ax.set_title("Total Annual Rainwater Harvesting Potential, Taita Region", fontsi
 
 plt.savefig(r'E:\LIDAR_FINAL\data\plots\annual_potential___test',  bbox_inches='tight', pad_inches=0.1)
 
+# =============================================================================
+# 
+# =============================================================================
 
 
 
-plt.savefig(r'E:\LIDAR_FINAL\data\plots\annual_potential___test')
-
-
-import pysal as ps
-
+# =============================================================================
+# 
+# =============================================================================
 # Define the number of classes
 n_classes = 9
 
 # Create a Natural Breaks classifier
 classifier = ps.Quantiles.make(k=n_classes)
 buildings_rain_aggr_['ann_POT_class'] = buildings_rain_aggr[['ann_rainPOT']].apply(classifier)
-
-buildings_rain_aggr_.plot(column='ann_POT_class',legend = True,linewidth=0, cmap='RdYlBu', k=9,  alpha=0.9)
+# =============================================================================
+# 
+# =============================================================================
 
 
 
@@ -530,16 +564,19 @@ buildings_rain_aggr_.plot(column='ann_POT_class',legend = True,linewidth=0, cmap
 
 
 
-month_list = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
-              'August', 'September', 'October', 'November', 'December']
-rain_pot_list = list(map(lambda x: x[:3] + '_rainPOT', month_list))
-rain_list =list(map(lambda x: x[:3] + '_rain', month_list))
 #plot_map(buildings_rain_aggr, rain_list)
 plot_map(buildings_rain_aggr, rain_pot_list[:6],0 , 5, True, 0, 500000, 1000, r'E:\LIDAR_FINAL\data\plots\jajun_tight_potential____.jpg')
 
+#plot_map(buildings_rain_aggr, rain_pot_list, 0 , 5, True, 0, 500000, 1000, r'E:\LIDAR_FINAL\data\plots\jan_dec_potential_final.jpg')
 
+
+
+
+
+
+buildings_rain_aggr.Nov_rain
 rain_potential_cmap = 'RdBu'
-#plot_map(buildings_rain_aggr, rain_list[:6],0 , 193,True, 6, 193, 1, r'E:\LIDAR_FINAL\data\plots\jan_jun_rain.jpg')
+plot_map(buildings_rain_aggr, rain_list[:6],0 , 193,True, 6, 193, 1, r'E:\LIDAR_FINAL\data\plots\jan_jun_rain.jpg')
 #plot_map(buildings_rain_aggr, rain_list[6:],0 , 193,False, 6, 193, 1,r'E:\LIDAR_FINAL\data\plots\jan_jun_rain.jpg')
 #plot_map(buildings_rain_aggr, rain_pot_list,0 , 5, True, 0, 500000, 1000, r'E:\LIDAR_FINAL\data\plots\jan_jun_RdYlBu__free_labelpadbet.jpg')
 #plot_map(buildings_rain_aggr, rain_pot_list[6:], 0, 5,True, 0, 500000, 1000, r'E:\LIDAR_FINAL\data\plots\jul_dec_RdYlBu__free_labelpadbeta.jpg')
@@ -549,6 +586,151 @@ rain_potential_cmap = 'RdBu'
 plot_map(buildings_rain_aggr, 'ann_rain',0 , 5, True, 0, 500000, 1000, r'E:\LIDAR_FINAL\data\plots\annual_tight_potential.jpg')
 buildings_rain_aggr.plot(column='ann_rainPOT', cmap='RdBu', scheme="quantiles", k=10, alpha=0.9,edgecolor='0.6')
 plt.hist(buildings_rain_aggr['Sep_rainPOT'])
+
+
+
+
+
+
+
+fig, axes = plt.subplots(4, 3, figsize=(12,12), sharex=True, sharey=True)
+#  plt.suptitle('RAINWATER HARVESTING POTENTIAL IN TAITA')
+#  vmin, vmax = dataFrame[column_list].min().min(), dataFrame[column_list].max().max()
+plt.suptitle('Rain Water Harvesting Potential in Taita Region', fontsize=18)
+#  plt.tight_layout()
+for i, (ax, column) in enumerate(zip(axes.flatten(), rain_list), 1):
+    buildings_rain_aggr_.plot(ax=ax, column=column,legend = True,linewidth=0, cmap='Blues',  alpha=0.9)
+
+
+
+
+
+# =============================================================================
+# 
+# =============================================================================
+
+
+rain_potential_cmap = 'Blues'
+
+def organise_colorbar(cbar, vmin, vmax, number_of_ticks=6, cbar_texts_padding=2, labelpad=23):
+  #    organise the labels of the colorbar
+    interval = int((vmax-vmin)/(number_of_ticks-1))
+    scale_divider = ((vmax-vmin)/interval) 
+    ticks=[]
+    for i in range(vmin, vmax+1, interval):
+      ticks.append(str(i))
+#    add greater than sign to the upper end of the scale
+    ticks[-1] = '>' + ticks[-1]
+    cbar.ax.set_yticklabels(ticks)
+    ticks_dol =[ '$' + x +'$' for x in ticks]
+    for i, lab in enumerate(ticks_dol,0):
+      if i == len(ticks_dol) -1:
+        cbar_texts_padding += 0.75
+      cbar.ax.text(cbar_texts_padding, (i) / scale_divider, lab, ha='center', va='center')
+#    cbar.ax.get_yaxis().labelpad = labelpad
+
+
+def colorbar(ax, vmin, vmax, truncate_cbar_texts=True, number_of_ticks=6, cbar_label_pad=2, labelpad = 18):
+  # add colorbar
+    fig = ax.get_figure()
+    sm = plt.cm.ScalarMappable(cmap=rain_potential_cmap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="4%", pad=0.05)
+    # fake up the array of the scalar mappable....
+    sm._A = []
+    cbar=fig.colorbar(sm, cax = cax, fraction=0.046)
+    cbar.set_label('100, 000 litres', rotation=270)
+    cbar.ax.get_yaxis().labelpad = labelpad
+    if truncate_cbar_texts:
+      cbar.ax.get_yaxis().set_ticks([])
+      organise_colorbar(cbar, vmin, vmax)
+    
+
+
+    
+def find_month(column_name):
+  month_list = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+              'August', 'September', 'October', 'November', 'December']
+  month_abbreviation= column_name[:3]
+  print(month_abbreviation)
+#  month = filter(lambda x: x.startswith(month_abbreviation), month_list)
+  month = [month for month in month_list if month.startswith(month_abbreviation)]
+  return ' '.join(month)
+
+
+
+def userDefinedClassifer(class_lower_limit, class_upper_limit, class_step):
+  breaks = [x for x in range(class_lower_limit, class_upper_limit, class_step)]
+  classifier = ps.User_Defined.make(bins=breaks)
+  return classifier
+
+
+def plot_map2(dataFrame,  column_list, vmin, vmax,truncate_cbar_texts, l_limit, h_limit, step, output_fp):
+  fig, axes = plt.subplots(4, 3, figsize=(12,12), sharex=True, sharey=True)
+#  plt.suptitle('RAINWATER HARVESTING POTENTIAL IN TAITA')
+#  vmin, vmax = dataFrame[column_list].min().min(), dataFrame[column_list].max().max()
+  classified_df = dataFrame.copy()
+  
+#  classified_df[column_list] = classified_df[column_list].apply(userDefinedClassifer(l_limit, h_limit, step))
+  plt.suptitle('Monthly Rain Water Harvesting Potential in Taita Region', fontsize=18)
+#  plt.tight_layout()
+  for i, (ax, column) in enumerate(zip(axes.flatten(), column_list), 1):
+    #Join the classes back to the main data.
+    month = find_month(column)
+#    print(month)
+    vmin, vmax = int(dataFrame[column].min()), int(dataFrame[column].max())
+    map_plot=classified_df.plot(ax=ax,column=column,linewidth=0.02, scheme='equal_interval', k=9 ,cmap='Blues',  alpha=0.9)
+    print(column)
+    ax.grid(b=True, which='minor', color='#D3D3D3', linestyle='-')
+    ax.set_aspect('equal')
+    
+    
+    # Rotate the x-axis labels so they don't overlap
+    plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)  
+    map_plot.set_facecolor("#eeeeee")
+    minx,miny,maxx,maxy =  dataFrame.total_bounds
+    
+    # these are matplotlib.patch.Patch properties
+    props = dict(boxstyle='round', facecolor='#eaeaea', alpha=0)
+    map_plot.text(x=minx+1000,y=maxy-5000, s=u'N \n\u25B2 ', ha='center', fontsize=17, weight='bold', family='Courier new', rotation = 0)
+    map_plot.text(x=426000,y=maxy+2000, s=month,  ha='center', fontsize=20, weight='bold', family='Courier new', bbox=props)
+    plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)
+    colorbar(map_plot, vmin, vmax, truncate_cbar_texts)
+    plt.subplots_adjust(top=0.92)
+    plt.savefig(output_fp, bbox_inches='tight', pad_inches=0.1)
+
+
+buildings_rain_aggr.Sep_rain
+
+plot_map2(buildings_rain_aggr, rain_list, 0 , 10, False, 0, 100, 1, r'E:\LIDAR_FINAL\data\plots\jan_dec_rain_dist_final.jpg')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# =============================================================================
+# 
+# =============================================================================
+
+
+
+
 
 from matplotlib.pyplot import figure
 figure(num=None, figsize=(6, 2), dpi=80, facecolor='w', edgecolor='k')
