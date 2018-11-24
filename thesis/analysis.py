@@ -580,7 +580,7 @@ plot_annual(buildings_rain_aggr_, 'ann_rainPOT', map_title, legend_title,cmap, o
 cmap='Oranges'
 map_title='Distribution of Areas of Roofs in Taita Region'
 legend_title='Area (sqm)'
-output_fp = r'E:\LIDAR_FINAL\data\plots\total_roof_areas_final_final_7'
+output_fp = r'E:\LIDAR_FINAL\data\plots\total_roof_areas_final_final_7.jpeg'
 plot_annual(buildings_rain_aggr_, 'area_sum', map_title, legend_title,cmap, output_fp)
 
 
@@ -592,17 +592,17 @@ plot_annual(buildings_rain_aggr_, 'area_sum', map_title, legend_title,cmap, outp
 # =============================================================================
 
 from matplotlib.pyplot import figure
-figure(num=None, figsize=(8, 3), dpi=80, facecolor='w', edgecolor='k')
-
+figure(num=None, figsize=(8, 5), dpi=80, facecolor='#eaeaea', edgecolor='k')
 first_letter = [first[:3] for first in rain_pot_list]
 plt.bar(first_letter, buildings_rain_aggr[ rain_pot_list].sum(), color='lightblue')
 plt.plot(first_letter, buildings_rain_aggr[ rain_pot_list].sum(), 'p-')
 plt.ylim(0, buildings_rain_aggr[ rain_pot_list].sum().max() + 100000000)
 buildings_rain_aggr[rain_list].mean()
 plt.title('Total Monthly Roof Rainwater Harveting Potential, Taita')
-plt.xlabel('Month')
+plt.xlabel('Months')
 plt.ylabel('RRHP\n(100 million litres)')
-
+plt.rcParams['axes.facecolor'] = '#ffffff'
+plt.savefig(r'E:\LIDAR_FINAL\data\plots\bar_line_RRWP_months_series.jpeg',  bbox_inches='tight', pad_inches=0.1)
 
 
 
