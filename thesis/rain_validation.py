@@ -61,8 +61,27 @@ for i, rain_data in enumerate(rain_fp_list[2:]):
 
 stations_names_list = all_data['station'].unique().tolist()
 
+def rename_stations(station):
+  if station == 'Taita_RS': 
+    station = "Taita Research Station" 
+  else:
+    station += ' Weather Station'
+  return station
 #stations_list.remove('Mwatate_Ar112509')
-plt.rcParams.update({'font.size': 22})
+  
+def design_multi_plots(ax, station, ylim_min, ylim_max):
+  ax.set_title(station, fontsize=18, weight='normal')
+  ax.grid(color='grey', linestyle='--', linewidth=1, alpha=0.3)
+  ax.set_ylim(ylim_min, ylim_max)
+#  ax.set_facecolor('white')
+  ax.tick_params(axis='both', which='major', labelsize=15)
+  # Axis labels
+  if i in [1, 3, 5]:
+    ax.set_ylabel('Rainfall (mm)', fontsize=18, weight='normal')
+  if i in [5, 6]:
+    ax.set_xlabel('Date', fontsize=18, weight='normal')
+    
+plt.rcParams.update({'font.size': 20})
 min_temp, max_temp = all_data.rain_mm.min()-20, all_data.rain_mm.max() + 20
 fig, axes = plt.subplots(3, 2, figsize=(14,14), sharex=True)
 for i, (ax, station) in enumerate(zip(axes.flatten(), stations_names_list), 1):
@@ -70,20 +89,8 @@ for i, (ax, station) in enumerate(zip(axes.flatten(), stations_names_list), 1):
   ax.plot(sub_data.Date, sub_data.rain_mm, lw = 1.5, c='blue')
   # Figure title
   fig.suptitle('Measured Rainfall in Taita Region')
-  if station == 'Taita_RS': 
-    station = "Taita Research Station" 
-  else:
-    station += ' Weather Station'
-  ax.set_title(station, fontsize=20)
-  ax.grid(color='grey', linestyle='-', linewidth=1, alpha=0.4)
-  ax.set_ylim(min_temp, max_temp)
-#  ax.set_facecolor('white')
-  ax.tick_params(axis='both', which='major', labelsize=15)
-  # Axis labels
-  if i in [1, 3, 5]:
-    ax.set_ylabel('Rainfall [mm]', fontsize=20)
-  if i in [5, 6]:
-    ax.set_xlabel('Date', fontsize=20)
+  station = rename_stations(station)
+  design_multi_plots(ax, station, min_temp, max_temp)
 plt.tight_layout()
 plt.subplots_adjust(top=0.92)
 plt.savefig(r'E:\LIDAR_FINAL\data\plots\stations_rain_timeseries.jpeg',  bbox_inches='tight', pad_inches=0.1)
@@ -108,24 +115,26 @@ for station in stations_names_list:
 import calendar
 monthly_agg_data['month_name'] = monthly_agg_data['month'].astype(int).apply(lambda x: calendar.month_abbr[x])
          
-min_temp, max_temp = monthly_agg_data.rain_mm.min()-20, monthly_agg_data.rain_mm.max() + 30
-fig, axes = plt.subplots(3, 2, figsize=(10,12), sharex=True, sharey=True)
-#  plt.suptitle('RAINWATER HARVESTING POTENTIAL IN TAITA')
-#  vmin, vmax = dataFrame[column_list].min().min(), dataFrame[column_list].max().max()
-for i, (ax, station) in enumerate(zip(axes.flatten(), stations_names_list), 1):
-  sub_data = monthly_agg_data.loc[monthly_agg_data['station']==station]
-  ax.plot(sub_data.month_name, sub_data.rain_mm, lw = 1.5)
-  # Figure title
-  fig.suptitle('Seasonal Rainfall observations - Taita-Taveta')
-  ax.text(2, max_temp-20, station)
-  ax.grid()
-  ax.set_ylim(min_temp, max_temp)
-  plt.setp(ax.xaxis.get_majorticklabels(), rotation=90)
-  # Axis labels
-  if i== 1 or i==3 or i==5:
-    ax.set_ylabel('Rainfall [mm]')
-  if i== 5 or i==6:
-    ax.set_xlabel('Date')
+# =============================================================================
+# min_temp, max_temp = monthly_agg_data.rain_mm.min()-20, monthly_agg_data.rain_mm.max() + 30
+# fig, axes = plt.subplots(3, 2, figsize=(10,12), sharex=True, sharey=True)
+# #  plt.suptitle('RAINWATER HARVESTING POTENTIAL IN TAITA')
+# #  vmin, vmax = dataFrame[column_list].min().min(), dataFrame[column_list].max().max()
+# for i, (ax, station) in enumerate(zip(axes.flatten(), stations_names_list), 1):
+#   sub_data = monthly_agg_data.loc[monthly_agg_data['station']==station]
+#   ax.plot(sub_data.month_name, sub_data.rain_mm, lw = 1.5)
+#   # Figure title
+#   fig.suptitle('Seasonal Rainfall observations - Taita-Taveta')
+#   ax.text(2, max_temp-20, station)
+#   ax.grid()
+#   ax.set_ylim(min_temp, max_temp)
+#   plt.setp(ax.xaxis.get_majorticklabels(), rotation=90)
+#   # Axis labels
+#   if i== 1 or i==3 or i==5:
+#     ax.set_ylabel('Rainfall [mm]')
+#   if i== 5 or i==6:
+#     ax.set_xlabel('Date')
+# =============================================================================
 
          
 
@@ -161,14 +170,14 @@ def plot_station(dataframe, column, map_title, legend_title,cmap, output_fp):
   ax.set_title(map_title, fontsize=15)
   #plt.axis('equal')
   #plt.show()
-  plt.savefig(output_fp,  bbox_inches='tight', pad_inches=0.1)
+  plt.savefig(output_fp, dpi=300, bbox_inches='tight', pad_inches=0.1)
 
 
 
 cmap='Blues'
 map_title=' in Taita Region'
 legend_title='Weather Stations'
-output_fp = r'E:\LIDAR_FINAL\data\plots\weather_stations_3'
+output_fp = r'E:\LIDAR_FINAL\data\plots\weather_stations_4'
 plot_station(stations, 'Location', map_title, legend_title,cmap, output_fp)
 
 
@@ -238,10 +247,13 @@ print(r2(measured_rain, modelled_rain))
 x=np.array(measured_rain) 
 y=np.array(modelled_rain)
 
-x = pd.Series(measured_rain, name="measured rain")
-y = pd.Series(modelled_rain, name="modelled rain")
+x = pd.Series(measured_rain, name="measured rain (mm)")
+y = pd.Series(modelled_rain, name="modelled rain (mm)")
 ax = sns.jointplot(x, y, kind="reg", stat_func=r2, logx=True, truncate=True, space=0.1)
-plt.title('YOUR TITLE HERE')
+plt.subplots_adjust(top=0.9)
+ax.fig.suptitle('Modelled Rainfall vs Measured Rainfall', fontsize=20) # can also get the figure from plt.gcf()
+output_fp = r'E:\LIDAR_FINAL\data\plots\validation_modelled_measured2'
+plt.savefig(output_fp,  bbox_inches='tight',dpi=300, pad_inches=0.1)
 
 
 
@@ -254,6 +266,7 @@ discontinued_station = 'Mwatate'
 if discontinued_station in stations_names_list:
   stations_names_list.remove(discontinued_station)
   
+#plt.rcParams.update({'font.size': 17})
 min_rain, max_rain = joined.rain_mm.min()-20, joined.rain_mm.max() + 30
 fig, axes = plt.subplots(3, 2, figsize=(10,12), sharex=True, sharey=True)
 for i, (ax, station) in enumerate(zip(axes.flatten(), stations_names_list), 1):
@@ -262,18 +275,15 @@ for i, (ax, station) in enumerate(zip(axes.flatten(), stations_names_list), 1):
   ax.plot(sub_data.month_name, sub_data.model_rain_mm, lw = 1.5, color='red', label= 'modelled')
   ax.legend()
   # Figure title
-  fig.suptitle('Seasonal Rainfall observations - Taita-Taveta')
-  ax.text(2, max_temp-20, station)
-  ax.grid(b=True, which='major', color='#dddddd', linestyle='-')
-  ax.set_ylim(min_temp, max_temp)
+  fig.suptitle('Comparison of Measured and modelled \n Mean Monthly Rainfall in Taita Region')
+  station = rename_stations(station)
+  design_multi_plots(ax, station, min_temp, max_temp)
   plt.setp(ax.xaxis.get_majorticklabels(), rotation=90)
-  # Axis labels
-  if i== 1 or i==3 or i==5:
-    ax.set_ylabel('Rainfall [mm]')
-  if i== 5 or i==6:
-    ax.set_xlabel('Date')
-  plt.tight_layout()
-  plt.subplots_adjust(top=0.95)
+plt.tight_layout()
+plt.subplots_adjust(top=0.89)
+output_fp = r'E:\LIDAR_FINAL\data\plots\monthly_validation_modelled_measured3'
+plt.savefig(output_fp,  bbox_inches='tight', pad_inches=0.1)
+  
 
 
 
