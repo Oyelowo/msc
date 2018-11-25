@@ -142,8 +142,43 @@ print(stations.crs)
 stations.crs = {'init' :'epsg:32737'}
 
 
-ax = buildings_rain_aggr.plot()
-stations.plot(ax=ax, c='red')
+
+def plot_station(dataframe, column, map_title, legend_title,cmap, output_fp):
+  minx, miny, maxx, maxy =  buildings_rain_aggr.total_bounds
+  fig, ax = plt.subplots(figsize  = (7, 7))
+  buildings_rain_aggr.plot(ax=ax, column='ann_rain', cmap='Blues', alpha=0.8)
+  map_plot = dataframe.plot(ax =ax,figsize=fig, column=column, s=100, alpha=1, legend = True)
+  ax.grid(b=True, which='minor', color='#D3D3D3', linestyle='-')
+  ax.set_aspect('equal')
+#  map_plot.set_facecolor("#ffffff")
+  map_plot.text(x=minx+3000,y=maxy-4000, s=u'N \n\u25B2 ', ha='center', fontsize=37, weight='bold', family='Courier new', rotation = 0)
+  ax.get_legend().set_bbox_to_anchor((1, 0.44))
+#  ax.get_legend().set_bbox_to_anchor((1.23, 0.9))
+  ax.get_legend().set_title(legend_title)
+  ax.get_figure()
+  ax.set_aspect('equal')
+  plt.xlim(minx-1000, maxx+1000)
+  ax.set_title(map_title, fontsize=15)
+  #plt.axis('equal')
+  #plt.show()
+  plt.savefig(output_fp,  bbox_inches='tight', pad_inches=0.1)
+
+
+
+cmap='Blues'
+map_title=' in Taita Region'
+legend_title='Weather Stations'
+output_fp = r'E:\LIDAR_FINAL\data\plots\weather_stations_3'
+plot_station(stations, 'Location', map_title, legend_title,cmap, output_fp)
+
+
+
+
+fig, ax = plt.subplots(figsize  = (9, 5))
+buildings_rain_aggr.plot(ax=ax)
+stations.plot(ax=ax, c='red', column='Location', legend=True)
+plt.xlim(400000, 480000)
+plt.ylim(9610000, 9645000)
 
 buildings_rain_aggr.crs = stations.crs
 len(stations)
