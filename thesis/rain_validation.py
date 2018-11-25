@@ -271,18 +271,18 @@ min_rain, max_rain = joined.rain_mm.min()-20, joined.rain_mm.max() + 30
 fig, axes = plt.subplots(3, 2, figsize=(10,12), sharex=True, sharey=True)
 for i, (ax, station) in enumerate(zip(axes.flatten(), stations_names_list), 1):
   sub_data = joined.loc[joined['station']==station].sort_values(by='month_y')
-  ax.plot(sub_data.month_name, sub_data.rain_mm, lw = 1.5, color = 'blue', label= 'measured')
-  ax.plot(sub_data.month_name, sub_data.model_rain_mm, lw = 1.5, color='red', label= 'modelled')
+  ax.plot(sub_data.month_name, sub_data.rain_mm, lw = 2, color = 'blue', label= 'Measured')
+  ax.plot(sub_data.month_name, sub_data.model_rain_mm, lw = 2, color='red', label= 'Modelled')
   ax.legend()
   # Figure title
   fig.suptitle('Comparison of Measured and modelled \n Mean Monthly Rainfall in Taita Region')
   station = rename_stations(station)
   design_multi_plots(ax, station, min_temp, max_temp)
   plt.setp(ax.xaxis.get_majorticklabels(), rotation=90)
-plt.tight_layout()
+  plt.tight_layout()
 plt.subplots_adjust(top=0.89)
-output_fp = r'E:\LIDAR_FINAL\data\plots\monthly_validation_modelled_measured3'
-plt.savefig(output_fp,  bbox_inches='tight', pad_inches=0.1)
+output_fp = r'E:\LIDAR_FINAL\data\plots\monthly_validation_modelled_measured4'
+plt.savefig(output_fp,  bbox_inches='tight',dpi=300, pad_inches=0.1)
   
 
 
