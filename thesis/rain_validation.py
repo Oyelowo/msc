@@ -62,24 +62,28 @@ for i, rain_data in enumerate(rain_fp_list[2:]):
 stations_names_list = all_data['station'].unique().tolist()
 
 #stations_list.remove('Mwatate_Ar112509')
-
+plt.rcParams.update({'font.size': 22})
 min_temp, max_temp = all_data.rain_mm.min()-20, all_data.rain_mm.max() + 20
-fig, axes = plt.subplots(3, 2, figsize=(10,12), sharex=True, sharey=True)
+fig, axes = plt.subplots(3, 2, figsize=(14,14))
 #  plt.suptitle('RAINWATER HARVESTING POTENTIAL IN TAITA')
 #  vmin, vmax = dataFrame[column_list].min().min(), dataFrame[column_list].max().max()
 for i, (ax, station) in enumerate(zip(axes.flatten(), stations_names_list), 1):
   sub_data = all_data.loc[all_data['station']==station]
   ax.plot(sub_data.Date, sub_data.rain_mm, lw = 1.5)
   # Figure title
-  fig.suptitle('Seasonal Rainfall observations - Taita-Taveta')
+  fig.suptitle('Measured Rainfall in Taita Region')
   ax.text(datetime(2012, 2, 15), 380, station)
-  ax.grid()
+  ax.grid(color='#eaeaea', linestyle='-', linewidth=0.8)
   ax.set_ylim(min_temp, max_temp)
   # Axis labels
   if i in [1, 3, 5]:
     ax.set_ylabel('Rainfall [mm]')
   if i in [5, 6]:
     ax.set_xlabel('Date')
+plt.tight_layout()
+plt.subplots_adjust(top=0.92)
+plt.savefig(r'E:\LIDAR_FINAL\data\plots\stations_rain_timeseries.jpeg',  bbox_inches='tight', pad_inches=0.1)
+
 
 
          
@@ -118,6 +122,7 @@ for i, (ax, station) in enumerate(zip(axes.flatten(), stations_names_list), 1):
     ax.set_ylabel('Rainfall [mm]')
   if i== 5 or i==6:
     ax.set_xlabel('Date')
+
          
 
 
@@ -206,7 +211,10 @@ plt.title('YOUR TITLE HERE')
 
 
 sns.set(color_codes=True)
-stations_names_list.remove('Mwatate')
+discontinued_station = 'Mwatate'
+if discontinued_station in stations_names_list:
+  stations_names_list.remove(discontinued_station)
+  
 min_rain, max_rain = joined.rain_mm.min()-20, joined.rain_mm.max() + 30
 fig, axes = plt.subplots(3, 2, figsize=(10,12), sharex=True, sharey=True)
 for i, (ax, station) in enumerate(zip(axes.flatten(), stations_names_list), 1):
