@@ -263,13 +263,26 @@ def r2(x, y):
 ax = sns.jointplot(x, y, kind="reg", stat_func=r2, logx=True, truncate=True, space=0.1)
 plt.subplots_adjust(top=0.9)
 ax.fig.suptitle('ARoof Areas of Extracted vs Digitised', fontsize=20) # can also get the figure from plt.gcf()
-output_fp = r'E:\LIDAR_FINAL\data\plots\digi_vs_lidar'
+output_fp = r'E:\LIDAR_FINAL\data\plots\digi_vs_lidar2'
 plt.savefig(output_fp,  bbox_inches='tight',dpi=300, pad_inches=0.1)
 
 
-#%timeit plt.scatter(roof_13_agg.digi_area, roof_13_agg.lidar_area)
+
+list(roof_13_agg.one_to_N_rel.astype(int)).count(1)
+
+from collections import Counter
+c = Counter(list(roof_13_agg.one_to_N_rel.astype(int)))
+one_to_N_counts = c.items()
 
 plt.hist(roof_13_agg.one_to_N_rel)
+plt.ylabel('Number of Buildings')
+plt.xlabel('One to N relationships')
+plt.title('One Digitized  Roof to N number of Extracted Roof area to relationships')
+plt.ylim(0, 1500)
+for item in one_to_N_counts:
+  plt.text(item[0]-0.05, item[1]+14, s=item[1])
+plt.savefig( r'E:\LIDAR_FINAL\data\plots\one_to_N_relationship', bbox_inches='tight',dpi=300, pad_inches=0.1)
+
 
 ((x-y)/x) *100
 
