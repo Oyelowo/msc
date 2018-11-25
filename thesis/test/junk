@@ -936,8 +936,7 @@ buildings_rain_aggr.describe()
 #plt.setp(ax22.xaxis.get_majorticklabels(), rotation=20)
 #
 ## Axis labels
-#ax21.set_xlabel('Date')
-#ax22.set_xlabel('Date')
+
 #ax11.set_ylabel('Temperature [deg. C]')
 #ax21.set_ylabel('Temperature [deg. C]')
 #
