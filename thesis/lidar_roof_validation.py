@@ -11,8 +11,8 @@ from shapely.geometry import Polygon,Point
 # =============================================================================
 digitized_roof = gpd.read_file(r'E:\LIDAR_FINAL\data\building_digitised\digitizedb_bbox.shp')
 #digitized_roof = gpd.read_file(r'E:\LIDAR_FINAL\diigised_Samples_roofs\building\buildings\new_buildings.shp')
-roof_2013 = gpd.read_file(r'E:\LIDAR_FINAL\data\buildings\2013\roof_polygons\buildings_2013_projected_regularized.shp')
-roof_2015 = gpd.read_file(r'E:\LIDAR_FINAL\data\buildings\2015\roof_polygons\buildings_2015_simplified.shp')
+roof_2013_all = gpd.read_file(r'E:\LIDAR_FINAL\data\buildings\2013\roof_polygons\buildings_2013_projected_regularized.shp')
+roof_2015_all = gpd.read_file(r'E:\LIDAR_FINAL\data\buildings\2015\roof_polygons\buildings_2015_simplified.shp')
 aoi = gpd.read_file(r'E:\LIDAR_FINAL\diigised_Samples_roofs\aoi_roof_samples.shp')
 
 
@@ -32,12 +32,12 @@ aoi.plot()
 # =============================================================================
 aoi_boundary = aoi.loc[0].geometry
 type(aoi_boundary)
-roof_2013 = roof_2013[roof_2013.geometry.within(aoi_boundary)]
-roof_2013.plot()
-roof_2015 = roof_2015[roof_2015.geometry.within(aoi_boundary)]
-roof_2015.plot()
-len(roof_2013)
-len(roof_2015)
+roof_2013_all = roof_2013_all[roof_2013_all.geometry.within(aoi_boundary)]
+roof_2013_all.plot()
+roof_2015_all = roof_2015_all[roof_2015_all.geometry.within(aoi_boundary)]
+roof_2015_all.plot()
+len(roof_2013_all)
+len(roof_2015_all)
 len(digitized_roof)
 
 
@@ -58,11 +58,11 @@ digitized_roof['digi_ID'] = digitized_roof.index + 1
 # FILTER TOO SMALL OR TOO BIG POLYGONS
 # =============================================================================
 lower_limit, upper_limit = 10, 2000
-roof_2013['area'] = roof_2013.geometry.area
-roof_2013 = roof_2013.loc[(roof_2013['area']>lower_limit) & (roof_2013['area']<upper_limit)].reset_index(drop=True)
+roof_2013_all['area'] = roof_2013_all.geometry.area
+roof_2013 = roof_2013_all.loc[(roof_2013_all['area']>lower_limit) & (roof_2013_all['area']<upper_limit)].reset_index(drop=True)
 
-roof_2015['area'] = roof_2015.geometry.area
-roof_2015 = roof_2015.loc[(roof_2015['area']>lower_limit) & (roof_2015['area']<upper_limit)].reset_index(drop=True)
+roof_2015_all['area'] = roof_2015_all.geometry.area
+roof_2015 = roof_2015_all.loc[(roof_2015_all['area']>lower_limit) & (roof_2015_all['area']<upper_limit)].reset_index(drop=True)
 
 
 # =============================================================================
@@ -149,18 +149,54 @@ digi_inter_roof13_df_grouped = digi_inter_roof13_df.groupby('digi_ID')
 correct_roof2013_count = len(digi_inter_roof13_df_grouped)
 omission_roof_2013 = ((digi_roofs_count - correct_roof2013_count) *100)/ digi_roofs_count
 
-print('In 2013, {0} roofs were rightly extracted out of {1} roofs'.format(correct_roof2013_count, digi_roofs_count))
-print('The error of ommission for 2013 extraction is {0}%'.format(omission_roof_2013))
-print('Accuracy is {0}%'.format(100-omission_roof_2013))
 
 #2015
 digi_inter_roof15_df_grouped = digi_inter_roof15_df.groupby('digi_ID')
 correct_roof2015_count = len(digi_inter_roof15_df_grouped)
 omission_roof_2015 = ((digi_roofs_count - correct_roof2015_count) *100)/ digi_roofs_count
 
-print('In 2013, {0} roofs were rightly extracted out of {1} roofs'.format(correct_roof2015_count, digi_roofs_count))
-print('The error of ommission for 2015 extraction is {0}%'.format(round(omission_roof_2015,2)))
-print('Accuracy is {0}%'.format(100-omission_roof_2015))
+print('In 2013, {0} roofs were correctly extracted out of {1} roofs'.format(correct_roof2013_count, digi_roofs_count), '\n',
+      'In 2013, {0} roofs were omitted out of {1} roofs. \n'.format(digi_roofs_count -correct_roof2013_count, digi_roofs_count),
+      'Percentage of omitted buildings in 2013 is {0}%'.format(omission_roof_2013), '\n',
+      'Percentage accurately extracted in 2013 is {0}%'.format(100-omission_roof_2013), '\n\n',
+      
+      
+      'In 2015, {0} roofs were rightly extracted out of {1} roofs'.format(correct_roof2015_count, digi_roofs_count), '\n',
+       'In 2015, {0} roofs were omitted out of {1} roofs. \n'.format(digi_roofs_count -correct_roof2015_count, digi_roofs_count),
+      'Percentage of omitted buildings in 2015 is '.format(round(omission_roof_2015,2)), '\n',
+      'Percentage accurately extracted in 2015 is {0}%'.format(100-omission_roof_2015)
+      )
+
+
+# =============================================================================
+# ERROR OF COMMISSION
+# =============================================================================
+#2013
+digi_inter_roof13_df_grouped = digi_inter_roof13_df.groupby('digi_ID')
+correct_roof2013_count = len(digi_inter_roof13_df)
+all_roofs_2013_count = len(roof_2013)
+commission_roof_2013 = ((all_roofs_2013_count - correct_roof2013_count) *100)/ all_roofs_2013_count
+
+print('In 2013, {0} roofs were wrongly extracted out of {1} roofs'.format(correct_roof2013_count, digi_roofs_count))
+print('The error of commission for 2013 extraction is {0}%'.format(commission_roof_2013))
+print('Accuracy is {0}%'.format(100-commission_roof_2013))
+
+#2015
+digi_inter_roof15_df_grouped = digi_inter_roof15_df.groupby('digi_ID')
+correct_roof2015_count = len(digi_inter_roof15_df)
+all_roofs_2015_count = len(roof_2015)
+commission_roof_2015 = ((all_roofs_2015_count - correct_roof2015_count) *100)/ all_roofs_2015_count
+
+print('In 2013, {0} roofs were rightly extracted out of {1} roofs'.format(all_roofs_2015_count, digi_roofs_count))
+print('The error of commission for 2015 extraction is {0}%'.format(round(commission_roof_2015,2)))
+print('Accuracy is {0}%'.format(100-commission_roof_2015))
+
+
+
+
+
+
+
 
 
 
