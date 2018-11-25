@@ -155,47 +155,72 @@ digi_inter_roof15_df_grouped = digi_inter_roof15_df.groupby('digi_ID')
 correct_roof2015_count = len(digi_inter_roof15_df_grouped)
 omission_roof_2015 = ((digi_roofs_count - correct_roof2015_count) *100)/ digi_roofs_count
 
-print('In 2013, {0} roofs were correctly extracted out of {1} roofs'.format(correct_roof2013_count, digi_roofs_count), '\n',
-      'In 2013, {0} roofs were omitted out of {1} roofs. \n'.format(digi_roofs_count -correct_roof2013_count, digi_roofs_count),
-      'Percentage of omitted buildings in 2013 is {0}%'.format(omission_roof_2013), '\n',
-      'Percentage accurately extracted in 2013 is {0}%'.format(100-omission_roof_2013), '\n\n',
+accuracy_statements = [
+    'In 2013, {0} roofs were correctly extracted out of {1} roofs. \n'.format(correct_roof2013_count, digi_roofs_count),   
+    'In 2013, {0} roofs were omitted out of {1} roofs. \n'.format(digi_roofs_count -correct_roof2013_count, digi_roofs_count),
+     'Percentage of omitted buildings in 2013 is {:.2f}%. \n'.format(omission_roof_2013),
+     'Percentage accurately extracted in 2013 is {:.2f}%. \n\n'.format(100-omission_roof_2013),
       
       
-      'In 2015, {0} roofs were rightly extracted out of {1} roofs'.format(correct_roof2015_count, digi_roofs_count), '\n',
-       'In 2015, {0} roofs were omitted out of {1} roofs. \n'.format(digi_roofs_count -correct_roof2015_count, digi_roofs_count),
-      'Percentage of omitted buildings in 2015 is '.format(round(omission_roof_2015,2)), '\n',
-      'Percentage accurately extracted in 2015 is {0}%'.format(100-omission_roof_2015)
-      )
+      'In 2015, {0} roofs were rightly extracted out of {1} roofs'.format(correct_roof2015_count, digi_roofs_count),
+       'In 2015, {} roofs were omitted out of {} roofs. \n'.format(digi_roofs_count -correct_roof2015_count, digi_roofs_count),
+      'Percentage of omitted buildings in 2015 is {:.2f}%. \n'.format(round(omission_roof_2015,2)),
+      'Percentage accurately extracted in 2015 is {:.2f}%. \n\n'.format(100-omission_roof_2015)
+      ]
+      
 
-
+print(*accuracy_statements)
 # =============================================================================
 # ERROR OF COMMISSION
 # =============================================================================
 #2013
-digi_inter_roof13_df_grouped = digi_inter_roof13_df.groupby('digi_ID')
+#digi_inter_roof13_df_grouped = digi_inter_roof13_df.groupby('digi_ID')
 correct_roof2013_count = len(digi_inter_roof13_df)
 all_roofs_2013_count = len(roof_2013)
-commission_roof_2013 = ((all_roofs_2013_count - correct_roof2013_count) *100)/ all_roofs_2013_count
+falsely_extracted_2013 = (all_roofs_2013_count - correct_roof2013_count)
+commission_roof_2013 = (falsely_extracted_2013 *100)/ all_roofs_2013_count
 
-print('In 2013, {0} roofs were wrongly extracted out of {1} roofs'.format(correct_roof2013_count, digi_roofs_count))
-print('The error of commission for 2013 extraction is {0}%'.format(commission_roof_2013))
-print('Accuracy is {0}%'.format(100-commission_roof_2013))
+#print('In 2013, {0} roofs were wrongly extracted out of {1} roofs'.format(correct_roof2013_count, digi_roofs_count))
+#print('The error of commission for 2013 extraction is {0}%'.format(commission_roof_2013))
+#print('Accuracy is {0}%'.format(100-commission_roof_2013))
 
 #2015
-digi_inter_roof15_df_grouped = digi_inter_roof15_df.groupby('digi_ID')
+#digi_inter_roof15_df_grouped = digi_inter_roof15_df.groupby('digi_ID')
 correct_roof2015_count = len(digi_inter_roof15_df)
 all_roofs_2015_count = len(roof_2015)
-commission_roof_2015 = ((all_roofs_2015_count - correct_roof2015_count) *100)/ all_roofs_2015_count
-
-print('In 2013, {0} roofs were rightly extracted out of {1} roofs'.format(all_roofs_2015_count, digi_roofs_count))
-print('The error of commission for 2015 extraction is {0}%'.format(round(commission_roof_2015,2)))
-print('Accuracy is {0}%'.format(100-commission_roof_2015))
+falsely_extracted_2015 = (all_roofs_2015_count - correct_roof2015_count)
+commission_roof_2015 = (falsely_extracted_2015 *100)/ all_roofs_2015_count
 
 
+#print('In 2013, {0} roofs were rightly extracted out of {1} roofs extracted'.format(all_roofs_2015_count, digi_roofs_count))
+#print('The error of commission for 2015 extraction is {0}%'.format(round(commission_roof_2015,2)))
+#print('Accuracy is {0}%'.format(100-commission_roof_2015))
 
 
+  
+accuracy_statements2 = ['In 2013, {0} roofs were falsely extracted(false positive) out of {1} roofs extracted. \n'.format(falsely_extracted_2013 , all_roofs_2013_count),
+      'The percentage of falsely extracted is {:.2f}%. \n\n'.format(commission_roof_2013),
+      
+      
+      'In 2015, {0} roofs were falsely extracted(false positive) out of {1} roofs extracted. \n'.format(falsely_extracted_2015 , all_roofs_2015_count),
+      'The percentage of falsely extracted is {:.2f}%. \n'.format(commission_roof_2015)
+      ]
 
 
+statement = '\n'
+for sentence in accuracy_statements:
+  statement += sentence
+
+for sentence in accuracy_statements2:
+  statement += sentence
+  
+type(statement)
+print(statement)
+print(*accuracy_statements, *accuracy_statements2)
+
+#accuracy_metrics = str(*accuracy_statements, *accuracy_statements2)
+with open(r"E:\LIDAR_FINAL\data\plots\Output.txt", "w") as text_file:
+    text_file.write(statement)
 
 
 
