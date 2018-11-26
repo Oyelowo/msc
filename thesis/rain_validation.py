@@ -95,8 +95,29 @@ plt.tight_layout()
 plt.subplots_adjust(top=0.92)
 plt.savefig(r'E:\LIDAR_FINAL\data\plots\stations_rain_timeseries.jpeg',  bbox_inches='tight', pad_inches=0.1)
 
+# =============================================================================
+kk = all_data.copy()
+kk.iloc[0].Date
+kk.index = kk.Date
+kk.loc['2011-01-01':'2014-02-01']
+end_date= pd.to_datetime(['2014-08-07 07:00:00'])
+print(end_date == end_date)
+type(end_date)
+kk.Date[:'2014-08-07']
 
+kk['ym_mo_str'] = kk['Date'].astype(str).str.slice(0,7).replace('-', '')
+kk['ym_mo_str']
+kkk =
 
+date_before = datetime.date(2015, 1, 19)
+kk[kk['Date']< date_before]
+kkk= kk.loc[(kk.station != 'Kitukunyi') | ((kk.Date == '2014-08-07') & (kk.station == 'Kitukunyi'))]
+kk.loc[(kk.Date[:'2014-08-07']) & (kk.station == 'Kitukunyi')]
+#7.8.2014 01:00-25.6.2015 18:00
+kk.loc[(kk['station']=='Kitukunyi')]['2014-08-07':]['rain_mm'] =  None
+kk.loc[(kk['station']=='Kitukunyi')]['2014-08-07':]
+kk
+# =============================================================================
          
 monthly_agg_data = pd.DataFrame(columns=["station", "month", "rain_mm"])
 i=0
