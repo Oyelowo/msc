@@ -351,44 +351,6 @@ buildings_rain_aggr.describe()
 
 
 # =============================================================================
-# TODO:
-# HISTOGRAM FOR MONTHLY AND ANNUAL RAINFALL
-# HISTOGRAM FOR ROOF SIZE DISTRIBUTION
-# HISTOGRAM FOR ROOF POTENTIAL FOR ALL MONTHS
-# HISTOGRAM FOR ANNUAL ROOF POTENTIAL
-#
-#
-#
-# =============================================================================
-
-
-
-# =============================================================================
-# 
-  
- 
- 
-#def colorbar(ax, vmin, vmax):
-#  # add colorbar
-#    fig = ax.get_figure()
-#    sm = plt.cm.ScalarMappable(cmap='RdBu', norm=plt.Normalize(vmin=vmin, vmax=vmax))
-#    divider = make_axes_locatable(ax)
-#    cax = divider.append_axes("right", size="4%", pad=0.05)
-#    # fake up the array of the scalar mappable. Urgh...
-#    sm._A = []
-#    cbar=fig.colorbar(sm, cax = cax, fraction=0.046)
-#    cbar.set_label('per million litres')
-#    ticks = [str(i) for i in range(vmin, vmax, 5)]
-#    ticks[-1] = '>' + ticks[-1]
-#    ticks_dol =[ '$' + x +'$' for x in ticks]
-#    for i, lab in enumerate(ticks_dol):
-#        cbar.ax.text(2, (2 * i) / 10, lab, ha='center', va='center')
-#    cbar.ax.get_yaxis().labelpad = 15
-#    cbar.ax.set_yticklabels(ticks)
-    
-#    cbar.ax.set_title('RWHP')
-
-# =============================================================================
 # PLOTTING MAPS
 # =============================================================================
 
@@ -468,7 +430,6 @@ def plot_map(dataFrame, column_list, scale_cmaps, vmin, vmax,truncate_cbar_texts
     ax.grid(b=True, which='minor', color='#D3D3D3', linestyle='-')
     ax.set_aspect('equal')
     
-    
     # Rotate the x-axis labels so they don't overlap
     plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)  
     map_plot.set_facecolor("#eeeeee")
@@ -481,7 +442,7 @@ def plot_map(dataFrame, column_list, scale_cmaps, vmin, vmax,truncate_cbar_texts
     plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)
     colorbar(map_plot, vmin, vmax, truncate_cbar_texts, cbar_title, labelpad=labelpad)
     plt.subplots_adjust(top=0.92)
-    plt.savefig(output_fp, bbox_inches='tight', pad_inches=0.1)
+    plt.savefig(output_fp, bbox_inches='tight',dpi=300, pad_inches=0.1)
 
 
 
@@ -494,19 +455,19 @@ rain_list =list(map(lambda x: x[:3] + '_rain', month_list))
 rain_potential_cmap = 'Blues'
 monthly_main_title = "Monthly Distribution of Rainfall in Taita Region"
 monthly_rain_cbar_title = "mm"
-monthly_rain_output_fp = r'E:\LIDAR_FINAL\data\plots\jan_dec_rain_distribution_final.jpg'
+monthly_rain_output_fp = r'E:\LIDAR_FINAL\data\plots\jan_dec_rain_distribution_final4.jpg'
 
 class_upper_limit = int(buildings_rain_aggr[rain_list].max().max())
 class_lower_limit = int(buildings_rain_aggr[rain_list].min().min())
 
 plot_map(buildings_rain_aggr, rain_list, False, None , None, False, 0, 200, 1,
-         monthly_rain_output_fp, main_title= monthly_main_title,  cbar_title= monthly_rain_cbar_title)
+         monthly_rain_output_fp, main_title= monthly_main_title,  cbar_title= monthly_rain_cbar_title, labelpad=15)
 
 
 #Plot for monthly rainfall potential distribution
 monthly_main_title = "Spatio-temporal Distribution of Roof RainWater Harvesting Potential in Taita"
 monthly_rain_cbar_title = "100, 000 litres"
-monthly_rain_output_fp = r'E:\LIDAR_FINAL\data\plots\jan_dec_rain__Potential4__distribution_final.jpg'
+monthly_rain_output_fp = r'E:\LIDAR_FINAL\data\plots\jan_dec_rain_Potential_distribution_final_1.jpg'
 
 
 rain_potential_cmap = 'RdYlBu'
@@ -542,7 +503,7 @@ def plot_annual(dataframe, column, map_title, legend_title,cmap, output_fp):
   map_plot = dataframe.plot(ax =ax,figsize=fig, column=column,scheme='quantiles', k=9,linewidth=0.02, cmap=cmap, alpha=0.9,legend = True)
   ax.grid(b=True, which='minor', color='#D3D3D3', linestyle='-')
   ax.set_aspect('equal')
-  map_plot.set_facecolor("#ffffff")
+  map_plot.set_facecolor("#eaeaea")
   map_plot.text(x=minx,y=maxy-6000, s=u'N \n\u25B2 ', ha='center', fontsize=37, weight='bold', family='Courier new', rotation = 0)
   ax.get_legend().set_bbox_to_anchor((1, 0.53))
   #ax.get_legend().set_bbox_to_anchor((1.43, 0.8))
@@ -553,7 +514,7 @@ def plot_annual(dataframe, column, map_title, legend_title,cmap, output_fp):
   ax.set_title(map_title, fontsize=15)
   #plt.axis('equal')
   #plt.show()
-  plt.savefig(output_fp,  bbox_inches='tight', pad_inches=0.1)
+  plt.savefig(output_fp,dpi=300,  bbox_inches='tight', pad_inches=0.1)
 
 
 
@@ -561,7 +522,7 @@ def plot_annual(dataframe, column, map_title, legend_title,cmap, output_fp):
 cmap='Blues'
 map_title='Distribution of Total Annual Rainfall in Taita Region'
 legend_title='Rainfall(mm)'
-output_fp = r'E:\LIDAR_FINAL\data\plots\total_annual_rain_final_final_2'
+output_fp = r'E:\LIDAR_FINAL\data\plots\total_annual_rain_final_final_4'
 plot_annual(buildings_rain_aggr, 'ann_rain', map_title, legend_title,cmap, output_fp)
 
 
@@ -571,7 +532,7 @@ buildings_rain_aggr_['ann_rainPOT'] = round((buildings_rain_aggr['ann_rainPOT']/
 cmap='RdYlBu'
 map_title='Distribution of Annual Roof Rainwater Harvesting in Taita Region'
 legend_title='RRWHP (thousand litres)'
-output_fp = r'E:\LIDAR_FINAL\data\plots\total_annual_rain_potential_final_final_7'
+output_fp = r'E:\LIDAR_FINAL\data\plots\total_annual_rain_potential_final_final_9'
 plot_annual(buildings_rain_aggr_, 'ann_rainPOT', map_title, legend_title,cmap, output_fp)
 
 
@@ -602,12 +563,11 @@ plt.title('Total Monthly Roof Rainwater Harveting Potential, Taita')
 plt.xlabel('Months')
 plt.ylabel('RRHP\n(100 million litres)')
 plt.rcParams['axes.facecolor'] = '#ffffff'
-plt.savefig(r'E:\LIDAR_FINAL\data\plots\bar_line_RRWP_months_series.jpeg',  bbox_inches='tight', pad_inches=0.1)
+plt.savefig(r'E:\LIDAR_FINAL\data\plots\bar_line_RRWP_months_series2.jpeg', dpi=300, bbox_inches='tight', pad_inches=0.1)
 
 
 
 #buildings_rain_aggr.to_file(r'E:\LIDAR_FINAL\data\aggregated\buildings_rain_aggr.shp')
-
 
 
 
