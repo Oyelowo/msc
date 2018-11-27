@@ -277,11 +277,11 @@ one_to_N_counts = c.items()
 plt.hist(roof_13_agg.one_to_N_rel)
 plt.ylabel('Number of Buildings')
 plt.xlabel('One to N relationships')
-plt.title('One Digitized  Roof to N number of Extracted Roof area to relationships')
+plt.title('One-to-One/One-to-Many Relationships Between Extracted Roofs \nand Digitized  Roofs')
 plt.ylim(0, 1500)
 for item in one_to_N_counts:
   plt.text(item[0]-0.05, item[1]+14, s=item[1])
-plt.savefig( r'E:\LIDAR_FINAL\data\plots\one_to_N_relationship', bbox_inches='tight',dpi=300, pad_inches=0.1)
+plt.savefig( r'E:\LIDAR_FINAL\data\plots\one_to_N_relationship1', bbox_inches='tight',dpi=300, pad_inches=0.1)
 
 
 ((x-y)/x) *100
