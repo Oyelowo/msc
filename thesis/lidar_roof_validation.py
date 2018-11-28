@@ -271,8 +271,8 @@ plt.savefig(output_fp,  bbox_inches='tight',dpi=300, pad_inches=0.1)
 list(roof_13_agg.one_to_N_rel.astype(int)).count(1)
 
 from collections import Counter
-c = Counter(list(roof_13_agg.one_to_N_rel.astype(int)))
-one_to_N_counts = c.items()
+one_to_N_rel_frequency = Counter(list(roof_13_agg.one_to_N_rel.astype(int)))
+one_to_N_counts = one_to_N_rel_frequency.items()
 
 plt.hist(roof_13_agg.one_to_N_rel)
 plt.ylabel('Number of Buildings')
