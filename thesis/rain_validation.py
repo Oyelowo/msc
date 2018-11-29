@@ -124,31 +124,7 @@ for station in stations_names_list:
          
 import calendar
 monthly_agg_data['month_name'] = monthly_agg_data['month'].astype(int).apply(lambda x: calendar.month_abbr[x])
-         
-# =============================================================================
-# min_temp, max_temp = monthly_agg_data.rain_mm.min()-20, monthly_agg_data.rain_mm.max() + 30
-# fig, axes = plt.subplots(3, 2, figsize=(10,12), sharex=True, sharey=True)
-# #  plt.suptitle('RAINWATER HARVESTING POTENTIAL IN TAITA')
-# #  vmin, vmax = dataFrame[column_list].min().min(), dataFrame[column_list].max().max()
-# for i, (ax, station) in enumerate(zip(axes.flatten(), stations_names_list), 1):
-#   sub_data = monthly_agg_data.loc[monthly_agg_data['station']==station]
-#   ax.plot(sub_data.month_name, sub_data.rain_mm, lw = 1.5)
-#   # Figure title
-#   fig.suptitle('Seasonal Rainfall observations - Taita-Taveta')
-#   ax.text(2, max_temp-20, station)
-#   ax.grid()
-#   ax.set_ylim(min_temp, max_temp)
-#   plt.setp(ax.xaxis.get_majorticklabels(), rotation=90)
-#   # Axis labels
-#   if i== 1 or i==3 or i==5:
-#     ax.set_ylabel('Rainfall [mm]')
-#   if i== 5 or i==6:
-#     ax.set_xlabel('Date')
-# =============================================================================
-
-         
-
-
+            
 
 stations = pd.read_csv(stations_filepath)
 stations = gpd.GeoDataFrame(stations)
