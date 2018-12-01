@@ -228,25 +228,25 @@ with open(r"E:\LIDAR_FINAL\data\plots\Output.txt", "w") as text_file:
 # =============================================================================
 # ACCURACY: AREA, RMSE, MAE, AND SCATTERPLOT
 # =============================================================================
-roof_13_agg=gpd.GeoDataFrame()
-roof_13_agg['geometry'] = None
-for key, group in digi_inter_roof13_df_grouped:
-  roof_13_agg.loc[key,'ID'] = key
-  roof_13_agg.loc[key,'digi_area'] = group['area_digi'].unique()
-  roof_13_agg.loc[key,'lidar_area'] =  group['area_lidar'].sum()
-  roof_13_agg.loc[key,'one_to_N_rel'] = len(group['area_lidar'])
+roof_15_agg=gpd.GeoDataFrame()
+roof_15_agg['geometry'] = None
+for key, group in digi_inter_roof15_df_grouped:
+  roof_15_agg.loc[key,'ID'] = key
+  roof_15_agg.loc[key,'digi_area'] = group['area_digi'].unique()
+  roof_15_agg.loc[key,'lidar_area'] =  group['area_lidar'].sum()
+  roof_15_agg.loc[key,'one_to_N_rel'] = len(group['area_lidar'])
   print('Aggregating: ', key)
 
 
 from pandas.plotting import scatter_matrix
 import scipy
 import numpy as np
-roof_13_agg[23:25].plot()
+roof_15_agg[23:25].plot()
 
-roof_13_agg.iloc[:,2:4].corr()
-scatter_matrix(roof_13_agg.iloc[:,2:4].corr())
-roof_13_agg_ = roof_13_agg.loc[(roof_13_agg['one_to_N_rel']==1) & (roof_13_agg.lidar_area<500)]
-x, y = roof_13_agg_.digi_area, roof_13_agg_.lidar_area
+roof_15_agg.iloc[:,2:4].corr()
+scatter_matrix(roof_15_agg.iloc[:,2:4].corr())
+roof_15_agg_ = roof_15_agg.loc[(roof_15_agg['one_to_N_rel']==1) & (roof_15_agg.lidar_area<500)]
+x, y = roof_15_agg_.digi_area, roof_15_agg_.lidar_area
 slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(x, y)
 r_value **2 * 100
 
@@ -268,26 +268,26 @@ plt.savefig(output_fp,  bbox_inches='tight',dpi=300, pad_inches=0.1)
 
 
 
-list(roof_13_agg.one_to_N_rel.astype(int)).count(1)
+list(roof_15_agg.one_to_N_rel.astype(int)).count(1)
 
 from collections import Counter
-one_to_N_rel_frequency = Counter(list(roof_13_agg.one_to_N_rel.astype(int)))
+one_to_N_rel_frequency = Counter(list(roof_15_agg.one_to_N_rel.astype(int)))
 one_to_N_counts = one_to_N_rel_frequency.items()
 
-plt.hist(roof_13_agg.one_to_N_rel)
+plt.hist(roof_15_agg.one_to_N_rel)
 plt.ylabel('Number of Buildings')
 plt.xlabel('One to N relationships')
 plt.title('One-to-One/One-to-Many Relationships Between Extracted Roofs \nand Digitized  Roofs')
 plt.ylim(0, 1500)
 for item in one_to_N_counts:
   plt.text(item[0]-0.05, item[1]+14, s=item[1])
-plt.savefig( r'E:\LIDAR_FINAL\data\plots\one_to_N_relationship1', bbox_inches='tight',dpi=300, pad_inches=0.1)
+plt.savefig( r'E:\LIDAR_FINAL\data\plots\one_to_N_relationship1_2015_', bbox_inches='tight',dpi=300, pad_inches=0.1)
 
 
 ((x-y)/x) *100
 
-roof_13_agg_.mean()
-digi_inter_roof13_df_grouped['area_lidar'].agg(lambda x: print(x.mean()))
+roof_15_agg_.mean()
+digi_inter_roof15_df_grouped['area_lidar'].agg(lambda x: print(x.mean()))
 
 
 import numpy as np

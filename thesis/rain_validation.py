@@ -136,19 +136,20 @@ stations.plot()
 print(stations.crs)
 stations.crs = {'init' :'epsg:32737'}
 
-
-kl = stations_.plot()
-
-
-import contextily as ctx
+# =============================================================================
+# 
+# kl = stations_.plot()
+# ctx.add_basemap(kl, url=ctx.tile_providers.OSM_A)
+# 
+# import contextily as ctx
+# =============================================================================
 
 def plot_station(dataframe, column, map_title, legend_title,cmap, output_fp):
   minx, miny, maxx, maxy =  buildings_rain_aggr.total_bounds
   fig, ax = plt.subplots(figsize  = (7, 7))
-  stations_proj = dataframe.to_crs(epsg=3857)
+  stations_proj = stations.to_crs(epsg=3857)
 #  buildings_rain_aggr_.plot(ax=ax, column='ann_rain', cmap='Blues', alpha=0.8)
   map_plot = stations_proj.plot(ax =ax,figsize=fig, column=column, s=100, alpha=1, legend = True)
-  ctx.add_basemap(map_plot, url=ctx.tile_providers.OSM_A)
   ax.grid(b=True, which='minor', color='#D3D3D3', linestyle='-')
   ax.set_aspect('equal')
 #  map_plot.set_facecolor("#ffffff")
@@ -162,7 +163,7 @@ def plot_station(dataframe, column, map_title, legend_title,cmap, output_fp):
   ax.set_title(map_title, fontsize=15)
   #plt.axis('equal')
   #plt.show()
-  plt.savefig(output_fp, bbox_inches='tight', pad_inches=0.1)
+  plt.savefig(output_fp, dpi=300, bbox_inches='tight', pad_inches=0.1)
 
 
 
