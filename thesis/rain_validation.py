@@ -137,12 +137,18 @@ print(stations.crs)
 stations.crs = {'init' :'epsg:32737'}
 
 
+kl = stations_.plot()
+
+
+import contextily as ctx
 
 def plot_station(dataframe, column, map_title, legend_title,cmap, output_fp):
   minx, miny, maxx, maxy =  buildings_rain_aggr.total_bounds
   fig, ax = plt.subplots(figsize  = (7, 7))
-  buildings_rain_aggr.plot(ax=ax, column='ann_rain', cmap='Blues', alpha=0.8)
-  map_plot = dataframe.plot(ax =ax,figsize=fig, column=column, s=100, alpha=1, legend = True)
+  stations_proj = dataframe.to_crs(epsg=3857)
+#  buildings_rain_aggr_.plot(ax=ax, column='ann_rain', cmap='Blues', alpha=0.8)
+  map_plot = stations_proj.plot(ax =ax,figsize=fig, column=column, s=100, alpha=1, legend = True)
+  ctx.add_basemap(map_plot, url=ctx.tile_providers.OSM_A)
   ax.grid(b=True, which='minor', color='#D3D3D3', linestyle='-')
   ax.set_aspect('equal')
 #  map_plot.set_facecolor("#ffffff")
@@ -156,16 +162,16 @@ def plot_station(dataframe, column, map_title, legend_title,cmap, output_fp):
   ax.set_title(map_title, fontsize=15)
   #plt.axis('equal')
   #plt.show()
-  plt.savefig(output_fp, dpi=300, bbox_inches='tight', pad_inches=0.1)
+  plt.savefig(output_fp, bbox_inches='tight', pad_inches=0.1)
 
 
 
 cmap='Blues'
 map_title=' in Taita Region'
 legend_title='Weather Stations'
-output_fp = r'E:\LIDAR_FINAL\data\plots\weather_stations_4'
+output_fp = r'E:\LIDAR_FINAL\data\plots\weather_stations_5'
 plot_station(stations, 'Location', map_title, legend_title,cmap, output_fp)
-
+  
 
 
 
@@ -238,7 +244,7 @@ y = pd.Series(modelled_rain, name="modelled rain (mm)")
 ax = sns.jointplot(x, y, kind="reg", stat_func=r2, logx=True, truncate=True, space=0.1)
 plt.subplots_adjust(top=0.9)
 ax.fig.suptitle('Modelled Rainfall vs Measured Rainfall', fontsize=20) # can also get the figure from plt.gcf()
-output_fp = r'E:\LIDAR_FINAL\data\plots\validation_modelled_measured2'
+output_fp = r'E:\LIDAR_FINAL\data\plots\validation_modelled_measured3'
 plt.savefig(output_fp,  bbox_inches='tight',dpi=300, pad_inches=0.1)
 
 
@@ -267,7 +273,7 @@ for i, (ax, station) in enumerate(zip(axes.flatten(), stations_names_list), 1):
   plt.setp(ax.xaxis.get_majorticklabels(), rotation=90)
   plt.tight_layout()
 plt.subplots_adjust(top=0.89)
-output_fp = r'E:\LIDAR_FINAL\data\plots\monthly_validation_modelled_measured5'
+output_fp = r'E:\LIDAR_FINAL\data\plots\monthly_validation_modelled_measured6'
 plt.savefig(output_fp,  bbox_inches='tight',dpi=300, pad_inches=0.1)
   
 

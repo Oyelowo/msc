@@ -53,11 +53,11 @@ def plot_density_spacing(data, year, outut_fp):
   ax22.set(xlabel='last returns point spacing(m),', ylabel='')
   plt.tight_layout()
   plt.subplots_adjust(top=0.95)
-  plt.savefig(outut_fp)
+  plt.savefig(outut_fp, dpi=300,  bbox_inches='tight', pad_inches=0.1)
   
 
-plot_density_spacing(lidar2013_info, '2013', 'E:\LIDAR_FINAL\data\plots/hist_lidar_density_spacing_2013.png')
-plot_density_spacing(lidar2015_info, '2015', 'E:\LIDAR_FINAL\data\plots/hist_lidar_density_spacing_2015.png')
+plot_density_spacing(lidar2013_info, '2013', 'E:/LIDAR_FINAL/data/plots/hist_lidar_density_spacing_2013')
+plot_density_spacing(lidar2015_info, '2015', 'E:/LIDAR_FINAL/data/plots/hist_lidar_density_spacing_2015')
 # plt.show(block=True)    
    
 
@@ -87,8 +87,8 @@ def plot_density_spacing_2(dataset, year, outut_fp):
   ax22.set(xlabel='last returns point spacing(m),', ylabel='')
   plt.tight_layout()
   plt.subplots_adjust(top=0.95)
-  plt.savefig(outut_fp, dpi=100)
+  plt.savefig(outut_fp, dpi=300, bbox_inches='tight', pad_inches=0.1)
   
-plot_density_spacing_2([lidar2013_info, lidar2015_info],'2013 and 2015', 'E:\LIDAR_FINAL\data\plots/hist_lidar_density_spacing_combined.png')
+plot_density_spacing_2([lidar2013_info, lidar2015_info],'2013 and 2015', 'E:/LIDAR_FINAL/data/plots/hist_lidar_density_spacing_combined')
   
   
