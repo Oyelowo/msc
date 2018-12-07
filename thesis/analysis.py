@@ -275,19 +275,21 @@ buildings_aggr.plot('area_sum', linewidth=0.03, cmap="YlOrBr", scheme="quantiles
 def aggregate_grid_rain(new_dataframe, old_dataframe, month_field_name):
     grouped_data = old_dataframe.groupby('grid_ID')
     #buildings_aggr['geometry']=None
-    grid_ID_list, geometry_list, total_grid_rain_list , roof_area_list=[], [], [], []
+    grid_ID_list, geometry_list, total_grid_rain_list , roof_area_list, buildings_count_list =[], [], [], [], []
     for key, (i, group ) in enumerate(grouped_data,1):
         group_geometry = group.iloc[0]['geometry']
         grid_ID_list.append(key)
         geometry_list.append(group_geometry)
         total_grid_rain_list.append(round(group[month_field_name].mean(), 2))
         roof_area_list.append(group['area_sum'].sum())
+        buildings_count_list.append(group.buildings_count.mean())
         print('Aggregating', key, month_field_name, group[month_field_name].mean())
 
     new_dataframe['area_sum'] = roof_area_list
     new_dataframe['geometry'] = geometry_list
     new_dataframe['grid_ID'] =grid_ID_list
     new_dataframe[month_field_name] = total_grid_rain_list
+    new_dataframe['buildings_count'] = buildings_count_list
     return new_dataframe
 
 
