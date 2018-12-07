@@ -255,15 +255,6 @@ buildings_aggr['geometry'] = geom
 buildings_aggr['area_sum'] = area
 buildings_aggr['buildings_count'] = buildings_count
 
-#From the fieldwork, the average water consumption per day is 136litres.
-#The lowland and highland has very little difference, 134 to 138   
-daily_Water_use_per_home = 136
-monthly_wateruse_per_home = daily_Water_use_per_home * 30
-buildings_aggr['monthly_water_use'] = monthly_wateruse_per_home * buildings_aggr['buildings_count']
-buildings_aggr['yearly_water_use'] = daily_Water_use_per_home * 365 * buildings_aggr['buildings_count']
-
-buildings_aggr.plot('area_sum', linewidth=0.03, cmap="YlOrBr", scheme="quantiles", k=19, alpha=0.9)
-
 
 
 # =============================================================================
@@ -320,7 +311,7 @@ for i, month_filepath in enumerate(months_shp_filepaths, 1):
     
     buildings_rain_aggr = aggregate_grid_rain(buildings_rain_aggr, joined_data, month_field_name)
     
-
+buildings_rain_aggr.plot(column='buildings_count' , legend=True)
 print("--- %s seconds ---" % (time.time() - start_time))
 # =============================================================================
 # PLOT THE ROOF AREA AND RAINFALL DATA
@@ -330,24 +321,40 @@ for column in buildings_rain_aggr.columns[3:]:
     buildings_rain_aggr.plot(column=column, cmap="Blues", scheme="quantiles", k=9, alpha=0.9)
     print(column)
     
+
+# =============================================================================
+# #From the fieldwork, the average water consumption per day is 136litres.
+# #The lowland and highland has very little difference, 134 to 138   
+# =============================================================================
+daily_Water_use_per_home = 136
+monthly_wateruse_per_home = daily_Water_use_per_home * 30
+buildings_rain_aggr['monthly_water_use'] = monthly_wateruse_per_home * buildings_rain_aggr['buildings_count']
+buildings_rain_aggr['yearly_water_use'] = daily_Water_use_per_home * 365 * buildings_rain_aggr['buildings_count']
+
+buildings_rain_aggr.plot('area_sum', linewidth=0.03, cmap="YlOrBr", scheme="quantiles", k=19, alpha=0.9)
+buildings_rain_aggr.plot('buildings_count', linewidth=0.03, cmap="YlOrBr", scheme="quantiles", k=19, alpha=0.9)
+
+    
 # =============================================================================
 #   CALCULATE MONTHLY RAINWATER HARVESTING POTENTIALS AND POTENTIAL MINUS 
 #   WATER USE PER GRID TO SEE IF IT IS ENOUGH
 # =============================================================================
 #buildings_rain_aggr = buildings_rain_aggr.fillna(0)
+roof_coefficient = 0.7
 for column in buildings_rain_aggr.columns:
-    if column in ['geometry', 'grid_ID', 'area_sum']:
+    if column in ['ann_rain','Apr_rain','Aug_rain','Dec_rain','Feb_rain','Jan_rain','Jul_rain','Jun_rain','Mar_rain','May_rain','Nov_rain','Oct_rain','Sep_rain']:
+      print(column)
+      roof_area = buildings_rain_aggr['area_sum']
+      rainfall = buildings_rain_aggr[column]
+      roof_harvesting_potential = (roof_area * rainfall * roof_coefficient)
+      rain_pot = round(roof_harvesting_potential, 2)
+      buildings_rain_aggr[column + 'POT'] = rain_pot
+      if column == 'ann_rain':
+        buildings_rain_aggr['ann_pot_vs_use'] = rain_pot - buildings_rain_aggr.yearly_water_use
         continue
-    roof_coefficient = 0.7
-    roof_area = buildings_rain_aggr['area_sum']
-    rainfall = buildings_rain_aggr[column]
-    
-#    1 m2 * 1 mm = 1litre. roof area is m2 and rain is in mm.
-    roof_harvesting_potential = (roof_area * rainfall * roof_coefficient)
-    month_rain_pot = round(roof_harvesting_potential, 2)
-    buildings_rain_aggr[column + 'POT'] = month_rain_pot
-    buildings_rain_aggr[column[:3] + '_pot_vs_use'] = month_rain_pot - buildings_rain_aggr.month_water_use
-    print(column)
+  #    1 m2 * 1 mm = 1litre. roof area is m2 and rain is in mm.
+      buildings_rain_aggr[column[:3] + '_pot_vs_use'] = rain_pot - buildings_rain_aggr.monthly_water_use
+      
 
 
 # =============================================================================
