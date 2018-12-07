@@ -242,17 +242,25 @@ months_shp_filepaths = glob.glob(os.path.join(monthly_rain_shp_dir,'*.shp'))
 buildings_grouped = buildings_grid.groupby('grid_ID')
 buildings_aggr = gpd.GeoDataFrame()
 #buildings_aggr['geometry']=None
-grid_ID, geom ,area = [], [], []
+grid_ID, geom ,area, buildings_count = [], [], [], []
 for key, (i, group ) in enumerate(buildings_grouped,1):
     group_geometry = group.iloc[0]['geometry']
     grid_ID.append(key)
     geom.append(group_geometry)
     area.append(group['area'].sum())
-    print('Aggregating grid', key,  'Total Area=', group['area'].sum())
+    buildings_count.append(len(group))
+    print('Aggregating grid', key,  'Total Area=', group['area'].sum(),'with', len(group) ,' buildings')
 buildings_aggr['grid_ID'] = grid_ID
 buildings_aggr['geometry'] = geom
 buildings_aggr['area_sum'] = area
-    
+buildings_aggr['buildings_count'] = buildings_count
+
+#From the fieldwork, the average water consumption per day is 136litres.
+#The lowland and highland has very little difference, 134 to 138   
+daily_Water_use_per_home = 136
+monthly_wateruse_per_home = daily_Water_use_per_home * 30
+buildings_aggr['monthly_water_use'] = monthly_wateruse_per_home * buildings_aggr['buildings_count']
+buildings_aggr['yearly_water_use'] = daily_Water_use_per_home * 365 * buildings_aggr['buildings_count']
 
 buildings_aggr.plot('area_sum', linewidth=0.03, cmap="YlOrBr", scheme="quantiles", k=19, alpha=0.9)
 
@@ -321,7 +329,8 @@ for column in buildings_rain_aggr.columns[3:]:
     print(column)
     
 # =============================================================================
-#     CALCULATE MONTHLY RAINWATER HARVESTING POTENTIALS
+#   CALCULATE MONTHLY RAINWATER HARVESTING POTENTIALS AND POTENTIAL MINUS 
+#   WATER USE PER GRID TO SEE IF IT IS ENOUGH
 # =============================================================================
 #buildings_rain_aggr = buildings_rain_aggr.fillna(0)
 for column in buildings_rain_aggr.columns:
@@ -331,10 +340,12 @@ for column in buildings_rain_aggr.columns:
     roof_area = buildings_rain_aggr['area_sum']
     rainfall = buildings_rain_aggr[column]
     
-#    1 m2) * 1 mm = 1litre. roof area is m2 and rain is in mm.
+#    1 m2 * 1 mm = 1litre. roof area is m2 and rain is in mm.
     roof_harvesting_potential = (roof_area * rainfall * roof_coefficient)
-    buildings_rain_aggr[column + 'POT'] =round(roof_harvesting_potential, 2)
-    print(buildings_rain_aggr.columns)
+    month_rain_pot = round(roof_harvesting_potential, 2)
+    buildings_rain_aggr[column + 'POT'] = month_rain_pot
+    buildings_rain_aggr[column[:3] + '_pot_vs_use'] = month_rain_pot - buildings_rain_aggr.month_water_use
+    print(column)
 
 
 # =============================================================================
