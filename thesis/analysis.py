@@ -524,20 +524,23 @@ plt.hist(buildings_rain_aggr['Sep_rainPOT'])
 # =============================================================================
 # Total Annual potential
 # =============================================================================
-def plot_annual(dataframe, column, map_title, legend_title,cmap, output_fp):
+def plot_annual(dataframe, column, map_title, legend_title,cmap, output_fp, categorical):
   minx, miny, maxx, maxy =  buildings_rain_aggr.total_bounds
   fig, ax = plt.subplots(figsize  = (9, 9))
-  map_plot = dataframe.plot(ax =ax,figsize=fig, column=column,scheme='quantiles', k=9,linewidth=0.02, cmap=cmap, alpha=0.9,legend = True)
+  if categorical:
+    map_plot = dataframe.plot(ax =ax,figsize=fig, column=column, categorical=True,linewidth=0.02, cmap=cmap, alpha=0.9,legend = True)
+  else:
+    map_plot = dataframe.plot(ax =ax,figsize=fig, column=column,scheme='quantiles', k=9,linewidth=0.02, cmap=cmap, alpha=0.9,legend = True)
   ax.grid(b=True, which='minor', color='#D3D3D3', linestyle='-')
   ax.set_aspect('equal')
   map_plot.set_facecolor("#eaeaea")
   map_plot.text(x=minx,y=maxy-6000, s=u'N \n\u25B2 ', ha='center', fontsize=37, weight='bold', family='Courier new', rotation = 0)
-  ax.get_legend().set_bbox_to_anchor((1, 0.53))
+  ax.get_legend().set_bbox_to_anchor((1, 0.61))
   #ax.get_legend().set_bbox_to_anchor((1.43, 0.8))
   ax.get_legend().set_title(legend_title)
   ax.get_figure()
   ax.set_aspect('equal')
-  plt.xlim(minx-5000, maxx+15000)
+  plt.xlim(minx-5000, maxx+20000)
   ax.set_title(map_title, fontsize=15)
   #plt.axis('equal')
   #plt.show()
@@ -560,7 +563,7 @@ cmap='RdYlBu'
 map_title='Distribution of Annual Roof Rainwater Harvesting in Taita Region'
 legend_title='RRWHP (thousand litres)'
 output_fp = r'E:\LIDAR_FINAL\data\plots\total_annual_rain_potential_final_final_9'
-plot_annual(buildings_rain_aggr_, 'ann_rainPOT', map_title, legend_title,cmap, output_fp)
+plot_annual(buildings_rain_aggr_, 'ann_rainPOT', map_title, legend_title,cmap, output_fp, False)
 
 
 
@@ -569,28 +572,28 @@ cmap='Oranges'
 map_title='Distribution of Areas of Roofs in Taita Region'
 legend_title='Area (sqm)'
 output_fp = r'E:\LIDAR_FINAL\data\plots\total_roof_areas_final_final_7.jpeg'
-plot_annual(buildings_rain_aggr_, 'area_sum', map_title, legend_title,cmap, output_fp)
+plot_annual(buildings_rain_aggr_, 'area_sum', map_title, legend_title,cmap, output_fp, False)
 
 
 
+cmap='RdYlBu'
+map_title='Comparison of RRWH Potential and Water Use'
+legend_title='RRWHP minus Water Use(litres)'
+output_fp = r'E:\LIDAR_FINAL\data\plots\annual_pot_vs_use_final_final.jpeg'
+plot_annual(buildings_rain_aggr_, 'ann_pot_vs_use', map_title, legend_title,cmap, output_fp, False)
 
 
+cmap='RdYlBu'
+map_title='Comparison of RRWH Potential and Water Use'
+legend_title='RRWHP minus Water Use'
+output_fp = r'E:\LIDAR_FINAL\data\plots\annual_pot_vs_use_final_final_class.jpeg'
+plot_annual(buildings_rain_aggr_, 'ann_pot_vs_use_class', map_title, legend_title,cmap, output_fp, True)
+
+# =============================================================================
+# RRWHP VS WATER USE
+# =============================================================================
 #Plot to see if potential meets needs, monthly
-rain_potential_cmap = 'RdYlBu'
-monthly_main_title = "Monthly Distribution of Rainfall in Taita Region"
-monthly_rain_cbar_title = "litres"
-monthly_rain_output_fp = r'E:\LIDAR_FINAL\data\plots\pot_vs_use_distribution_final.jpg'
-
-class_upper_limit = int(buildings_rain_aggr[rain_list].max().max())
-class_lower_limit = int(buildings_rain_aggr[rain_list].min().min())
-
-plot_map(buildings_rain_aggr, rain_pot_vs_use_list, False, None , None, False, -1000, 500000, 100,
-         monthly_rain_output_fp, main_title= monthly_main_title,  cbar_title= monthly_rain_cbar_title, labelpad=15)
-
-
-
-
-buildings_rain_aggr.plot(column='ann_pot_vs_use_class', cmap='RdYlBu', legend=True)
+monthly_rain_output_fp = r'E:\LIDAR_FINAL\data\plots\monthly_pot_vs_use_distribution_final.jpg'
 fig, axes = plt.subplots(4, 3, figsize=(10,12), sharex=True, sharey=True)
 plt.suptitle('Comparison of RRWH Potential and Water Use in Taita', fontsize=18)
 #  vmin, vmax = dataFrame[column_list].min().min(), dataFrame[column_list].max().max()
@@ -624,7 +627,9 @@ for i, (ax, column) in enumerate(zip(axes.flatten(), rain_pot_vs_use_list), 1):
 #  plt.tight_layout()
   plt.subplots_adjust(top=0.92)
   plt.savefig(monthly_rain_output_fp, bbox_inches='tight',dpi=300, pad_inches=0.1)
-
+# =============================================================================
+# 
+# =============================================================================
 
 
 
