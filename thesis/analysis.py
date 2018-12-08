@@ -351,11 +351,13 @@ for column in buildings_rain_aggr.columns:
       buildings_rain_aggr[column + 'POT'] = rain_pot
       if column == 'ann_rain':
         buildings_rain_aggr['ann_pot_vs_use'] = rain_pot - buildings_rain_aggr.yearly_water_use
+        buildings_rain_aggr['ann_pot_vs_use_class'] = buildings_rain_aggr.ann_pot_vs_use.apply(lambda x: 'positive' if x>=0 else 'negative')
         continue
   #    1 m2 * 1 mm = 1litre. roof area is m2 and rain is in mm.
       buildings_rain_aggr[column[:3] + '_pot_vs_use'] = rain_pot - buildings_rain_aggr.monthly_water_use
-      
-
+      buildings_rain_aggr[column[:3] + '_pot_vs_use_class'] = buildings_rain_aggr[column[:3] + '_pot_vs_use'].apply(lambda x: 'positive' if x>=0 else 'negative')
+   
+     
 
 # =============================================================================
 # PLOT ROOF HARVESTING POTENTIAL FOR ALL MONTHS
@@ -466,9 +468,13 @@ def plot_map(dataFrame, column_list, scale_cmaps, vmin, vmax,truncate_cbar_texts
 
 
 
+
+
+
 month_list = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
               'August', 'September', 'October', 'November', 'December']
 rain_pot_list = list(map(lambda x: x[:3] + '_rainPOT', month_list))
+rain_pot_vs_use_list = list(map(lambda x: x[:3] + '_pot_vs_use_class', month_list))
 rain_list =list(map(lambda x: x[:3] + '_rain', month_list))
 
 #Plot for monthly rainfall distribution
@@ -482,6 +488,7 @@ class_lower_limit = int(buildings_rain_aggr[rain_list].min().min())
 
 plot_map(buildings_rain_aggr, rain_list, False, None , None, False, 0, 200, 1,
          monthly_rain_output_fp, main_title= monthly_main_title,  cbar_title= monthly_rain_cbar_title, labelpad=15)
+
 
 
 #Plot for monthly rainfall potential distribution
@@ -564,6 +571,59 @@ legend_title='Area (sqm)'
 output_fp = r'E:\LIDAR_FINAL\data\plots\total_roof_areas_final_final_7.jpeg'
 plot_annual(buildings_rain_aggr_, 'area_sum', map_title, legend_title,cmap, output_fp)
 
+
+
+
+
+#Plot to see if potential meets needs, monthly
+rain_potential_cmap = 'RdYlBu'
+monthly_main_title = "Monthly Distribution of Rainfall in Taita Region"
+monthly_rain_cbar_title = "litres"
+monthly_rain_output_fp = r'E:\LIDAR_FINAL\data\plots\pot_vs_use_distribution_final.jpg'
+
+class_upper_limit = int(buildings_rain_aggr[rain_list].max().max())
+class_lower_limit = int(buildings_rain_aggr[rain_list].min().min())
+
+plot_map(buildings_rain_aggr, rain_pot_vs_use_list, False, None , None, False, -1000, 500000, 100,
+         monthly_rain_output_fp, main_title= monthly_main_title,  cbar_title= monthly_rain_cbar_title, labelpad=15)
+
+
+
+
+buildings_rain_aggr.plot(column='ann_pot_vs_use_class', cmap='RdYlBu', legend=True)
+fig, axes = plt.subplots(4, 3, figsize=(10,12), sharex=True, sharey=True)
+plt.suptitle('Comparison of RRWH Potential and Water Use in Taita', fontsize=18)
+#  vmin, vmax = dataFrame[column_list].min().min(), dataFrame[column_list].max().max()
+#  plt.tight_layout()
+for i, (ax, column) in enumerate(zip(axes.flatten(), rain_pot_vs_use_list), 1):
+  #Join the classes back to the main data.
+  month = find_month(column)
+#    print(month)
+  legend=False
+  if i == 3:
+    legend=True
+  map_plot=buildings_rain_aggr.plot(ax=ax, column=column,linewidth=0.02,legend=legend, cmap='RdYlBu',  alpha=0.9)
+  print(column)
+  ax.grid(b=True, which='minor', color='#D3D3D3', linestyle='-')
+  ax.set_aspect('equal')
+  
+  # Rotate the x-axis labels so they don't overlap
+  plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)  
+  map_plot.set_facecolor("#eeeeee")
+  minx,miny,maxx,maxy =  buildings_rain_aggr.total_bounds
+  maxx += 2500
+  if i==3:
+    map_plot.get_legend().set_bbox_to_anchor((1.8, 0.97))
+    #ax.get_legend().set_bbox_to_anchor((1.43, 0.8))
+    map_plot.get_legend().set_title('RRWHP vs Water Use')
+  # these are matplotlib.patch.Patch properties
+  props = dict(boxstyle='round', facecolor='#eaeaea', alpha=0)
+  map_plot.text(x=minx+1000,y=maxy-5000, s=u'N \n\u25B2 ', ha='center', fontsize=17, weight='bold', family='Courier new', rotation = 0)
+  map_plot.text(x=426000,y=maxy+2000, s=month,  ha='center', fontsize=20, weight='bold', family='Courier new', bbox=props)
+  plt.setp(ax.xaxis.get_majorticklabels(), rotation=20)
+#  plt.tight_layout()
+  plt.subplots_adjust(top=0.92)
+  plt.savefig(monthly_rain_output_fp, bbox_inches='tight',dpi=300, pad_inches=0.1)
 
 
 
