@@ -171,7 +171,7 @@ cmap='Blues'
 map_title=' in Taita Region'
 legend_title='Weather Stations'
 output_fp = r'E:\LIDAR_FINAL\data\plots\weather_stations_5'
-plot_station(stations, 'Location', map_title, legend_title,cmap, output_fp)
+#plot_station(stations, 'Location', map_title, legend_title,cmap, output_fp)
   
 
 

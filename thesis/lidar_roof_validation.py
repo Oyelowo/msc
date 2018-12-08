@@ -31,6 +31,7 @@ aoi.plot()
 # SELECT ONLY ROOFS WITHIN THE AOI
 # =============================================================================
 aoi_boundary = aoi.loc[0].geometry
+print(aoi_boundary)
 type(aoi_boundary)
 roof_2013_all = roof_2013_all[roof_2013_all.geometry.within(aoi_boundary)]
 roof_2013_all.plot()
@@ -59,11 +60,14 @@ digitized_roof['digi_ID'] = digitized_roof.index + 1
 # =============================================================================
 lower_limit, upper_limit = 10, 2000
 roof_2013_all['area'] = roof_2013_all.geometry.area
+print(len(roof_2013_all))
 roof_2013 = roof_2013_all.loc[(roof_2013_all['area']>lower_limit) & (roof_2013_all['area']<upper_limit)].reset_index(drop=True)
+print(len(roof_2013))
 
 roof_2015_all['area'] = roof_2015_all.geometry.area
+print(len(roof_2015_all))
 roof_2015 = roof_2015_all.loc[(roof_2015_all['area']>lower_limit) & (roof_2015_all['area']<upper_limit)].reset_index(drop=True)
-
+print(len(roof_2015))
 
 # =============================================================================
 # Check the data

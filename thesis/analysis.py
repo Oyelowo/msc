@@ -147,15 +147,14 @@ print(aoi_polygon)
 # =============================================================================
 # WORKING WITH THE BUILDING SHAPEFILE
 # =============================================================================
-buildings_shp = gpd.read_file(buildings_filepath)
+buildings_shp_unfiltered = gpd.read_file(buildings_filepath)
 
 # calculate area and centroid of the buildings
-buildings_shp['area'] = buildings_shp['geometry'].area
-
+buildings_shp_unfiltered['area'] = buildings_shp_unfiltered['geometry'].area
+print(len(buildings_shp_unfiltered))
 # filter roof areas lower than 10sqm or higher than 2000sqm
-
-buildings_shp = buildings_shp.loc[(buildings_shp['area']>10) & (buildings_shp['area']<2000)]
-
+buildings_shp = buildings_shp_unfiltered.loc[(buildings_shp_unfiltered['area']>10) & (buildings_shp_unfiltered['area']<2000)]
+print(len(buildings_shp))
 # get the centroid of every building
 buildings_shp['centroid']= buildings_shp['geometry'].centroid
 
@@ -474,7 +473,8 @@ def plot_map(dataFrame, column_list, scale_cmaps, vmin, vmax,truncate_cbar_texts
 month_list = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
               'August', 'September', 'October', 'November', 'December']
 rain_pot_list = list(map(lambda x: x[:3] + '_rainPOT', month_list))
-rain_pot_vs_use_list = list(map(lambda x: x[:3] + '_pot_vs_use_class', month_list))
+rain_pot_vs_use_list = list(map(lambda x: x[:3] + '_pot_vs_use', month_list))
+rain_pot_vs_use_class_list = list(map(lambda x: x[:3] + '_pot_vs_use_class', month_list))
 rain_list =list(map(lambda x: x[:3] + '_rain', month_list))
 
 #Plot for monthly rainfall distribution
@@ -598,7 +598,7 @@ fig, axes = plt.subplots(4, 3, figsize=(10,12), sharex=True, sharey=True)
 plt.suptitle('Comparison of RRWH Potential and Water Use in Taita', fontsize=18)
 #  vmin, vmax = dataFrame[column_list].min().min(), dataFrame[column_list].max().max()
 #  plt.tight_layout()
-for i, (ax, column) in enumerate(zip(axes.flatten(), rain_pot_vs_use_list), 1):
+for i, (ax, column) in enumerate(zip(axes.flatten(), rain_pot_vs_use_class_list), 1):
   #Join the classes back to the main data.
   month = find_month(column)
 #    print(month)
@@ -652,12 +652,41 @@ plt.savefig(r'E:\LIDAR_FINAL\data\plots\bar_line_RRWP_months_series2.jpeg', dpi=
 
 
 
+# =============================================================================
+# PERCENTAGE OF BUILDINGS THAT RRWH CAN FULFILL THEIR NEEDS
+# =============================================================================
 #buildings_rain_aggr.to_file(r'E:\LIDAR_FINAL\data\aggregated\buildings_rain_aggr.shp')
 
+percent_buildings_with_positive_RRWHP_list = []
+buildings_total_count = buildings_rain_aggr['buildings_count'].sum()
+for month_use_class in rain_pot_vs_use_class_list:
+  gr = buildings_rain_aggr.groupby(month_use_class)
+  buildings_with_net_positive_pot = (gr['buildings_count'].sum()['positive'] * 100) / buildings_total_count
+  buildings_with_net_negative_pot = gr['buildings_count'].sum()['negative']
+  percent_buildings_with_positive_RRWHP_list.append(buildings_with_net_positive_pot)
+  print(percent_buildings_with_positive_RRWHP_list[-1])
+
+
+  
+
+from matplotlib.pyplot import figure
+figure(num=None, figsize=(8, 5), dpi=80, facecolor='#eaeaea', edgecolor='k')
+first_letter = [first[:3] for first in rain_pot_list]
+plt.bar(first_letter, percent_buildings_with_positive_RRWHP_list, color='lightblue')
+plt.plot(first_letter,percent_buildings_with_positive_RRWHP_list , 'p-')
+#plt.ylim(0, buildings_rain_aggr[ rain_pot_list].sum().max() + 100000000)
+buildings_rain_aggr[rain_list].mean()
+plt.title('Percentage of Buildings in Taita that RRWH alone can Meet their Water Use')
+plt.xlabel('Months')
+plt.ylabel('Percentage of Buildings (%)')
+plt.rcParams['axes.facecolor'] = '#ffffff'
+plt.savefig(r'E:\LIDAR_FINAL\data\plots\bar_line_pot_vs_use_months1', dpi=300, bbox_inches='tight', pad_inches=0.1)
 
 
 
 
-
-
+buildings_rain_aggr.columns
+annual_use_class = 'ann_pot_vs_use_class'
+annual_group = buildings_rain_aggr.groupby('ann_pot_vs_use_class')
+annual_buildings_with_net_positive_pot = (annual_group['buildings_count'].sum()['positive'] * 100) / buildings_total_count
 
