@@ -507,18 +507,18 @@ buildings_rain_aggr[rain_pot_list].max()
 
 
 
-buildings_rain_aggr.Nov_rain
-rain_potential_cmap = 'RdBu'
-plot_map(buildings_rain_aggr, rain_list[:6],0 , 193,True, 6, 193, 1, r'E:\LIDAR_FINAL\data\plots\jan_jun_rain.jpg')
+#buildings_rain_aggr.Nov_rain
+#rain_potential_cmap = 'RdBu'
+#plot_map(buildings_rain_aggr, rain_list[:6],0 , 193,True, 6, 193, 1, r'E:\LIDAR_FINAL\data\plots\jan_jun_rain.jpg')
 #plot_map(buildings_rain_aggr, rain_list[6:],0 , 193,False, 6, 193, 1,r'E:\LIDAR_FINAL\data\plots\jan_jun_rain.jpg')
 #plot_map(buildings_rain_aggr, rain_pot_list,0 , 5, True, 0, 500000, 1000, r'E:\LIDAR_FINAL\data\plots\jan_jun_RdYlBu__free_labelpadbet.jpg')
 #plot_map(buildings_rain_aggr, rain_pot_list[6:], 0, 5,True, 0, 500000, 1000, r'E:\LIDAR_FINAL\data\plots\jul_dec_RdYlBu__free_labelpadbeta.jpg')
 # =============================================================================
 # 
 # =============================================================================
-plot_map(buildings_rain_aggr, 'ann_rain',0 , 5, True, 0, 500000, 1000, r'E:\LIDAR_FINAL\data\plots\annual_tight_potential.jpg')
-buildings_rain_aggr.plot(column='ann_rainPOT', cmap='RdBu', scheme="quantiles", k=10, alpha=0.9,edgecolor='0.6')
-plt.hist(buildings_rain_aggr['Sep_rainPOT'])
+#plot_map(buildings_rain_aggr, 'ann_rain',0 , 5, True, 0, 500000, 1000, r'E:\LIDAR_FINAL\data\plots\annual_tight_potential.jpg')
+#buildings_rain_aggr.plot(column='ann_rainPOT', cmap='RdBu', scheme="quantiles", k=10, alpha=0.9,edgecolor='0.6')
+#plt.hist(buildings_rain_aggr['Sep_rainPOT'])
 
 
 # =============================================================================
@@ -553,7 +553,7 @@ cmap='Blues'
 map_title='Distribution of Total Annual Rainfall in Taita Region'
 legend_title='Rainfall(mm)'
 output_fp = r'E:\LIDAR_FINAL\data\plots\total_annual_rain_final_final_4'
-plot_annual(buildings_rain_aggr, 'ann_rain', map_title, legend_title,cmap, output_fp)
+plot_annual(buildings_rain_aggr, 'ann_rain', map_title, legend_title,cmap, output_fp, False)
 
 
 buildings_rain_aggr_ = buildings_rain_aggr.copy()
@@ -577,16 +577,16 @@ plot_annual(buildings_rain_aggr_, 'area_sum', map_title, legend_title,cmap, outp
 
 
 cmap='RdYlBu'
-map_title='Comparison of RRWH Potential and Water Use'
+map_title='Comparison of Annual RRWH Potential and Water Use'
 legend_title='RRWHP minus Water Use(litres)'
-output_fp = r'E:\LIDAR_FINAL\data\plots\annual_pot_vs_use_final_final.jpeg'
+output_fp = r'E:\LIDAR_FINAL\data\plots\annual_pot_vs_use_final_final1.jpeg'
 plot_annual(buildings_rain_aggr_, 'ann_pot_vs_use', map_title, legend_title,cmap, output_fp, False)
 
 
 cmap='RdYlBu'
-map_title='Comparison of RRWH Potential and Water Use'
+map_title='Comparison of Annual RRWH Potential and Water Use'
 legend_title='RRWHP minus Water Use'
-output_fp = r'E:\LIDAR_FINAL\data\plots\annual_pot_vs_use_final_final_class.jpeg'
+output_fp = r'E:\LIDAR_FINAL\data\plots\annual_pot_vs_use_final_final_class1.jpeg'
 plot_annual(buildings_rain_aggr_, 'ann_pot_vs_use_class', map_title, legend_title,cmap, output_fp, True)
 
 # =============================================================================
