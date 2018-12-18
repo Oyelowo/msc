@@ -10,8 +10,10 @@ from shapely.geometry import Polygon,Point
 # IMPORT DATA
 # =============================================================================
 digitized_roof = gpd.read_file(r'E:\LIDAR_FINAL\data\building_digitised\digitizedb_bbox.shp')
+#digitized_roof = gpd.read_file(r'E:\LIDAR_FINAL\diigised_Samples_roofs\building\buildings\new_buildings.shp')
 roof_2013_all = gpd.read_file(r'E:\LIDAR_FINAL\data\buildings\2013\roof_polygons\buildings_2013_projected_regularized.shp')
 roof_2015_all = gpd.read_file(r'E:\LIDAR_FINAL\data\buildings\2015\roof_polygons\buildings_2015_simplified.shp')
+aoi = gpd.read_file(r'E:\LIDAR_FINAL\diigised_Samples_roofs\aoi_roof_samples.shp')
 
 
 

@@ -13,15 +13,15 @@ from scipy.stats import linregress
 import seaborn as sns
 from scipy import stats
 from pathlib import Path
-import clip_raster as ras
+import lowo_utils as lut
 
 my_dir = r'E:\LIDAR_FINAL\data'
 
 
-ras.create_dir(my_dir)
+lut.create_dir(my_dir)
 
 def create_path(sub_dir='', my_dir=my_dir):
-  return ras.create_dir(Path(my_dir + sub_dir))
+  return lut.create_dir(Path(my_dir + sub_dir))
 
 rain_dir = r"E:\LIDAR_FINAL\data\rainfall_data_field\rain"
 rain_dir_all = r"E:\LIDAR_FINAL\data\rainfall_data_field\rain\Precipitation\*.XLSX"

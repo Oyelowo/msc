@@ -17,16 +17,16 @@ from pathlib import Path
 speedups.available
 speedups.enable()
 
-import clip_raster as ras
+import lowo_utils as lut
 
 #my_path = os.path.abspath(os.path.dirname('__file__'))
 my_dir = r'E:\LIDAR_FINAL\data'
 
 
-ras.create_dir(my_dir)
+lut.create_dir(my_dir)
 
 def create_path(sub_dir='', my_dir=my_dir):
-  return ras.create_dir(Path(my_dir + sub_dir))
+  return lut.create_dir(Path(my_dir + sub_dir))
 
 
 aoi_dir = os.path.join(my_dir, 'AOI') 
@@ -36,12 +36,12 @@ aoi_poly_filepath = os.path.join(aoi_dir, 'AOI_polygon.shp')
 aoi_vertices_filepath= os.path.join(aoi_dir, 'aoi_vertices.shp')
 buildings_filepath = os.path.join(my_dir,  'buildings', '2015', 'roof_polygons', 'buildings_2015_simplified.shp')
 
-#rain_rasters_dir = ras.create_dir(os.path.join(my_dir,'precipitation'))
-#output_clipped_raster_dir = ras.create_dir(os.path.join(my_dir, 'precipitation', 'clipped'))
-#monthly_rain_shp_dir= ras.create_dir(os.path.join(my_dir, 'precipitation', 'clipped', 'to_vector'))
-#centroid_filepath = ras.create_dir(os.path.join(my_dir,  'buildings', '2015', 'buildings_centroid', 'buildings_centroid.shp'))
-#grid_filepath = ras.create_dir(os.path.join(my_dir,  'grid', 'grid.shp'))
-#aoi_grid_clipped_shp_filepath = ras.create_dir(os.path.join(my_dir,  'grid', 'aoi_grid_clipped.shp'))
+#rain_rasters_dir = lut.create_dir(os.path.join(my_dir,'precipitation'))
+#output_clipped_raster_dir = lut.create_dir(os.path.join(my_dir, 'precipitation', 'clipped'))
+#monthly_rain_shp_dir= lut.create_dir(os.path.join(my_dir, 'precipitation', 'clipped', 'to_vector'))
+#centroid_filepath = lut.create_dir(os.path.join(my_dir,  'buildings', '2015', 'buildings_centroid', 'buildings_centroid.shp'))
+#grid_filepath = lut.create_dir(os.path.join(my_dir,  'grid', 'grid.shp'))
+#aoi_grid_clipped_shp_filepath = lut.create_dir(os.path.join(my_dir,  'grid', 'aoi_grid_clipped.shp'))
 
 
 rain_rasters_dir = create_path('/precipitation')
@@ -66,13 +66,13 @@ rain_raster_data_epsg_code = 4326
 aoi_shapefile = gpd.read_file(aoi_filepath)
 
 
-#bbox_aoi2 = ras.get_vector_extent(aoi_shapefile)'
-#bbox_aoi = ras.get_vector_extent(aoi_shapefile)
-#bbox_aoi = ras.get_raster_extent(bbox_raster_filepath)
+#bbox_aoi2 = lut.get_vector_extent(aoi_shapefile)'
+#bbox_aoi = lut.get_vector_extent(aoi_shapefile)
+#bbox_aoi = lut.get_raster_extent(bbox_raster_filepath)
 bbox_aoi = [38.19986023835, -3.2418059025499986, 38.52486023705, -3.516805901449999]
 aoi_polygon =  gpd.read_file(aoi_poly_filepath)
 aoi_polygon.crs = aoi_crs_epsg
-#bbox_aoi = ras.get_vector_extent(aoi_polygon)
+#bbox_aoi = lut.get_vector_extent(aoi_polygon)
 
 
 
@@ -93,7 +93,7 @@ for i, month_file_path in enumerate(rain_raster, 1):
     month_abbreviation = month_name[:3]+'_rain'
     output_tif = os.path.join(output_clipped_raster_dir, month_abbreviation + '.tif')
     print(output_tif)
-    ras.clip_and_export_raster(month_file_path, output_tif, bbox_aoi)
+    lut.clip_and_export_raster(month_file_path, output_tif, bbox_aoi)
     
     month_raster = rasterio.open(output_tif).read().astype(float)
     sum_rain += month_raster
@@ -117,7 +117,7 @@ for i, month_file in enumerate(monthly_rain_clipped, 1):
     output_shp = os.path.join(monthly_rain_shp_dir, month_field_name + '.shp')
     print(month_field_name)
 #    month_raster = rasterio.open(month_file)
-    polygonized_raster = ras.polygonize(month_file, rain_raster_data_epsg_code, aoi_crs_epsg_code)
+    polygonized_raster = lut.polygonize(month_file, rain_raster_data_epsg_code, aoi_crs_epsg_code)
     polygonized_raster=polygonized_raster.rename(columns={'grid_value': month_field_name})
     polygonized_raster.to_file(output_shp)
     
@@ -186,11 +186,11 @@ buildings_centroid.to_file(centroid_filepath)
 # # CREATE A FISHNET/GRID OF 926.1m PIXEL
 # =============================================================================
 #generating grid by directly providing the bounding box
-grid = ras.create_grid(926.1, 926.1, shapefile=buildings_centroid)
+grid = lut.create_grid(926.1, 926.1, shapefile=buildings_centroid)
 #generating grid based on shapefile extent
-#grid2 = ras.create_grid(926.1, 926.1, shapefile=aoi_shapefile)
+#grid2 = lut.create_grid(926.1, 926.1, shapefile=aoi_shapefile)
 
-#grid = ras.create_grid(gridHeight=926.1, gridWidth=926.1,shapefile=aoi_shapefile)
+#grid = lut.create_grid(gridHeight=926.1, gridWidth=926.1,shapefile=aoi_shapefile)
 #grid.plot()
 
 

@@ -2,7 +2,7 @@
 # Import library and dataset
 import seaborn as sns
 import matplotlib.pyplot as plt
-import clip_raster as ras
+import lowo_utils as lut
 from itertools import cycle
 
 
@@ -12,10 +12,10 @@ inputdir_2015 = r'E:\LIDAR_FINAL\data\lidar_tiles_info\2015'
 outputdir_2013 = r'E:\LIDAR_FINAL\data\lidar_tiles_info_output\lidar_info_2013.txt'
 inputdir_2013 = r'E:\LIDAR_FINAL\data\lidar_tiles_info\2013'
 
-lidar2015_info = ras.get_density_spacing_info(inputdir_2015)
+lidar2015_info = lut.get_density_spacing_info(inputdir_2015)
 lidar2015_info.to_csv(outputdir_2015)
 
-lidar2013_info = ras.get_density_spacing_info(inputdir_2013)
+lidar2013_info = lut.get_density_spacing_info(inputdir_2013)
 lidar2013_info.to_csv(outputdir_2013)
 
 sns.boxplot(lidar2013_info['all_returns_density'])
