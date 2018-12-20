@@ -98,8 +98,6 @@ for i, month_file_path in enumerate(rain_raster, 1):
     month_raster = rasterio.open(output_tif).read().astype(float)
     sum_rain += month_raster
 
-
-cc = sum_rain/12
 # =============================================================================
 # ['nearest' | 'bilinear' | 'bicubic' | 'spline16' |
 #            'spline36' | 'hanning' | 'hamming' | 'hermite' | 'kaiser' |
@@ -213,8 +211,6 @@ aoi_grid_clipped.to_file(aoi_grid_clipped_shp_filepath)
 
 
 
-
-
 # =============================================================================
 # SPATIAL JOIN
 # =============================================================================
@@ -235,9 +231,6 @@ months_shp_filepaths = glob.glob(os.path.join(monthly_rain_shp_dir,'*.shp'))
 # =============================================================================
 # AGGREGATE ROOF AREAS BASED ON GRID ID
 # =============================================================================
-
-
-
 buildings_grouped = buildings_grid.groupby('grid_ID')
 buildings_aggr = gpd.GeoDataFrame()
 #buildings_aggr['geometry']=None
@@ -288,20 +281,13 @@ def aggregate_grid_rain(new_dataframe, old_dataframe, month_field_name):
 # =============================================================================
 import time
 start_time = time.time()
-
-
-
 months_shp_filepaths = glob.glob(os.path.join(monthly_rain_shp_dir, '*.shp'))
-
-
 buildings_rain_aggr = gpd.GeoDataFrame()
 #del buildings_rain['area']
 for i, month_filepath in enumerate(months_shp_filepaths, 1):  
     print(i)
     month_rain_data = gpd.read_file(month_filepath)
-    
     buildings_aggr.crs = month_rain_data.crs=  aoi_crs_epsg
-    
     joined_data = gpd.sjoin(buildings_aggr, month_rain_data, how='left', op='intersects')
     
 #    Get field name from file name and exclude the file format
@@ -666,9 +652,6 @@ for month_use_class in rain_pot_vs_use_class_list:
   percent_buildings_with_positive_RRWHP_list.append(buildings_with_net_positive_pot)
   print(percent_buildings_with_positive_RRWHP_list[-1])
 
-
-  
-
 from matplotlib.pyplot import figure
 figure(num=None, figsize=(8, 5), dpi=80, facecolor='#eaeaea', edgecolor='k')
 first_letter = [first[:3] for first in rain_pot_list]
@@ -681,8 +664,6 @@ plt.xlabel('Months')
 plt.ylabel('Percentage of Buildings (%)')
 plt.rcParams['axes.facecolor'] = '#ffffff'
 plt.savefig(r'E:\LIDAR_FINAL\data\plots\bar_line_pot_vs_use_months1', dpi=300, bbox_inches='tight', pad_inches=0.1)
-
-
 
 
 buildings_rain_aggr.columns
